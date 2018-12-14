@@ -1,0 +1,14 @@
+{
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "eventHubMessages",
+      "direction": "in",
+      "eventHubName": "AlertLogic-Logs-Hub",
+      "connection": "APP_LOG_EHUB_ACCESS_KEY",
+      "cardinality": "many",
+      "consumerGroup": "$Default"
+    }
+  ],
+  "disabled": false
+}

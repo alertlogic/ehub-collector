@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "AlertlogicMasterTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 */15 * * * *"
+    }
+  ],
+  "disabled": false
+}

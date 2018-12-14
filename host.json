@@ -1,0 +1,13 @@
+{
+    "version": "2.0",
+    "functionTimeout": "00:10:00",
+    "extensions": {
+        "eventHubs": {
+            "batchCheckpointFrequency": 1,
+            "eventProcessorOptions": {
+                "maxBatchSize": 64,
+                "prefetchCount": 128
+            }
+        }
+    }
+}  
