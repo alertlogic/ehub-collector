@@ -73,7 +73,7 @@
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~2"
+                            "value": "~1"
                         },
                         {
                             "name": "SCM_USE_FUNCPACK",
@@ -96,10 +96,6 @@
                             "value": "6.5.0"
                         },
                         {
-                            "name": "O365_CONTENT_STREAMS",
-                            "value": "[]"
-                        },
-                        {
                             "name": "APP_SUBSCRIPTION_ID",
                             "value": "[variables('subscriptionId')]"
                         },
@@ -113,7 +109,7 @@
                         },
                         {
                             "name": "APP_LOG_EHUB_ACCESS_KEY",
-                            "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('ehubNsName'), variables('ehubForLogName')), '2017-04-01').primaryConnectionString]"
+                            "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
                         }
                     ],
                     "connectionStrings": [
@@ -128,12 +124,12 @@
                             "connectionString": "[parameters('App Client Secret')]"
                         },
                         {
-                            "name": "APP_CI_ACCESS_KEY_ID",
+                            "name": "APP_AL_ACCESS_KEY_ID",
                             "type": "Custom",
                             "connectionString": "[parameters('Alert Logic Access Key ID')]"
                         },
                         {
-                            "name": "APP_CI_SECRET_KEY",
+                            "name": "APP_AL_SECRET_KEY",
                             "type": "Custom",
                             "connectionString": "[parameters('Alert Logic Secret Key')]"
                         },
@@ -153,7 +149,7 @@
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name'))]",
-                "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('ehubNsName'), variables('ehubForLogName'))]"
+                "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
             ],
             "resources": [{
                 "apiVersion": "2015-08-01",

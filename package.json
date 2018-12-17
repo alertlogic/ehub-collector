@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "dependencies": {
     "al-azure-collector-js": "git://github.com/alertlogic/al-azure-collector-js#master",
-    "async": "*",
+    "async": "^2.6.1",
     "azure": "^2.0.0-preview"
   },
   "scripts": {
     "local-master": "node ./local_dev/master_local_dev.js",
     "local-updater": "node ./local_dev/updater_local_dev.js",
     "local-ehub": "node ./local_dev/ehub_local_dev.js",
-    "lint": "jshint --exclude \"./node_modules/*\" **/*.js",
+    "lint": "jshint --show-non-errors --exclude \"./node_modules/*\" **/*.js",
     "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura mocha --colors --reporter mocha-jenkins-reporter"
   },
   "devDependencies": {

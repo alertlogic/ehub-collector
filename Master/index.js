@@ -11,10 +11,10 @@
  
 const async = require('async');
 const pkg = require('../package.json');
-const AlMaster = require('al-azure-collector-js').Master;
+const AlAzureMaster = require('al-azure-collector-js').AlAzureMaster;
 
 module.exports = function (context, AlertlogicMasterTimer) {
-    var master = new AlMaster(context, 'ehub', pkg.version);
+    var master = new AlAzureMaster(context, 'ehub', pkg.version);
     async.waterfall([
         function(asyncCallback) {
             return master.register({}, asyncCallback);
@@ -22,11 +22,11 @@ module.exports = function (context, AlertlogicMasterTimer) {
         function(hostId, sourceId, asyncCallback) {
             return master.checkin(AlertlogicMasterTimer.last,
                 function(checkinError, checkinResp) {
-                    if (azcollectError) {
-                        return asyncCallback(`Checkin failed ${azcollectError}`);
+                    if (checkinError) {
+                        return asyncCallback(`Checkin failed ${checkinError}`);
                     }
                     context.log.info('Ehub source checkin OK', checkinResp);
-                    return asyncCallback(null);
+                    return asyncCallback(null, {});
                 });
         }],
     function(error, results) {
