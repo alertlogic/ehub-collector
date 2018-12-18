@@ -108,7 +108,7 @@
                             "value": "[variables('tenantId')]"
                         },
                         {
-                            "name": "APP_LOG_EHUB_ACCESS_KEY",
+                            "name": "APP_LOG_EHUB_CONNECTION",
                             "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
                         }
                     ],
