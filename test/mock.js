@@ -9,7 +9,6 @@
  */
  
 const util = require('util');
-const fs = require('fs');
 
 process.env.WEBSITE_HOSTNAME = 'kkuzmin-app-ehub.azurewebsites.net';
 process.env.WEBSITE_SITE_NAME = 'kkuzmin-app-ehub.azurewebsites.net';

@@ -9,5 +9,8 @@
                 "prefetchCount": 128
             }
         }
+    },
+    "tracing": {
+        "consoleLevel": "verbose"
     }
 }  

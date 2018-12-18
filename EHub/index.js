@@ -9,12 +9,11 @@
  * -----------------------------------------------------------------------------
  */
 
-const async = require('async');
 const pkg = require('../package.json');
-const AlCollector = require('al-azure-collector-js').Collector;
+const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 
 module.exports = function (context, eventHubMessages) {
-    var master = new AlCollector(context, 'ehub', pkg.version);
+    var collector = new AlAzureCollector(context, 'ehub', pkg.version);
     
     context.log.error('Received:', eventHubMessages);
     context.done();

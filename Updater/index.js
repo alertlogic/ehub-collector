@@ -10,11 +10,11 @@
  * -----------------------------------------------------------------------------
  */
 
-const AlUpdater = require('al-azure-collector-js').Updater;
+const AlAzureUpdater = require('al-azure-collector-js').AlAzureUpdater;
 
 
 module.exports = function (context, AlertlogicUpdaterTimer) {
-    var updater = new AlUpdater();
+    var updater = new AlAzureUpdater();
     updater.syncWebApp(function(syncError){
         if (syncError) {
             context.log.error('Site sync failed:', syncError);
