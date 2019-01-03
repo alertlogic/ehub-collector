@@ -23,6 +23,11 @@ const tsPaths = [
     ['time']
 ];
 
+/*
+ * For the ISO8601 timestamp, '2018-12-19T08:18:21.1834546Z'
+ */
+const ISO8601_MICROSEC_OFFSET = 23;
+
 const getProp = function(path, obj, defaultVal = null) {
     var reduceFun = function(xs, x) {
         return (xs && xs[x]) ? xs[x] : defaultVal;
@@ -41,9 +46,9 @@ var parseTs = function(ts) {
     var milli = Date.parse(ts);
     var micro = null;
     try {
-        // parses '2018-12-19T08:18:21.1834546Z'
-        if (ts.length > 23) {
-            micro = Number.parseInt(ts.slice(23).replace(/[a-zA-Z]/, ''));
+        // extracts microseconds from ISO8601 timestamp, like '2018-12-19T08:18:21.1834546Z'
+        if (ts.length > ISO8601_MICROSEC_OFFSET) {
+            micro = Number.parseInt(ts.slice(ISO8601_MICROSEC_OFFSET).replace(/[Z]/, ''));
         }
         return {
             msec: milli,
@@ -58,26 +63,23 @@ var parseTs = function(ts) {
     }
 };
 
-var getMsgTs = function(msg) {
-    var msgTs = tsPaths.reduce(function(acc, v) {
+var iteratePropPaths = function(paths, msg) {
+    return paths.reduce(function(acc, v) {
         if (acc) {
             return acc;
         } else {
             return getProp(v, msg);
         }
     }, null);
+};
+
+var getMsgTs = function(msg) {
+    var msgTs = iteratePropPaths(tsPaths, msg);
     return msgTs ? parseTs(msgTs) : defaultTs();
 };
 
 var getMsgType = function(msg, defaultVal) {
-    var msgType = typePaths.reduce(function(acc, v) {
-        if (acc) {
-            return acc;
-        } else {
-            return getProp(v, msg);
-        }
-    }, null);
-    
+    var msgType = iteratePropPaths(typePaths, msg);
     return msgType ? msgType : defaultVal;
 };
 
