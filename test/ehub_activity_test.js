@@ -51,5 +51,19 @@ describe('Event hub functions unit tests.', function() {
         
         done();
     });
+    
+    it('Default message type (Administrative)', function(done) {
+        var privFormatFun = ehubActivityLogs.__get__('formatActivityLogRecord');
+        var testRecord = mock.AUDIT_LOG_RECORD;
+        delete testRecord.category;
+        delete testRecord.operationName;
+        var result = privFormatFun(testRecord);
+        assert.equal(result.message, JSON.stringify(mock.AUDIT_LOG_RECORD));
+        assert.equal(result.messageTypeId, 'Administrative');
+        assert.equal(result.messageTs, 1544400226616);
+        assert.equal(result.messageTsUs, 1822);
+        
+        done();
+    });
 });
 

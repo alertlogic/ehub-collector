@@ -28,7 +28,7 @@ const tsPaths = [
  */
 const ISO8601_MICROSEC_OFFSET = 23;
 
-const getProp = function(path, obj, defaultVal = null) {
+var getProp = function(path, obj, defaultVal = null) {
     var reduceFun = function(xs, x) {
         return (xs && xs[x]) ? xs[x] : defaultVal;
     };
@@ -44,22 +44,28 @@ var defaultTs = function() {
 
 var parseTs = function(ts) {
     var milli = Date.parse(ts);
+    if (isNaN(milli)) {
+        return defaultTs();
+    } else {
+        var micro = parseTsUsec(ts);
+        return {
+            msec: milli,
+            usec: micro
+        };
+    }
+};
+
+var parseTsUsec = function(ts) {
     var micro = null;
     try {
         // extracts microseconds from ISO8601 timestamp, like '2018-12-19T08:18:21.1834546Z'
         if (ts.length > ISO8601_MICROSEC_OFFSET) {
             micro = Number.parseInt(ts.slice(ISO8601_MICROSEC_OFFSET).replace(/[Z]/, ''));
         }
-        return {
-            msec: milli,
-            usec: micro
-        };
+        return micro;
     } catch (err) {
         // Unable to get microseconds from a timestamp. Do nothing.
-        return {
-            msec: milli,
-            usec: null
-        };
+        return null;
     }
 };
 
