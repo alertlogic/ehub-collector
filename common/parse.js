@@ -15,7 +15,7 @@ const typePaths = [
     ['operationName', 'value'],
     ['operationName'],
     ['category', 'value'],
-    ['category'],
+    ['category']
 ];
 
 const tsPaths = [
@@ -60,11 +60,17 @@ var parseTsUsec = function(ts) {
     try {
         // extracts microseconds from ISO8601 timestamp, like '2018-12-19T08:18:21.1834546Z'
         if (ts.length > ISO8601_MICROSEC_OFFSET) {
-            micro = Number.parseInt(ts.slice(ISO8601_MICROSEC_OFFSET).replace(/[Z]/, ''));
+            var microStr = ts.slice(ISO8601_MICROSEC_OFFSET, ISO8601_MICROSEC_OFFSET + 3).replace(/[Z\+]/, '');
+            while (microStr && microStr.length > 0 && microStr.length < 3) {
+                microStr += '0';
+            }
+            micro = Number.parseInt(microStr);
+            micro = Number.isInteger(micro) ? micro : null;
         }
         return micro;
     } catch (err) {
         // Unable to get microseconds from a timestamp. Do nothing.
+        console.log(err);
         return null;
     }
 };

@@ -23,7 +23,7 @@ describe('Event hub functions unit tests.', function() {
         assert.equal(result.message, JSON.stringify(mock.ACTIVITY_LOG_RECORD));
         assert.equal(result.messageTypeId, 'Microsoft.Advisor/recommendations/available/action');
         assert.equal(result.messageTs, 1545207501183);
-        assert.equal(result.messageTsUs, 4546);
+        assert.equal(result.messageTsUs, 454);
         
         done();
     });
@@ -47,21 +47,34 @@ describe('Event hub functions unit tests.', function() {
         assert.equal(result.message, JSON.stringify(mock.AUDIT_LOG_RECORD));
         assert.equal(result.messageTypeId, 'Update policy');
         assert.equal(result.messageTs, 1544400226616);
-        assert.equal(result.messageTsUs, 1822);
+        assert.equal(result.messageTsUs, 182);
         
         done();
     });
     
     it('Default message type (Administrative)', function(done) {
         var privFormatFun = ehubActivityLogs.__get__('formatActivityLogRecord');
-        var testRecord = mock.AUDIT_LOG_RECORD;
+        var testRecord = Object.assign({}, mock.AUDIT_LOG_RECORD);
         delete testRecord.category;
         delete testRecord.operationName;
         var result = privFormatFun(testRecord);
-        assert.equal(result.message, JSON.stringify(mock.AUDIT_LOG_RECORD));
+        assert.equal(result.message, JSON.stringify(testRecord));
         assert.equal(result.messageTypeId, 'Administrative');
         assert.equal(result.messageTs, 1544400226616);
-        assert.equal(result.messageTsUs, 1822);
+        assert.equal(result.messageTsUs, 182);
+        
+        done();
+    });
+    
+    it('Category as message type', function(done) {
+        var privFormatFun = ehubActivityLogs.__get__('formatActivityLogRecord');
+        var testRecord = Object.assign({}, mock.AUDIT_LOG_RECORD);
+        delete testRecord.operationName;
+        var result = privFormatFun(testRecord);
+        assert.equal(result.message, JSON.stringify(testRecord));
+        assert.equal(result.messageTypeId, 'AuditLogs');
+        assert.equal(result.messageTs, 1544400226616);
+        assert.equal(result.messageTsUs, 182);
         
         done();
     });
