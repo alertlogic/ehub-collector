@@ -13,8 +13,10 @@ const async = require('async');
 const pkg = require('../package.json');
 const AlAzureMaster = require('al-azure-collector-js').AlAzureMaster;
 
+const APP_FUNCTIONS = ['Master', 'Updater', 'EHubGeneral', 'EHubActivityLogs'];
+
 module.exports = function (context, AlertlogicMasterTimer) {
-    var master = new AlAzureMaster(context, 'ehub', pkg.version);
+    var master = new AlAzureMaster(context, 'ehub', pkg.version, [], [], {}, {}, APP_FUNCTIONS);
     async.waterfall([
         function(asyncCallback) {
             return master.register({}, asyncCallback);

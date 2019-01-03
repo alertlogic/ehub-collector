@@ -4,8 +4,8 @@
       "type": "eventHubTrigger",
       "name": "eventHubMessages",
       "direction": "in",
-      "eventHubName": "AlertLogic-Logs-Hub",
-      "connection": "APP_LOG_EHUB_ACCESS_KEY",
+      "path": "insights-operational-logs",
+      "connection": "APP_LOG_EHUB_CONNECTION",
       "cardinality": "many",
       "consumerGroup": "$Default"
     }
