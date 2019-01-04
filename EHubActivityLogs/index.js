@@ -14,6 +14,7 @@
  * -----------------------------------------------------------------------------
  */
 
+const async = require('async');
 const pkg = require('../package.json');
 const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 const parse = require('../common/parse');
@@ -36,17 +37,26 @@ var formatActivityLogRecord = function(msg) {
 };
 
 module.exports = function (context, eventHubMessages) {
-    if (eventHubMessages.length > 1) {
-        context.log('WARNING: dropping message batches', eventHubMessages.length - 1);
-    }
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
-    collector.processLog(eventHubMessages[0].records, formatActivityLogRecord, [], function(err) {
-        if (err) {
-            // TODO: DLQ
-            context.log.error('Error processing messages:', err);
-        }
-        context.log.error('Processed:', eventHubMessages[0].records.length);
-        context.done();
+    async.map(eventHubMessages, 
+        function(msgArray, callback) {
+            collector.processLog(msgArray.records, formatActivityLogRecord, [],
+                function(err) {
+                    if (err) {
+                        return callback(err);
+                    } else {
+                        return callback(null, msgArray.records.length);
+                    }
+            });
+        },
+        function(err, mapResult) {
+            if (err) {
+                // TODO: DLQ
+                context.log.error('Error processing messages:', err);
+            } else {
+                context.log.error('Processed:', mapResult.reduce((a, b) => a + b, 0));
+            }
+            context.done();
     });
 };
 
