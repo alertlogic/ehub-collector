@@ -29,7 +29,7 @@ process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=te
 
 var context = function(done) {
     return {
-        invocationId: 'ID',
+        invocationId: 'invocationID',
         bindings: {
         },
         log: {

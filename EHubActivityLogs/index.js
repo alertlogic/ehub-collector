@@ -38,23 +38,24 @@ var formatActivityLogRecord = function(msg) {
 
 module.exports = function (context, eventHubMessages) {
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
-    async.map(eventHubMessages, 
+    async.filter(eventHubMessages, 
         function(msgArray, callback) {
             collector.processLog(msgArray.records, formatActivityLogRecord, [],
                 function(err) {
                     if (err) {
-                        return callback(err);
-                    } else {
-                        return callback(null, msgArray.records.length);
+                     // TODO: DLQ
+                        context.log.error('Error processing batch:', err);
+                        context.log.error('Records skipped:', msgArray.records.length);
                     }
+                    return callback(null, !err);
             });
         },
         function(err, mapResult) {
             if (err) {
                 // TODO: DLQ
-                context.log.error('Error processing messages:', err);
+                context.log.error('Processing error:', err);
             } else {
-                context.log.error('Processed:', mapResult.reduce((a, b) => a + b, 0));
+                context.log.info('Processed:', mapResult.reduce((a, b) => a + b.records.length, 0));
             }
             context.done();
     });
