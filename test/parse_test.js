@@ -98,19 +98,19 @@ describe('Common parse functions unit tests.', function() {
     
     it('Parse timestamp ISO-8601', function(done) {
         var privParseTs = parse.__get__('parseTs');
-        assert.deepEqual(privParseTs('2018-12-19T08:18:21.13Z'), {msec: 1545207501130, usec: null});
-        assert.deepEqual(privParseTs('2018-12-19T08:18:21Z'), {msec: 1545207501000, usec: null});
-        assert.deepEqual(privParseTs('2018-12-19T08:18:21.1357685Z'), {msec: 1545207501135, usec: 768});
-        assert.deepEqual(privParseTs('2018-12-10T00:03:46.6161822+00:00'), {msec: 1544400226616, usec: 182});
-        assert.deepEqual(privParseTs('2018-12-19T08:18:21.1351Z'), {msec: 1545207501135, usec: 100});
-        assert.deepEqual(privParseTs('2018-12-10T00:03:46.61618+00:00'), {msec: 1544400226616, usec: 180});
+        assert.deepEqual(privParseTs('2018-12-19T08:18:21.13Z'), {sec: 1545207501, usec: 130000});
+        assert.deepEqual(privParseTs('2018-12-19T08:18:21Z'), {sec: 1545207501, usec: null});
+        assert.deepEqual(privParseTs('2018-12-19T08:18:21.1357685Z'), {sec: 1545207501, usec: 135768});
+        assert.deepEqual(privParseTs('2018-12-10T00:03:46.6161822+00:00'), {sec: 1544400226, usec: 616182});
+        assert.deepEqual(privParseTs('2018-12-19T08:18:21.1351Z'), {sec: 1545207501, usec: 135100});
+        assert.deepEqual(privParseTs('2018-12-10T00:03:46.61618+00:00'), {sec: 1544400226, usec: 616180});
         
         done();
     });
     
     it('Wrong timestamp input', function(done) {
         var privParseTs = parse.__get__('parseTs');
-        assert.deepEqual(privParseTs('foo'), {msec: 1234567890, usec: null});
+        assert.deepEqual(privParseTs('foo'), {sec: 1234567, usec: null});
         
         done();
     });

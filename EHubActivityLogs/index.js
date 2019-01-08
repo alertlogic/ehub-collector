@@ -25,11 +25,12 @@ var formatActivityLogRecord = function(msg) {
     // https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-log-schema#mapping-to-diagnostic-logs-schema
     const type = parse.getMsgType(msg, 'Administrative');
     return {
-        messageTs: ts.msec,
+        messageTs: ts.sec,
         priority: 11,
         progName: 'EHubActivityLogs',
         pid: undefined,
         message: JSON.stringify(msg),
+        // TODO: detect message type
         messageType: 'json/azure.activitylog',
         messageTypeId: type,
         messageTsUs: ts.usec
@@ -40,10 +41,10 @@ module.exports = function (context, eventHubMessages) {
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
     async.filter(eventHubMessages, 
         function(msgArray, callback) {
-            collector.processLog(msgArray.records, formatActivityLogRecord, [],
+            collector.processLog(msgArray.records, formatActivityLogRecord, null,
                 function(err) {
                     if (err) {
-                     // TODO: DLQ
+                        // TODO: DLQ
                         context.log.error('Error processing batch:', err);
                         context.log.error('Records skipped:', msgArray.records.length);
                     }
