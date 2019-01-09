@@ -29,6 +29,17 @@ describe('Event hub functions unit tests.', function() {
         
         done();
     });
+    
+    it('Simple OK test, o365 record', function(done) {
+        var privFormatFun = ehubGeneralWire.__get__('formatGeneralLogRecord');
+        var result = privFormatFun(mock.O365_RECORD);
+        assert.equal(result.message, JSON.stringify(mock.O365_RECORD));
+        assert.equal(result.messageTypeId, '15');
+        assert.equal(result.messageTs, 1521651632);
+        assert.equal(result.messageTsUs, null);
+        
+        done();
+    });
 
     it('Batch processing error test', function(done) {
         process.env.WEBSITE_HOSTNAME = 'app-name';

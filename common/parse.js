@@ -15,7 +15,8 @@ const typePaths = [
     ['operationName', 'value'],
     ['operationName'],
     ['category', 'value'],
-    ['category']
+    ['category'],
+    ['RecordType']
 ];
 
 const tsPaths = [

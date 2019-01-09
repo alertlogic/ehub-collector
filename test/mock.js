@@ -164,11 +164,77 @@ const AUDIT_LOG_RECORD = {
     }
 };
 
+const O365_RECORD = {
+      "ApplicationId": "c44b4083-3bb0-49c1-b47d-974e53cbdf3c",
+      "TargetContextId": "bf8d32d3-1c13-4487-af02-80dba2236485",
+      "Target": [
+        {
+          "Type": 0,
+          "ID": "797f4846-ba00-4fd7-ba43-dac1f8f63013"
+        }
+      ],
+      "IntraSystemId": "c177a031-d063-4789-873d-87af94762900",
+      "InterSystemsId": "a9eccaf4-84f7-47c4-99f4-f3989bd1899a",
+      "ActorIpAddress": "87.113.76.58",
+      "ActorContextId": "bf8d32d3-1c13-4487-af02-80dba2236485",
+      "UserType": 0,
+      "UserKey": "10030000A19F1B13@alazurealertlogic.onmicrosoft.com",
+      "ResultStatus": "Succeeded",
+      "RecordType": 15,
+      "OrganizationId": "bf8d32d3-1c13-4487-af02-80dba2236485",
+      "Operation": "UserLoggedIn",
+      "Id": "425415ab-86e9-4ae1-b91f-61d748d2a812",
+      "CreationTime": "2018-03-21T17:00:32",
+      "Version": 1,
+      "Workload": "AzureActiveDirectory",
+      "ClientIP": "87.113.76.58",
+      "ObjectId": "797f4846-ba00-4fd7-ba43-dac1f8f63013",
+      "UserId": "kkuzmin@alazurealertlogic.onmicrosoft.com",
+      "AzureActiveDirectoryEventType": 1,
+      "ExtendedProperties": [
+        {
+          "Value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36",
+          "Name": "UserAgent"
+        },
+        {
+          "Value": "1",
+          "Name": "UserAuthenticationMethod"
+        },
+        {
+          "Value": "OAuth2:Authorize",
+          "Name": "RequestType"
+        },
+        {
+          "Value": "Success",
+          "Name": "ResultStatusDetail"
+        },
+        {
+          "Value": "True",
+          "Name": "KeepMeSignedIn"
+        }
+      ],
+      "Actor": [
+        {
+          "Type": 0,
+          "ID": "bea5cb4c-0348-49e4-b225-8acf2623d1ea"
+        },
+        {
+          "Type": 5,
+          "ID": "kkuzmin@alazurealertlogic.onmicrosoft.com"
+        },
+        {
+          "Type": 3,
+          "ID": "10030000A19F1B13"
+        }
+      ]
+};
+
 module.exports = {
     context: context,
     timer: timer,
     ACTIVITY_LOG_RECORD: ACTIVITY_LOG_RECORD,
     AUDIT_LOG_RECORD: AUDIT_LOG_RECORD,
+    O365_RECORD: O365_RECORD,
     getAuthResp: getAuthResp,
     AL_CID: AL_CID
 };
