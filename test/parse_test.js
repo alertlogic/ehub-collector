@@ -101,11 +101,14 @@ describe('Common parse functions unit tests.', function() {
         assert.deepEqual(privParseTs('2018-12-19T08:18:21.13Z'), {sec: 1545207501, usec: 130000});
         assert.deepEqual(privParseTs('2018-12-19T08:18:21Z'), {sec: 1545207501, usec: null});
         assert.deepEqual(privParseTs('2018-12-19T08:18:21.1357685Z'), {sec: 1545207501, usec: 135768});
-        assert.deepEqual(privParseTs('2018-12-10T00:03:46.6161822+00:00'), {sec: 1544400226, usec: 616182});
         assert.deepEqual(privParseTs('2018-12-19T08:18:21.1351Z'), {sec: 1545207501, usec: 135100});
         assert.deepEqual(privParseTs('2018-12-10T00:03:46.61618+00:00'), {sec: 1544400226, usec: 616180});
-        assert.deepEqual(privParseTs('2018-12-10T00:03:46.12+00:00'), {sec: 1544400226, usec: 120000});
         assert.deepEqual(privParseTs('2018-12-10T00:03:46.1+00:00'), {sec: 1544400226, usec: 100000});
+        assert.deepEqual(privParseTs('2018-12-10T00:03:46.12+00:00'), {sec: 1544400226, usec: 120000});
+        assert.deepEqual(privParseTs('2018-12-10T00:03:46.123+00:00'), {sec: 1544400226, usec: 123000});
+        assert.deepEqual(privParseTs('2018-12-10T00:03:46.1234+00:00'), {sec: 1544400226, usec: 123400});
+        assert.deepEqual(privParseTs('2018-12-10T00:03:46.12345+00:00'), {sec: 1544400226, usec: 123450});
+        assert.deepEqual(privParseTs('2018-12-10T00:03:46.6161822+00:00'), {sec: 1544400226, usec: 616182});
         
         done();
     });
