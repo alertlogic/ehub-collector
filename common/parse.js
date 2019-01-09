@@ -20,7 +20,8 @@ const typePaths = [
 
 const tsPaths = [
     ['eventTimestamp'],
-    ['time']
+    ['time'],
+    ['CreationTime']
 ];
 
 /*
@@ -89,13 +90,13 @@ var getMsgTs = function(msg) {
     return msgTs ? parseTs(msgTs) : defaultTs();
 };
 
-var getMsgType = function(msg, defaultVal) {
+var getMsgTypeId = function(msg, defaultVal) {
     var msgType = iteratePropPaths(typePaths, msg);
     return msgType ? msgType : defaultVal;
 };
 
 module.exports = {
     getMsgTs: getMsgTs,
-    getMsgType: getMsgType
+    getMsgTypeId: getMsgTypeId
 };
 

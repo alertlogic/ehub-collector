@@ -2,7 +2,7 @@
  * @copyright (C) 2018, Alert Logic, Inc
  * @doc
  * 
- * Unit tests for EHub functions
+ * Unit tests for EHubActivityLogs functions
  * 
  * @end
  * -----------------------------------------------------------------------------
@@ -32,7 +32,7 @@ describe('Event hub functions unit tests.', function() {
     
     it('OK test, no usec', function(done) {
         var privFormatFun = ehubActivityLogsWire.__get__('formatActivityLogRecord');
-        var testRecord = mock.ACTIVITY_LOG_RECORD;
+        var testRecord = Object.assign({}, mock.ACTIVITY_LOG_RECORD);
         testRecord.eventTimestamp = '2018-12-19T08:18:21.13Z';
         var result = privFormatFun(testRecord);
         assert.equal(result.message, JSON.stringify(testRecord));

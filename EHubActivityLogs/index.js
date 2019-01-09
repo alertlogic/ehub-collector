@@ -23,7 +23,7 @@ var formatActivityLogRecord = function(msg) {
     const ts = parse.getMsgTs(msg);
     // If properties.eventCategory is not present, category is "Administrative"
     // https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-log-schema#mapping-to-diagnostic-logs-schema
-    const type = parse.getMsgType(msg, 'Administrative');
+    const typeId = parse.getMsgTypeId(msg, 'Administrative');
     return {
         messageTs: ts.sec,
         priority: 11,
@@ -32,7 +32,7 @@ var formatActivityLogRecord = function(msg) {
         message: JSON.stringify(msg),
         // TODO: detect message type
         messageType: 'json/azure.activitylog',
-        messageTypeId: type,
+        messageTypeId: typeId,
         messageTsUs: ts.usec
     };
 };
