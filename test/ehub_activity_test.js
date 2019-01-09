@@ -24,8 +24,8 @@ describe('Event hub functions unit tests.', function() {
         var result = privFormatFun(mock.ACTIVITY_LOG_RECORD);
         assert.equal(result.message, JSON.stringify(mock.ACTIVITY_LOG_RECORD));
         assert.equal(result.messageTypeId, 'Microsoft.Advisor/recommendations/available/action');
-        assert.equal(result.messageTs, 1545207501183);
-        assert.equal(result.messageTsUs, 454);
+        assert.equal(result.messageTs, 1545207501);
+        assert.equal(result.messageTsUs, 183454);
         
         done();
     });
@@ -37,8 +37,8 @@ describe('Event hub functions unit tests.', function() {
         var result = privFormatFun(testRecord);
         assert.equal(result.message, JSON.stringify(testRecord));
         assert.equal(result.messageTypeId, 'Microsoft.Advisor/recommendations/available/action');
-        assert.equal(result.messageTs, 1545207501130);
-        assert.equal(result.messageTsUs, null);
+        assert.equal(result.messageTs, 1545207501);
+        assert.equal(result.messageTsUs, 130000);
         
         done();
     });
@@ -48,8 +48,8 @@ describe('Event hub functions unit tests.', function() {
         var result = privFormatFun(mock.AUDIT_LOG_RECORD);
         assert.equal(result.message, JSON.stringify(mock.AUDIT_LOG_RECORD));
         assert.equal(result.messageTypeId, 'Update policy');
-        assert.equal(result.messageTs, 1544400226616);
-        assert.equal(result.messageTsUs, 182);
+        assert.equal(result.messageTs, 1544400226);
+        assert.equal(result.messageTsUs, 616182);
         
         done();
     });
@@ -62,8 +62,8 @@ describe('Event hub functions unit tests.', function() {
         var result = privFormatFun(testRecord);
         assert.equal(result.message, JSON.stringify(testRecord));
         assert.equal(result.messageTypeId, 'Administrative');
-        assert.equal(result.messageTs, 1544400226616);
-        assert.equal(result.messageTsUs, 182);
+        assert.equal(result.messageTs, 1544400226);
+        assert.equal(result.messageTsUs, 616182);
         
         done();
     });
@@ -75,8 +75,8 @@ describe('Event hub functions unit tests.', function() {
         var result = privFormatFun(testRecord);
         assert.equal(result.message, JSON.stringify(testRecord));
         assert.equal(result.messageTypeId, 'AuditLogs');
-        assert.equal(result.messageTs, 1544400226616);
-        assert.equal(result.messageTsUs, 182);
+        assert.equal(result.messageTs, 1544400226);
+        assert.equal(result.messageTsUs, 616182);
         
         done();
     });
