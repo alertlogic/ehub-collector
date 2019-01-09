@@ -33,7 +33,7 @@ module.exports = function (context, eventHubMessages) {
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
     async.filter(eventHubMessages, 
         function(msgArray, callback) {
-            collector.processLog(msgArray.records, formatGeneralLogRecord, [],
+            collector.processLog(msgArray.records, formatGeneralLogRecord, null,
                 function(err) {
                     if (err) {
                      // TODO: DLQ
