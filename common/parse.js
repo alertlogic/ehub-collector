@@ -60,7 +60,7 @@ var parseTsUsec = function(ts) {
     try {
         // extracts microseconds from ISO8601 timestamp, like '2018-12-19T08:18:21.1834546Z'
         if (ts.length > ISO8601_MICROSEC_OFFSET) {
-            var microStr = ts.slice(ISO8601_MICROSEC_OFFSET, ISO8601_MICROSEC_OFFSET + 6).replace(/[Z\+]/, '');
+            var microStr = ts.slice(ISO8601_MICROSEC_OFFSET, ISO8601_MICROSEC_OFFSET + 6).replace(/[Z\+:]/g, '');
             while (microStr && microStr.length > 0 && microStr.length < 6) {
                 microStr += '0';
             }
