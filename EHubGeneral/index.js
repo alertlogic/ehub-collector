@@ -16,7 +16,7 @@ const parse = require('../common/parse');
 
 var formatGeneralLogRecord = function(msg) {
     const ts = parse.getMsgTs(msg);
-    const typeId = parse.getMsgTypeId(msg, null);
+    const typeId = parse.getMsgTypeId(msg);
     return {
         messageTs: ts.sec,
         priority: 11,

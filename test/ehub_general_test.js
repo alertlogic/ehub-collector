@@ -23,7 +23,8 @@ describe('Event hub functions unit tests.', function() {
         var privFormatFun = ehubGeneralWire.__get__('formatGeneralLogRecord');
         var result = privFormatFun(mock.ACTIVITY_LOG_RECORD);
         assert.equal(result.message, JSON.stringify(mock.ACTIVITY_LOG_RECORD));
-        assert.equal(result.messageTypeId, 'Microsoft.Advisor/recommendations/available/action');
+        assert.equal(result.messageType, 'json/azure.ehub');
+        assert.equal(result.messageTypeId, 'Recommendation');
         assert.equal(result.messageTs, 1545207501);
         assert.equal(result.messageTsUs, 183454);
         
@@ -34,7 +35,24 @@ describe('Event hub functions unit tests.', function() {
         var privFormatFun = ehubGeneralWire.__get__('formatGeneralLogRecord');
         var result = privFormatFun(mock.O365_RECORD);
         assert.equal(result.message, JSON.stringify(mock.O365_RECORD));
+        assert.equal(result.messageType, 'json/azure.ehub');
         assert.equal(result.messageTypeId, '15');
+        assert.equal(result.messageTs, 1521651632);
+        assert.equal(result.messageTsUs, null);
+        
+        done();
+    });
+    
+    it('Simple OK test, other record', function(done) {
+        var privFormatFun = ehubGeneralWire.__get__('formatGeneralLogRecord');
+        var testRecord = {
+             "CreationTime": "2018-03-21T17:00:32",
+             some: 'value'
+        };
+        var result = privFormatFun(testRecord);
+        assert.equal(result.message, JSON.stringify(testRecord));
+        assert.equal(result.messageType, 'json/azure.ehub');
+        assert.equal(result.messageTypeId, null);
         assert.equal(result.messageTs, 1521651632);
         assert.equal(result.messageTsUs, null);
         
