@@ -8,7 +8,8 @@
   "scripts": {
     "local-master": "node ./local_dev/master_local_dev.js",
     "local-updater": "node ./local_dev/updater_local_dev.js",
-    "local-ehub": "node ./local_dev/ehub_local_dev.js",
+    "local-ehub-general": "node ./local_dev/ehub_general_local_dev.js",
+    "local-ehub-activitylogs": "node ./local_dev/ehub_activitylogs_local_dev.js",
     "lint": "jshint --show-non-errors --exclude \"./node_modules/*\" **/*.js",
     "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura mocha --colors --reporter mocha-jenkins-reporter"
   },

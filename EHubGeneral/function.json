@@ -4,10 +4,17 @@
       "type": "eventHubTrigger",
       "name": "eventHubMessages",
       "direction": "in",
-      "path": "AlertLogicLogHub",
+      "path": "alertlogic-log",
       "connection": "APP_LOG_EHUB_CONNECTION",
       "cardinality": "many",
       "consumerGroup": "$Default"
+    },
+    {
+      "name": "dlBlob",
+      "type": "blob",
+      "path": "alertlogic-dl/%WEBSITE_SITE_NAME%/ehubgeneral/{DateTime}",
+      "connection": "AzureWebJobsStorage",
+      "direction": "out"
     }
   ],
   "disabled": false

@@ -9,9 +9,7 @@
  */
 
 
-const async = require('async');
-const pkg = require('../package.json');
-const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
+const ehubCollector = require('../common/ehub_collector');
 const parse = require('../common/parse');
 
 var formatGeneralLogRecord = function(msg) {
@@ -30,28 +28,7 @@ var formatGeneralLogRecord = function(msg) {
 };
 
 module.exports = function (context, eventHubMessages) {
-    var collector = new AlAzureCollector(context, 'ehub', pkg.version);
-    async.filter(eventHubMessages, 
-        function(msgArray, callback) {
-            collector.processLog(msgArray.records, formatGeneralLogRecord, null,
-                function(err) {
-                    if (err) {
-                     // TODO: DLQ
-                        context.log.error('Error processing batch:', err);
-                        context.log.error('Records skipped:', msgArray.records.length);
-                    }
-                    return callback(null, !err);
-            });
-        },
-        function(err, mapResult) {
-            if (err) {
-                // TODO: DLQ
-                context.log.error('Processing error:', err);
-            } else {
-                context.log.info('Processed:', mapResult.reduce((a, b) => a + b.records.length, 0));
-            }
-            context.done();
-    });
+    return ehubCollector(context, eventHubMessages, formatGeneralLogRecord);
 };
 
 

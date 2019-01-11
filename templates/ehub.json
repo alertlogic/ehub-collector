@@ -49,8 +49,9 @@
         "contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "master",
-        "ehubNsName": "[concat('AlertLogicIngestion-', parameters('name'), '-', uniqueString(resourceGroup().id))]",
-        "ehubForLogName": "AlertLogicLogHub"
+        "ehubNsName": "[concat('AlertLogicIngest-', resourceGroup().location, '-', uniqueString(resourceGroup().id))]",
+        "ehubForLogName": "alertlogic-log",
+        "dlBlobName": "default/alertlogic-dl"
     },
     "resources": [
         {
@@ -172,7 +173,21 @@
             "location": "[variables('location')]",
             "properties": {
                 "accountType": "Standard_LRS"
-            }
+            },
+            "dependsOn": [],
+            "resources": [
+                {
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "name": "[variables('dlBlobName')]",
+                    "dependsOn": [
+                        "[parameters('Storage Name')]"
+                    ],
+                    "properties": {
+                        "publicAccess": "None"
+                    }
+                }
+            ]
         },
         {
             "type": "Microsoft.Authorization/roleAssignments",
