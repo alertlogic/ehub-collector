@@ -3,7 +3,7 @@
  * @doc
  *
  * Message parse utilities common for event hub collector functions.
- * Message timestamp and type proprty paths are based on Azure event schema definitions
+ * Message timestamp and type property paths are based on Azure event schema definitions
  * https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-log-schema#mapping-to-diagnostic-logs-schema
  * https://docs.microsoft.com/en-us/azure/azure-monitor/platform/tutorial-dashboards
  *
@@ -11,18 +11,19 @@
  * -----------------------------------------------------------------------------
  */
 
-const typePaths = [
-    ['operationName', 'value'],
-    ['operationName'],
-    ['category', 'value'],
-    ['category'],
-    ['RecordType']
+const typeIdPaths = [
+    { path: ['category', 'value'] },
+    { path: ['category'] },
+    { path: ['operationName', 'value'] },
+    { path: ['operationName'] },
+    { path: ['RecordType'] },
+    { path: ['Operation'] }
 ];
 
 const tsPaths = [
-    ['eventTimestamp'],
-    ['time'],
-    ['CreationTime']
+    { path: ['eventTimestamp'] },
+    { path: ['time'] },
+    { path: ['CreationTime'] }
 ];
 
 /*
@@ -81,7 +82,12 @@ var iteratePropPaths = function(paths, msg) {
         if (acc) {
             return acc;
         } else {
-            return getProp(v, msg);
+            const propVal = getProp(v.path, msg);
+            if (v.override) {
+                return propVal ? v.override : propVal;
+            } else {
+                return propVal;
+            }
         }
     }, null);
 };
@@ -91,12 +97,13 @@ var getMsgTs = function(msg) {
     return msgTs ? parseTs(msgTs) : defaultTs();
 };
 
-var getMsgTypeId = function(msg, defaultVal) {
-    var msgType = iteratePropPaths(typePaths, msg);
+var getMsgTypeId = function(msg, defaultVal = null) {
+    var msgType = iteratePropPaths(typeIdPaths, msg);
     return msgType ? msgType : defaultVal;
 };
 
 module.exports = {
+    iteratePropPaths: iteratePropPaths,
     getMsgTs: getMsgTs,
     getMsgTypeId: getMsgTypeId
 };

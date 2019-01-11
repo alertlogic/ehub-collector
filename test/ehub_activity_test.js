@@ -23,7 +23,8 @@ describe('Event hub functions unit tests.', function() {
         var privFormatFun = ehubActivityLogsWire.__get__('formatActivityLogRecord');
         var result = privFormatFun(mock.ACTIVITY_LOG_RECORD);
         assert.equal(result.message, JSON.stringify(mock.ACTIVITY_LOG_RECORD));
-        assert.equal(result.messageTypeId, 'Microsoft.Advisor/recommendations/available/action');
+        assert.equal(result.messageType, 'json/azure.ehub');
+        assert.equal(result.messageTypeId, 'Recommendation');
         assert.equal(result.messageTs, 1545207501);
         assert.equal(result.messageTsUs, 183454);
         
@@ -36,7 +37,8 @@ describe('Event hub functions unit tests.', function() {
         testRecord.eventTimestamp = '2018-12-19T08:18:21.13Z';
         var result = privFormatFun(testRecord);
         assert.equal(result.message, JSON.stringify(testRecord));
-        assert.equal(result.messageTypeId, 'Microsoft.Advisor/recommendations/available/action');
+        assert.equal(result.messageType, 'json/azure.ehub');
+        assert.equal(result.messageTypeId, 'Recommendation');
         assert.equal(result.messageTs, 1545207501);
         assert.equal(result.messageTsUs, 130000);
         
@@ -47,34 +49,23 @@ describe('Event hub functions unit tests.', function() {
         var privFormatFun = ehubActivityLogsWire.__get__('formatActivityLogRecord');
         var result = privFormatFun(mock.AUDIT_LOG_RECORD);
         assert.equal(result.message, JSON.stringify(mock.AUDIT_LOG_RECORD));
-        assert.equal(result.messageTypeId, 'Update policy');
+        assert.equal(result.messageType, 'json/azure.ehub');
+        assert.equal(result.messageTypeId, 'AuditLogs');
         assert.equal(result.messageTs, 1544400226);
         assert.equal(result.messageTsUs, 616182);
         
         done();
     });
     
-    it('Default message type (Administrative)', function(done) {
+    it('Default message type id (null)', function(done) {
         var privFormatFun = ehubActivityLogsWire.__get__('formatActivityLogRecord');
         var testRecord = Object.assign({}, mock.AUDIT_LOG_RECORD);
         delete testRecord.category;
         delete testRecord.operationName;
         var result = privFormatFun(testRecord);
         assert.equal(result.message, JSON.stringify(testRecord));
-        assert.equal(result.messageTypeId, 'Administrative');
-        assert.equal(result.messageTs, 1544400226);
-        assert.equal(result.messageTsUs, 616182);
-        
-        done();
-    });
-    
-    it('Category as message type', function(done) {
-        var privFormatFun = ehubActivityLogsWire.__get__('formatActivityLogRecord');
-        var testRecord = Object.assign({}, mock.AUDIT_LOG_RECORD);
-        delete testRecord.operationName;
-        var result = privFormatFun(testRecord);
-        assert.equal(result.message, JSON.stringify(testRecord));
-        assert.equal(result.messageTypeId, 'AuditLogs');
+        assert.equal(result.messageType, 'json/azure.ehub');
+        assert.equal(result.messageTypeId, null);
         assert.equal(result.messageTs, 1544400226);
         assert.equal(result.messageTsUs, 616182);
         

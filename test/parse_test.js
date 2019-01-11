@@ -8,12 +8,14 @@
  * -----------------------------------------------------------------------------
  */
  
-var assert = require('assert');
-var rewire = require('rewire');
-var sinon = require('sinon');
-var mock = require('./mock');
+const assert = require('assert');
+const rewire = require('rewire');
+const sinon = require('sinon');
+const mock = require('./mock');
 
-var parse = rewire('../common/parse');
+var parseWire = rewire('../common/parse');
+
+const parse = require('../common/parse');
 
 describe('Common parse functions unit tests.', function() {
     var clock;
@@ -26,7 +28,7 @@ describe('Common parse functions unit tests.', function() {
     });
     
     it('Simple OK test', function(done) {
-        var privGetProp = parse.__get__('getProp');
+        var privGetProp = parseWire.__get__('getProp');
         var obj = {
             a: {
                 aa: 1,
@@ -43,7 +45,7 @@ describe('Common parse functions unit tests.', function() {
     });
     
     it('Empty path', function(done) {
-        var privGetProp = parse.__get__('getProp');
+        var privGetProp = parseWire.__get__('getProp');
         var obj = {
             a: {
                 aa: 1,
@@ -58,14 +60,14 @@ describe('Common parse functions unit tests.', function() {
     });
     
     it('Empty obj', function(done) {
-        var privGetProp = parse.__get__('getProp');
+        var privGetProp = parseWire.__get__('getProp');
         assert.deepEqual(privGetProp(['a'], {}), null);
         
         done();
     });
     
     it('Wrong path', function(done) {
-        var privGetProp = parse.__get__('getProp');
+        var privGetProp = parseWire.__get__('getProp');
         var obj = {
             a: {
                 aa: 1,
@@ -81,7 +83,7 @@ describe('Common parse functions unit tests.', function() {
     });
     
     it('Ok test with default', function(done) {
-        var privGetProp = parse.__get__('getProp');
+        var privGetProp = parseWire.__get__('getProp');
         var obj = {
             a: {
                 aa: 1,
@@ -97,7 +99,7 @@ describe('Common parse functions unit tests.', function() {
     });
     
     it('Parse timestamp ISO-8601', function(done) {
-        var privParseTs = parse.__get__('parseTs');
+        var privParseTs = parseWire.__get__('parseTs');
         assert.deepEqual(privParseTs('2018-12-19T08:18:21.13Z'), {sec: 1545207501, usec: 130000});
         assert.deepEqual(privParseTs('2018-12-19T08:18:21Z'), {sec: 1545207501, usec: null});
         assert.deepEqual(privParseTs('2018-12-19T08:18:21.1357685Z'), {sec: 1545207501, usec: 135768});
@@ -114,8 +116,23 @@ describe('Common parse functions unit tests.', function() {
     });
     
     it('Wrong timestamp input', function(done) {
-        var privParseTs = parse.__get__('parseTs');
+        var privParseTs = parseWire.__get__('parseTs');
         assert.deepEqual(privParseTs('foo'), {sec: 1234567, usec: null});
+        
+        done();
+    });
+    
+    it('Test override values', function(done) {
+        const testPaths = [
+            { path: ['eventTimestamp'] },
+            { path: ['time'], override: 'foo' },
+            { path: ['CreationTime'] }
+        ];
+        const testObj = {
+            some: 'value',
+            time: 'some-time'
+        };
+        assert.deepEqual(parse.iteratePropPaths(testPaths, testObj), 'foo');
         
         done();
     });
