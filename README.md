@@ -33,7 +33,7 @@ In the Azure AD portal, you must register a new web application.
 1. From the `All applications` tab on the `App registration (Preview)` blade, select `All apps`, and then click the application name you created. 
 1. Note the `Application ID`, for example, `a261478c-84fb-42f9-84c2-de050a4babe3`
 
-## Set Up the Required Active Directory Security Permissions.
+## Set Up the Required Active Directory Security Permissions
 
 1. On the `Settings` panel for the application, select `Keys`.
 1. Type a key `Description`, and then set `Duration` to `Never expires`. 
@@ -134,20 +134,20 @@ If you want to deploy the template through the Azure command line (CLI), you can
 ## Verify the Installation
 **To verify successful installation of the template:**
 
-1. In the Azure portal, access `Function Apps`, and then choose the Alert Logic Office 365 collector function. 
-1. Click `Functions` -> `Master` -> `Monitor` and verify the recent log entry has the status of "OK' and contains no error messages.
+1. In the Azure portal, access `Function Apps`, and then choose the Alert Logic Event Hub collector function. 
+1. Click `Functions` -> `Master` -> `Monitor` and verify the recent log entry has the status of `OK` and contains no error messages.
 **Example:** `Ehub source checkin OK`.
 1. In the Alert Logic console, navigate to `Configuration` -> `Deployments` -> `All Deployments` -> `Log Sources`, and then filter the list by `Push (Office 365, EventHub)` collection method. 
 1. Verify a new Azure Event Hub log source with the name provided during `az group deployment create` above appears with the source status as `OK`.
 
 # How the Collector Works
 
-**Note:** The following Azure functions use the Application/O365 tenant ID (`APP_TENANT_ID` web application setting) as a `PublisherIdentifier` during Office 365 management API requests. For more information  about `PublisherIdentifier`, see  [Requesting content blobs and throttling](https://msdn.microsoft.com/en-us/office-365/troubleshooting-the-office-365-management-activity-api#requesting-content-blobs-and-throttling).
+The [template](https://github.com/alertlogic/ehub-collector/blob/master/templates/ehub.json) creates an `AlertLogicIngest-<region-name>-<unique-string>` Event Hub Namespace where `alertlogic-log` event hub is created. Collector Azure function listens to event hub and forwards incoming events to Alert Logic Ingestion service. If data processing fails the data is stored in `alertlogic-dl` Azure Blob container located in the storage account specified during template deployment. 
 
 ## Master Function
 
 The `Master` function is a timer trigger function responsible for:
-- Registering the Azure web application in Alert Logic backend
+- Registering the Azure web application in the Alert Logic backend
 - Reporting health-checks to the backend
 
 **Note:** When you release a new version of the collector, remember to increment the version number in
@@ -159,13 +159,13 @@ The `Updater` function is a timer triggered function that runs a deployment sync
 
 ## EHubActivityLogs Function
 
-The `EHubActivityLogs` listens to `insights-operational-logs` Event Hub located in the Event Hub namespace created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `insights-operational-logs` is created automatically by Azure when a subscription's [Log Profile is integrated with Event Hub](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
+The `EHubActivityLogs` listens to `insights-operational-logs` Event Hub located in the Event Hub namespace created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `insights-operational-logs` is created automatically by Azure when a subscription's [Log Profile is integrated with Event Hub via Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
 Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs). 
 Collected JSON objects are wrapped into the protobuf [structure](https://github.com/alertlogic/al-collector-js/blob/master/proto/common_proto.piqi.proto) structure and then are forwarded to Alert Logic Ingestion service.
 
 ## EHubGeneral Function
 
-The `EHubGeneral` listens to `alertlogicloghub` which is created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `alertlogicloghub` event hub can be used for integration with, for example, [diagnostic logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-logs-stream-event-hubs) or [Azure AD logs](https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub).
+The `EHubGeneral` listens to `alertlogic-log` which is created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `alertlogicloghub` event hub can be used for integration with, for example, [diagnostic logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-logs-stream-event-hubs) or [Azure AD logs](https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub).
 Collected JSON objects are wrapped into the protobuf [structure](https://github.com/alertlogic/al-collector-js/blob/master/proto/common_proto.piqi.proto) structure and then are forwarded to Alert Logic Ingestion service.
 
 # Local Development
