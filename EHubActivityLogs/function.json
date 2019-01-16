@@ -8,6 +8,13 @@
       "connection": "APP_LOG_EHUB_CONNECTION",
       "cardinality": "many",
       "consumerGroup": "$Default"
+    },
+    {
+      "name": "dlBlob",
+      "type": "blob",
+      "path": "alertlogic-dl/%WEBSITE_SITE_NAME%/ehubactivitylogs/{DateTime}",
+      "connection": "AzureWebJobsStorage",
+      "direction": "out"
     }
   ],
   "disabled": false

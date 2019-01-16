@@ -1,7 +1,7 @@
 const util = require('util');
 
 var devConfig = require('./dev_config');
-var azureFunction = require('../EHub/index');
+var azureFunction = require('../EHubGeneral/index');
 
 // Local development query and body params
 var debugQuery = {

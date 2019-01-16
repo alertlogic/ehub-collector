@@ -176,7 +176,8 @@ Collected JSON objects are wrapped into the protobuf [structure](https://github.
 1. Edit `./local_dev/dev_config.js`.
 1. Run the Master function locally: `npm run local-master`.
 1. Run the Updater function locally: `npm run local-updater`.
-1. Run the EHub function locally: `npm run local-ehub`.
+1. Run the EHubGeneral function locally: `npm run local-ehub-general`.
+1. Run the EHubActivityLogs function locally: `npm run local-ehub-activitylogs`.
 1. Run `npm test` to perform code analysis and unit tests.
 
 Please use the following [code style](https://github.com/airbnb/javascript) as much as possible.
