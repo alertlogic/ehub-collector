@@ -82,7 +82,7 @@ describe('Event hub functions unit tests.', function() {
             {records: [{operationName: 'Bad batch'}, {bad: 'mAssage'}]},
             {records: [{operationName: 'Good batch'}, {some: 'message 2'}]},
         ];
-        testDone = function() {
+        var testDone = function() {
             processLogStub.restore();
             sinon.assert.callCount(processLogStub, 3);
             done();

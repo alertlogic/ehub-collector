@@ -17,7 +17,7 @@
     "jshint": "^2.9.5",
     "mocha": "^3.5.3",
     "mocha-jenkins-reporter": "^0.3.10",
-    "nock": "^10.0.2",
+    "nock": "^10.0.6",
     "nyc": "^11.3.0",
     "pre-commit": "^1.2.2",
     "rewire": "^2.5.2",

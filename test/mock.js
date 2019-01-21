@@ -229,6 +229,68 @@ const O365_RECORD = {
       ]
 };
 
+const AZURE_GET_EHUB_NS = function(ehubNsState = 'Succeeded') {
+    return {
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard",
+        "capacity": 1
+      },
+      "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/rcs-master-ehub/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xxk",
+      "name": "AlertLogicIngest-westeurope-pcmpl7iir6xxk",
+      "type": "Microsoft.EventHub/Namespaces",
+      "location": "West Europe",
+      "tags": {},
+      "properties": {
+        "isAutoInflateEnabled": true,
+        "maximumThroughputUnits": 16,
+        "kafkaEnabled": false,
+        "provisioningState": ehubNsState,
+        "metricId": "05dcd414-c680-4f2c-8716-058cd058974b:alertlogicingest-westeurope-pcmpl7iir6xxk",
+        "createdAt": "2019-01-16T12:06:07.107Z",
+        "updatedAt": "2019-01-16T12:06:31.82Z",
+        "serviceBusEndpoint": "https://AlertLogicIngest-westeurope-pcmpl7iir6xxk.servicebus.windows.net:443/",
+        "status": "Active"
+      }
+    };
+};
+
+const AZURE_LIST_EVENT_HUBS = function(ehubStatus = 'Active') {
+    return {
+      "value": [
+        {
+          "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/rcs-master-ehub/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xxk/eventhubs/alertlogic-log",
+          "name": "alertlogic-log",
+          "type": "Microsoft.EventHub/Namespaces/EventHubs",
+          "location": "West Europe",
+          "properties": {
+            "messageRetentionInDays": 7,
+            "partitionCount": 4,
+            "status": ehubStatus,
+            "createdAt": "2019-01-16T12:06:46.267",
+            "updatedAt": "2019-01-16T12:06:46.643",
+            "partitionIds": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ]
+          }
+        }
+      ]
+    };
+};
+
+const AZURE_TOKEN_MOCK = {
+    'token_type' : 'Bearer',
+    'expires_in' : 3599,
+    'ext_expires_in' : 3599,
+    'expires_on' : '1543401497',
+    'not_before' :'1543401497',
+    'resource' : 'https://management.azure.com',
+    'access_token' :  'some-token'
+};
+
 module.exports = {
     context: context,
     timer: timer,
@@ -236,5 +298,8 @@ module.exports = {
     AUDIT_LOG_RECORD: AUDIT_LOG_RECORD,
     O365_RECORD: O365_RECORD,
     getAuthResp: getAuthResp,
-    AL_CID: AL_CID
+    AL_CID: AL_CID,
+    AZURE_GET_EHUB_NS: AZURE_GET_EHUB_NS,
+    AZURE_LIST_EVENT_HUBS: AZURE_LIST_EVENT_HUBS,
+    AZURE_TOKEN_MOCK: AZURE_TOKEN_MOCK
 };

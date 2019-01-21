@@ -11,7 +11,6 @@
 const async = require('async');
 const pkg = require('../package.json');
 const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
-const parse = require('./parse');
 
 var processError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
