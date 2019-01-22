@@ -3,7 +3,7 @@
  * @doc
  * 
  * Various Event hub collector health checks.
- * The last error code is EHUB000005
+ * The last error code is EHUB000006
  * 
  * @end
  * ----------------------------------------------------------------------------
@@ -47,20 +47,32 @@ function checkEventHubNamespace(master, ns, callback) {
 }
 
 function checkEventHub(master, eventHubs, callback) {
-    return callback(eventHubs.reduce(function(acc, ehub) {
-        if (acc) {
+    const check = eventHubs.reduce(function(acc, ehub) {
+        acc.logHubExists = acc.logHubExists || ehub.name === 'alertlogic-log';
+        if (acc.error) {
             return acc;
         } else {
             const status = ehub.status;
+            
             if (status === 'Active') {
-                return null;
+                return acc;
             } else {
-                return master.errorStatusFmt(
+                acc.error = master.errorStatusFmt(
                     'EHUB000002',
                     `Event Hub status is not ok. EventHub = ${ehub.name}, status = ${status}`);
+                return acc;
             }
+            
         }
-    }, null));
+    }, {logHubExists: false, error: null});
+    
+    if (!check.logHubExists) {
+        return callback(master.errorStatusFmt(
+            'EHUB000006',
+            `Default alertlogic-log event hub doesn't exist in the namespace.`));
+    } else {
+        return callback(check.error);
+    }
 }
 
 var eventHubNs = function(master, callback) {

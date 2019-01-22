@@ -209,5 +209,34 @@ describe('Event hub health check unit tests.', function() {
             done();
         });
     });
+    
+    it('Absent alertlogic-log event hub', function(done) {
+        // Mock Azure HTTP calls
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/2wljtgprz47om$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(200, mock.AZURE_GET_EHUB_NS());
+        
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/eventhubs$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(200, {value: [mock.AZURE_LIST_EVENT_HUBS().value[1]]});
+        
+        process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
+        
+        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        
+        ehubHealthCheck.eventHubNs(master, function(err) {
+            const expected = {
+                status: 'error',
+                error_code: 'EHUB000006',
+                details: [`Default alertlogic-log event hub doesn't exist in the namespace.`]
+            };
+            assert.deepEqual(err, expected);
+            done();
+        });
+    });
 });
 

@@ -276,7 +276,26 @@ const AZURE_LIST_EVENT_HUBS = function(ehubStatus = 'Active') {
               "3"
             ]
           }
-        }
+        },
+        {
+            "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/rcs-master-ehub/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xxk/eventhubs/insights-operational-log",
+            "name": "insights-operational-log",
+            "type": "Microsoft.EventHub/Namespaces/EventHubs",
+            "location": "West Europe",
+            "properties": {
+              "messageRetentionInDays": 7,
+              "partitionCount": 4,
+              "status": "Active",
+              "createdAt": "2019-01-16T12:06:46.267",
+              "updatedAt": "2019-01-16T12:06:46.643",
+              "partitionIds": [
+                "0",
+                "1",
+                "2",
+                "3"
+              ]
+            }
+          }
       ]
     };
 };
