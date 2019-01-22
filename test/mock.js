@@ -281,6 +281,13 @@ const AZURE_LIST_EVENT_HUBS = function(ehubStatus = 'Active') {
     };
 };
 
+const AZURE_RESOURCE_NOT_FOUND = {
+    "error": {
+        "code": "ResourceNotFound",
+        "message": "The Resource 'Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xx' under resource group 'rcs-master-ehub' was not found."
+      }
+    };
+
 const AZURE_TOKEN_MOCK = {
     'token_type' : 'Bearer',
     'expires_in' : 3599,
@@ -301,5 +308,6 @@ module.exports = {
     AL_CID: AL_CID,
     AZURE_GET_EHUB_NS: AZURE_GET_EHUB_NS,
     AZURE_LIST_EVENT_HUBS: AZURE_LIST_EVENT_HUBS,
-    AZURE_TOKEN_MOCK: AZURE_TOKEN_MOCK
+    AZURE_TOKEN_MOCK: AZURE_TOKEN_MOCK,
+    AZURE_RESOURCE_NOT_FOUND: AZURE_RESOURCE_NOT_FOUND
 };

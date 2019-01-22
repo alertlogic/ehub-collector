@@ -2,7 +2,8 @@
  * @copyright (C) 2019, Alert Logic, Inc
  * @doc
  * 
- * Various Event hub collector health checks
+ * Various Event hub collector health checks.
+ * The last error code is EHUB000005
  * 
  * @end
  * ----------------------------------------------------------------------------
@@ -18,6 +19,14 @@ function initArmEhub(master) {
     return azure.createEventHubManagementClient(azureCreds, subscriptionId);
 }
 
+function formatSdkError(master, alErrorCode, err) {
+    if (typeof err === 'string' || err instanceof String) {
+        return master.errorStatusFmt(alErrorCode, err);
+    } else if (typeof err === 'object') {
+        return master.errorStatusFmt(alErrorCode, JSON.stringify(err));
+    }
+}
+
 function getEhubNsName() {
     const connectionParams = parse(process.env.APP_LOG_EHUB_CONNECTION);
     return connectionParams.Endpoint.split(/[\.\/]/g)[2];
@@ -31,7 +40,7 @@ function checkEventHubNamespace(master, ns, callback) {
     } else {
         const err = master.errorStatusFmt(
             'EHUB000001',
-            `Event Hub Namespaces state is not ok. Name = ${ns.name}, provisioningState = ${pState}`);
+            `Event Hub Namespace state is not ok. Namespace = ${ns.name}, provisioningState = ${pState}`);
         
         return callback(err);
     }
@@ -46,7 +55,9 @@ function checkEventHub(master, eventHubs, callback) {
             if (status === 'Active') {
                 return null;
             } else {
-                return master.errorStatusFmt('EHUB000002', `Event Hub status is not ok. Name = ${ehub.name}, status = ${status}`);
+                return master.errorStatusFmt(
+                    'EHUB000002',
+                    `Event Hub status is not ok. EventHub = ${ehub.name}, status = ${status}`);
             }
         }
     }, null));
@@ -59,9 +70,9 @@ var eventHubNs = function(master, callback) {
     
     async.waterfall([
         function(callback){
-            return armEhub.namespaces.get(rg, nsName, function (err, namespace) {
+            return armEhub.namespaces.get(rg, nsName, function (err, namespace, req, resp) {
                 if (err) {
-                    return callback(master.errorStatusFmt('EHUB000003', err));
+                    return callback(formatSdkError(master, 'EHUB000003', err));
                 } else {
                     return checkEventHubNamespace(master, namespace, callback);
                 }
@@ -70,7 +81,11 @@ var eventHubNs = function(master, callback) {
         function(namespace, callback) {
             return armEhub.eventHubs.listByNamespace(rg, namespace.name, function(err, eventHubs) {
                 if (err) {
-                    return callback(master.errorStatusFmt('EHUB000004', err));
+                    return callback(formatSdkError(master, 'EHUB000004', err));
+                } else if (eventHubs.length === 0){
+                    return callback(master.errorStatusFmt(
+                        'EHUB000005',
+                        `Event Hub Namespace contains zero event hubs. Namespace = ${namespace.name}`));
                 } else {
                     return checkEventHub(master, eventHubs, callback);
                 }

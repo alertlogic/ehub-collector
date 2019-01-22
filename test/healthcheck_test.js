@@ -119,7 +119,7 @@ describe('Event hub health check unit tests.', function() {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000001',
-                details: ['Event Hub Namespaces state is not ok. Name = AlertLogicIngest-westeurope-pcmpl7iir6xxk, provisioningState = Created']
+                details: ['Event Hub Namespace state is not ok. Namespace = AlertLogicIngest-westeurope-pcmpl7iir6xxk, provisioningState = Created']
             };
             assert.deepEqual(err, expected);
             done();
@@ -148,12 +148,66 @@ describe('Event hub health check unit tests.', function() {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000002',
-                details: ['Event Hub status is not ok. Name = alertlogic-log, status = Disabled']
+                details: ['Event Hub status is not ok. EventHub = alertlogic-log, status = Disabled']
             };
             assert.deepEqual(err, expected);
             done();
         });
     });
     
+    it('Event hub namespace not found error', function(done) {
+        // Mock Azure HTTP calls
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/2wljtgprz47om$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(404, mock.AZURE_RESOURCE_NOT_FOUND);
+        
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/eventhubs$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(200, mock.AZURE_LIST_EVENT_HUBS());
+        
+        process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
+        
+        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        
+        ehubHealthCheck.eventHubNs(master, function(err) {
+            assert.equal(err.status, 'error');
+            assert.equal(err.error_code, 'EHUB000003');
+            sinon.assert.match(err.details[0], "{\"statusCode\":404,\"request\":{\"rawResponse\":false,\"queryString\":{},\"url\":\"https://management.azure.com/subscriptions/subscription-id/resourceGroups/kktest11-rg/providers/Microsoft.EventHub/namespaces/alertlogicingest-centralus-2wljtgprz47om?api-version=2017-04-01\"");
+            done();
+        });
+    });
+    
+    it('Zero event hubs in a namespace', function(done) {
+        // Mock Azure HTTP calls
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/2wljtgprz47om$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(200, mock.AZURE_GET_EHUB_NS());
+        
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/eventhubs$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(200, {value: []});
+        
+        process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
+        
+        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        
+        ehubHealthCheck.eventHubNs(master, function(err) {
+            const expected = {
+                status: 'error',
+                error_code: 'EHUB000005',
+                details: ['Event Hub Namespace contains zero event hubs. Namespace = AlertLogicIngest-westeurope-pcmpl7iir6xxk']
+            };
+            assert.deepEqual(err, expected);
+            done();
+        });
+    });
 });
 
