@@ -11,7 +11,6 @@
 const assert = require('assert');
 const rewire = require('rewire');
 const sinon = require('sinon');
-const mock = require('./mock');
 
 var parseWire = rewire('../common/parse');
 

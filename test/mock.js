@@ -229,12 +229,158 @@ const O365_RECORD = {
       ]
 };
 
+const SQL_AUDIT_LOG_RECORD = {
+    "properties": {
+        "is_server_level_audit": "false",
+        "data_sensitivity_information": "",
+        "application_name": "Azure SQL Query Editor",
+        "user_defined_information": "",
+        "additional_information": "",
+        "statement": "",
+        "object_name": "kktestsql",
+        "schema_name": "",
+        "database_name": "kktestsql",
+        "affected_rows": 0,
+        "response_rows": 0,
+        "duration_milliseconds": 0,
+        "transaction_id": 0,
+        "user_defined_event_id": 0,
+        "object_id": 5,
+        "target_database_principal_id": 0,
+        "target_server_principal_id": 0,
+        "audit_schema_version": 1,
+        "event_time": "2019-01-22T21:21:19.734Z",
+        "sequence_number": 1,
+        "succeeded": "true",
+        "is_column_permission": "false",
+        "session_id": 127,
+        "server_principal_id": 0,
+        "database_principal_id": 1,
+        "action_id": "DBAS",
+        "action_name": "DATABASE AUTHENTICATION SUCCEEDED",
+        "class_type": "DB",
+        "class_type_description": "DATABASE",
+        "securable_class_type": "DATABASE",
+        "client_ip": "104.40.130.216",
+        "permission_bitmask": "0x00000000000000000000000000000000",
+        "sequence_group_id": "3D7C524F-6658-42C4-8C5C-EF6CDE657481",
+        "session_server_principal_name": "kkuzmin",
+        "server_principal_name": "kkuzmin",
+        "server_principal_sid": "0x0106000000000164000000000000000071DB52980FE6574ABF82FA2619C6464E",
+        "database_principal_name": "dbo",
+        "target_server_principal_name": "",
+        "target_server_principal_sid": "",
+        "target_database_principal_name": "",
+        "server_instance_name": "kktest-sql-us"
+      },
+      "operationName": "AuditEvent",
+      "category": "SQLSecurityAuditEvents",
+      "resourceId": "/SUBSCRIPTIONS/05DCD414-C680-4F2C-8716-058CD058974B/RESOURCEGROUPS/KKTESTEHUB/PROVIDERS/MICROSOFT.SQL/SERVERS/KKTEST-SQL-US/DATABASES/KKTESTSQL",
+      "time": "2019-01-22T21:21:26.844Z",
+      "ResourceGroup": "kktestehub",
+      "SubscriptionId": "05dcd414-c680-4f2c-8716-058cd058974b",
+      "LogicalServerName": "kktest-sql-us"
+    };
+
+const AZURE_GET_EHUB_NS = function(ehubNsState = 'Succeeded') {
+    return {
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard",
+        "capacity": 1
+      },
+      "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/rcs-master-ehub/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xxk",
+      "name": "AlertLogicIngest-westeurope-pcmpl7iir6xxk",
+      "type": "Microsoft.EventHub/Namespaces",
+      "location": "West Europe",
+      "tags": {},
+      "properties": {
+        "isAutoInflateEnabled": true,
+        "maximumThroughputUnits": 16,
+        "kafkaEnabled": false,
+        "provisioningState": ehubNsState,
+        "metricId": "05dcd414-c680-4f2c-8716-058cd058974b:alertlogicingest-westeurope-pcmpl7iir6xxk",
+        "createdAt": "2019-01-16T12:06:07.107Z",
+        "updatedAt": "2019-01-16T12:06:31.82Z",
+        "serviceBusEndpoint": "https://AlertLogicIngest-westeurope-pcmpl7iir6xxk.servicebus.windows.net:443/",
+        "status": "Active"
+      }
+    };
+};
+
+const AZURE_LIST_EVENT_HUBS = function(ehubStatus = 'Active') {
+    return {
+      "value": [
+        {
+          "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/rcs-master-ehub/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xxk/eventhubs/alertlogic-log",
+          "name": "alertlogic-log",
+          "type": "Microsoft.EventHub/Namespaces/EventHubs",
+          "location": "West Europe",
+          "properties": {
+            "messageRetentionInDays": 7,
+            "partitionCount": 4,
+            "status": ehubStatus,
+            "createdAt": "2019-01-16T12:06:46.267",
+            "updatedAt": "2019-01-16T12:06:46.643",
+            "partitionIds": [
+              "0",
+              "1",
+              "2",
+              "3"
+            ]
+          }
+        },
+        {
+            "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/rcs-master-ehub/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xxk/eventhubs/insights-operational-log",
+            "name": "insights-operational-log",
+            "type": "Microsoft.EventHub/Namespaces/EventHubs",
+            "location": "West Europe",
+            "properties": {
+              "messageRetentionInDays": 7,
+              "partitionCount": 4,
+              "status": "Active",
+              "createdAt": "2019-01-16T12:06:46.267",
+              "updatedAt": "2019-01-16T12:06:46.643",
+              "partitionIds": [
+                "0",
+                "1",
+                "2",
+                "3"
+              ]
+            }
+          }
+      ]
+    };
+};
+
+const AZURE_RESOURCE_NOT_FOUND = {
+    "error": {
+        "code": "ResourceNotFound",
+        "message": "The Resource 'Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xx' under resource group 'rcs-master-ehub' was not found."
+      }
+    };
+
+const AZURE_TOKEN_MOCK = {
+    'token_type' : 'Bearer',
+    'expires_in' : 3599,
+    'ext_expires_in' : 3599,
+    'expires_on' : '1543401497',
+    'not_before' :'1543401497',
+    'resource' : 'https://management.azure.com',
+    'access_token' :  'some-token'
+};
+
 module.exports = {
     context: context,
     timer: timer,
     ACTIVITY_LOG_RECORD: ACTIVITY_LOG_RECORD,
     AUDIT_LOG_RECORD: AUDIT_LOG_RECORD,
     O365_RECORD: O365_RECORD,
+    SQL_AUDIT_LOG_RECORD: SQL_AUDIT_LOG_RECORD,
     getAuthResp: getAuthResp,
-    AL_CID: AL_CID
+    AL_CID: AL_CID,
+    AZURE_GET_EHUB_NS: AZURE_GET_EHUB_NS,
+    AZURE_LIST_EVENT_HUBS: AZURE_LIST_EVENT_HUBS,
+    AZURE_TOKEN_MOCK: AZURE_TOKEN_MOCK,
+    AZURE_RESOURCE_NOT_FOUND: AZURE_RESOURCE_NOT_FOUND
 };

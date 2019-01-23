@@ -31,6 +31,18 @@ describe('Event hub functions unit tests.', function() {
         done();
     });
     
+    it('Simple OK test, SQL audit log record', function(done) {
+        var privFormatFun = ehubGeneralWire.__get__('formatGeneralLogRecord');
+        var result = privFormatFun(mock.SQL_AUDIT_LOG_RECORD);
+        assert.equal(result.message, JSON.stringify(mock.SQL_AUDIT_LOG_RECORD));
+        assert.equal(result.messageType, 'json/azure.ehub');
+        assert.equal(result.messageTypeId, 'SQLSecurityAuditEvents');
+        assert.equal(result.messageTs, 1548192086);
+        assert.equal(result.messageTsUs, 844000);
+        
+        done();
+    });
+    
     it('Simple OK test, o365 record', function(done) {
         var privFormatFun = ehubGeneralWire.__get__('formatGeneralLogRecord');
         var result = privFormatFun(mock.O365_RECORD);
@@ -82,7 +94,7 @@ describe('Event hub functions unit tests.', function() {
             {records: [{operationName: 'Bad batch'}, {bad: 'mAssage'}]},
             {records: [{operationName: 'Good batch'}, {some: 'message 2'}]},
         ];
-        testDone = function() {
+        var testDone = function() {
             processLogStub.restore();
             sinon.assert.callCount(processLogStub, 3);
             done();
