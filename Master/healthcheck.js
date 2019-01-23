@@ -34,7 +34,6 @@ function getEhubNsName() {
 
 function checkEventHubNamespace(master, ns, callback) {
     const pState = ns.provisioningState;
-    //const status = ns.status;
     if (pState === 'Succeeded') {
         return callback(null, ns);
     } else {

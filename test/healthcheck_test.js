@@ -181,6 +181,32 @@ describe('Event hub health check unit tests.', function() {
         });
     });
     
+    it('List event hubs not found error', function(done) {
+        // Mock Azure HTTP calls
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/2wljtgprz47om$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(200, mock.AZURE_GET_EHUB_NS());
+        
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/eventhubs$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(404, mock.AZURE_RESOURCE_NOT_FOUND);
+        
+        process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
+        
+        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        
+        ehubHealthCheck.eventHubNs(master, function(err) {
+            assert.equal(err.status, 'error');
+            assert.equal(err.error_code, 'EHUB000004');
+            sinon.assert.match(err.details[0], "{\"statusCode\":404,\"request\":{\"rawResponse\":false,\"queryString\":{},\"url\":\"https://management.azure.com/subscriptions/subscription-id/resourceGroups/kktest11-rg/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-westeurope-pcmpl7iir6xxk/eventhubs?api-version=2017-04-01\"");
+            done();
+        });
+    });
+    
     it('Zero event hubs in a namespace', function(done) {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
