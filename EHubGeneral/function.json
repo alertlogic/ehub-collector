@@ -12,7 +12,7 @@
     {
       "name": "dlBlob",
       "type": "blob",
-      "path": "alertlogic-dl/%WEBSITE_SITE_NAME%/ehubgeneral/{DateTime}",
+      "path": "%APP_DL_CONTAINER_NAME%/%WEBSITE_SITE_NAME%/ehubgeneral/{DateTime}",
       "connection": "AzureWebJobsStorage",
       "direction": "out"
     }

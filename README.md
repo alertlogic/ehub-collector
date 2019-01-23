@@ -168,6 +168,10 @@ Collected JSON objects are wrapped into the protobuf [structure](https://github.
 The `EHubGeneral` function listens to `alertlogic-log` which is created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `alertlogicloghub` event hub can be used for integration with, for example, [diagnostic logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-logs-stream-event-hubs) or [Azure AD logs](https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub).
 Collected JSON objects are wrapped into the protobuf [structure](https://github.com/alertlogic/al-collector-js/blob/master/proto/common_proto.piqi.proto) and then are forwarded to the Alert Logic Ingestion service.
 
+## DLBlob Function
+
+The `DLBlob` function processes dead letter blob produced by `EHubGeneral` and `EHubActivityLog` function. Every 15 minutes the `DLBlob` function lists all blobs located in  `alertlogic-dl` container and processes them according to the function dead letter blob belongs to. Once a blob is processed it gets removed from the container.
+
 # Local Development
 
 1. Clone the repo `git clone git@github.com:alertlogic/ehub-collector.git`.

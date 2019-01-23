@@ -51,7 +51,7 @@
         "branch": "master",
         "ehubNsName": "[concat('AlertLogicIngest-', resourceGroup().location, '-', uniqueString(resourceGroup().id))]",
         "ehubForLogName": "alertlogic-log",
-        "dlBlobName": "default/alertlogic-dl"
+        "dlContainerName": "alertlogic-dl"
     },
     "resources": [
         {
@@ -111,6 +111,14 @@
                         {
                             "name": "APP_LOG_EHUB_CONNECTION",
                             "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
+                        },
+                        {
+                            "name": "APP_DL_CONTAINER_NAME",
+                            "value": "[variables('dlContainerName')]"
+                        },
+                        {
+                            "name": "DL_BLOB_PAGE_SIZE",
+                            "value": "100"
                         }
                     ],
                     "connectionStrings": [
@@ -179,7 +187,7 @@
                 {
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
-                    "name": "[variables('dlBlobName')]",
+                    "name": "[concat('default/', variables('dlContainerName'))]",
                     "dependsOn": [
                         "[parameters('Storage Name')]"
                     ],

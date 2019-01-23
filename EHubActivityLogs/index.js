@@ -15,24 +15,12 @@
  */
 
 const ehubCollector = require('../common/ehub_collector');
-const parse = require('../common/parse');
+const formatLogs = require('./format').logRecord;
 
-var formatActivityLogRecord = function(msg) {
-    const ts = parse.getMsgTs(msg);
-    const typeId = parse.getMsgTypeId(msg);
-    return {
-        messageTs: ts.sec,
-        priority: 11,
-        progName: 'EHubActivityLogs',
-        pid: undefined,
-        message: JSON.stringify(msg),
-        messageType: 'json/azure.ehub',
-        messageTypeId: typeId,
-        messageTsUs: ts.usec
-    };
-};
 
 module.exports = function (context, eventHubMessages) {
-    return ehubCollector(context, eventHubMessages, formatActivityLogRecord);
+    return ehubCollector(context, eventHubMessages, formatLogs, null, function(err) {
+        context.done(err);
+    });
 };
 

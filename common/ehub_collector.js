@@ -12,7 +12,7 @@ const async = require('async');
 const pkg = require('../package.json');
 const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 
-var processError = function(context, err, messages) {
+var defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     var skipped = messages.records ? messages.records.length : messages.length;
     context.log.error('Records skipped:', skipped);
@@ -20,7 +20,8 @@ var processError = function(context, err, messages) {
     return context;
 };
 
-module.exports = function (context, eventHubMessages, parseFun) {
+module.exports = function (context, eventHubMessages, parseFun, processErrorFun, callback) {
+    var processError = processErrorFun ? processErrorFun : defaultProcessError;
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
     async.filter(eventHubMessages, 
         function(msgArray, callback) {
@@ -40,9 +41,13 @@ module.exports = function (context, eventHubMessages, parseFun) {
         function(err, mapResult) {
             if (err) {
                 processError(context, err, eventHubMessages);
+                return callback(err);
             } else {
-                context.log.info('Processed:', mapResult.reduce((a, b) => a + b.records.length, 0));
+                const processedCount = mapResult.reduce(function(acc, b) {
+                    return acc + b.records ? b.records.length : 0;
+                }, 0);
+                context.log.info('Processed:', processedCount);
             }
-            context.done();
+            return callback(null);
     });
 };

@@ -10,25 +10,11 @@
 
 
 const ehubCollector = require('../common/ehub_collector');
-const parse = require('../common/parse');
-
-var formatGeneralLogRecord = function(msg) {
-    const ts = parse.getMsgTs(msg);
-    const typeId = parse.getMsgTypeId(msg);
-    return {
-        messageTs: ts.sec,
-        priority: 11,
-        progName: 'EHubGeneral',
-        pid: undefined,
-        message: JSON.stringify(msg),
-        messageType: 'json/azure.ehub',
-        messageTypeId: typeId,
-        messageTsUs: ts.usec
-    };
-};
+const formatLogs = require('./format').logRecord;
 
 module.exports = function (context, eventHubMessages) {
-    return ehubCollector(context, eventHubMessages, formatGeneralLogRecord);
+    return ehubCollector(context, eventHubMessages, null, formatLogs, function(err) {
+        context.done(err);
+    });
 };
-
 

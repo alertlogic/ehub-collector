@@ -55,6 +55,7 @@ describe('Event hub health check unit tests.', function() {
     
     after(function() {
         nock.restore();
+        fakeAuth.restore();
     });
 
     beforeEach(function() {
