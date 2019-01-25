@@ -25,8 +25,7 @@ function getCollectorFunName(blobName) {
 var collectorProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     var skipped = messages.records ? messages.records.length : messages.length;
-    context.log.error('Records skipped:', skipped);
-    return context;
+    return skipped;
 };
 
 function processDLBlob(blobService, context, blob, callback) {
@@ -51,7 +50,7 @@ function processDLBlob(blobService, context, blob, callback) {
         },
         function(blobData, blobReq, blobResp, callback) {
             try {
-                return ehubCollector(context, [JSON.parse(blobData)], collectorFormatFun, collectorProcessError, callback);
+                return ehubCollector(context, JSON.parse(blobData), collectorFormatFun, collectorProcessError, callback);
             } catch (ex) {
                 return callback(ex);
             }

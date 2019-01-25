@@ -15,8 +15,11 @@ const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 var defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     var skipped = messages.records ? messages.records.length : messages.length;
-    // TODO: append?
-    context.bindings.dlBlob = JSON.stringify(messages);
+    if (context.bindings.dlBlob && context.bindings.dlBlob instanceof Array) {
+        context.bindings.dlBlob.append([messages]);
+    } else {
+        context.bindings.dlBlob = [messages];
+    }
     return skipped;
 };
 

@@ -16,7 +16,7 @@ var AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 var ehubGeneral = require('../EHubGeneral/index');
 var formatFun = require('../EHubGeneral/format').logRecord;
 
-describe('Event hub functions unit tests.', function() {
+describe('Event hub general function unit tests.', function() {
     
     it('Simple OK test, activity record', function(done) {
         var result = formatFun(mock.ACTIVITY_LOG_RECORD);
