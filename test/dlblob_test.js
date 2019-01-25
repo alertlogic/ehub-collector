@@ -9,7 +9,6 @@
  */
  
 const assert = require('assert');
-const rewire = require('rewire');
 const sinon = require('sinon');
 const nock = require('nock');
 const alcollector = require('al-collector-js');
@@ -19,6 +18,7 @@ var AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 const dlblob = require('../DLBlob/index');
 const ehubActivityLogsFormat = require('../EHubActivityLogs/format');
 const ehubGeneralFormat = require('../EHubGeneral/format');
+
 
 describe('Event hub health check unit tests.', function() {
     var fakeAuth;
@@ -56,7 +56,8 @@ describe('Event hub health check unit tests.', function() {
         process.env.CUSTOMCONNSTR_APP_CLIENT_SECRET = 'client-secret';
         
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
-                function fakeFn(messages, formatFun, hostmetaElems, callback) {
+                function fakeFn(message, formatFun, hostmetaElems, callback) {
+                    formatFun(message);
                     return callback(null);
                 });
     });
@@ -104,14 +105,13 @@ describe('Event hub health check unit tests.', function() {
         // Mock collector API
         var ehubGeneralFormatStub = sinon.stub(ehubGeneralFormat, 'logRecord')
         .callsFake(function fakeFn(message) {
-            console.log(message);
-            return ehubGeneralFormat(message);
+            console.log('!!!', message);
+            return {};
         });
         
         var ehubActivityLogsFormatStub = sinon.stub(ehubActivityLogsFormat, 'logRecord')
         .callsFake(function fakeFn(message) {
-            console.log(message);
-            return ehubGeneralFormat(message);
+            return {};
         });
         
         var cb = function(err, res) {

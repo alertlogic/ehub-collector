@@ -15,39 +15,42 @@ const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 var defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     var skipped = messages.records ? messages.records.length : messages.length;
-    context.log.error('Records skipped:', skipped);
+    // TODO: append?
     context.bindings.dlBlob = JSON.stringify(messages);
-    return context;
+    return skipped;
 };
 
 module.exports = function (context, eventHubMessages, parseFun, processErrorFun, callback) {
     var processError = processErrorFun ? processErrorFun : defaultProcessError;
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
-    async.filter(eventHubMessages, 
-        function(msgArray, callback) {
+    async.reduce(eventHubMessages, {processed: 0, skipped: 0},
+        function(acc, msgArray, callback) {
             try {
                 collector.processLog(msgArray.records, parseFun, null,
                     function(err) {
                         if (err) {
-                            processError(context, err, msgArray);
+                            acc.skipped += processError(context, err, msgArray);
+                        } else {
+                            acc.processed += msgArray.records.length;
                         }
-                        return callback(null, !err);
+                        return callback(null, acc);
                 });
             } catch (exception) {
-                processError(context, exception, msgArray);
-                return callback(null, false);
+                acc.skipped += processError(context, exception, msgArray);
+                return callback(null, acc);
             }
         },
-        function(err, mapResult) {
+        function(err, redResult) {
             if (err) {
-                processError(context, err, eventHubMessages);
+                const skipped = processError(context, err, eventHubMessages);
+                context.log.error('Records skipped:', skipped);
                 return callback(err);
             } else {
-                const processedCount = mapResult.reduce(function(acc, b) {
-                    return acc + b.records ? b.records.length : 0;
-                }, 0);
-                context.log.info('Processed:', processedCount);
+                context.log.info('Processed:', redResult.processed);
+                if (redResult.skipped) {
+                    context.log.info('Records skipped:', redResult.skipped);
+                }
+                return callback(null, redResult);
             }
-            return callback(null);
     });
 };

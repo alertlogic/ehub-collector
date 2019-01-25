@@ -13,8 +13,8 @@ const async = require('async');
 const azure = require('azure');
 
 const ehubCollector = require('../common/ehub_collector');
-const ehubActivityLogsFormat = require('../EHubActivityLogs/format');
-const ehubGeneralFormat = require('../EHubGeneral/format');
+const ehubActivityLogsFormat = require('../EHubActivityLogs/format').logRecord;
+const ehubGeneralFormat = require('../EHubGeneral/format').logRecord;
 
 const CONCURRENT_BLOB_PROCESS_NUM = 20;
 
@@ -56,8 +56,12 @@ function processDLBlob(blobService, context, blob, callback) {
                 return callback(ex);
             }
         },
-        function(callback) {
-            return blobService.deleteBlob(process.env.APP_DL_CONTAINER_NAME, blob.name, callback);
+        function(result, callback) {
+            if (result.skipped === 0) {
+                return blobService.deleteBlob(process.env.APP_DL_CONTAINER_NAME, blob.name, callback);
+            } else {
+                return callback(null, result);
+            }
         }
     ], callback);
 }
