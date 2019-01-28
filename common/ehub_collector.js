@@ -12,9 +12,9 @@ const async = require('async');
 const pkg = require('../package.json');
 const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 
-var defaultProcessError = function(context, err, messages) {
+const defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
-    var skipped = messages.records ? messages.records.length : messages.length;
+    const skipped = messages.records ? messages.records.length : messages.length;
     if (context.bindings.dlBlob && context.bindings.dlBlob instanceof Array) {
         context.bindings.dlBlob.append([messages]);
     } else {
@@ -53,7 +53,12 @@ module.exports = function (context, eventHubMessages, parseFun, processErrorFun,
                 if (redResult.skipped) {
                     context.log.info('Records skipped:', redResult.skipped);
                 }
-                return callback(null, redResult);
+                
             }
+            
+            if (context.bindings.dlBlob) {
+                context.bindings.dlBlob = JSON.stringify(context.bindings.dlBlob);
+            }
+            return callback(null, redResult);
     });
 };

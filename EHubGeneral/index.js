@@ -13,7 +13,7 @@ const ehubCollector = require('../common/ehub_collector');
 const formatLogs = require('./format').logRecord;
 
 module.exports = function (context, eventHubMessages) {
-    return ehubCollector(context, eventHubMessages, null, formatLogs, function(err) {
+    return ehubCollector(context, eventHubMessages, formatLogs, null, function(err) {
         context.done(err);
     });
 };
