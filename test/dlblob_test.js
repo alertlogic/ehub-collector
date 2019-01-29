@@ -99,13 +99,15 @@ describe('Event hub DLBlob function unit tests.', function() {
         .reply(200, mock.GET_BLOB_CONTENT_TEXT);
         
         // Delete blob
+        var deleteBlobStub = sinon.fake();
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl.*/)
         .times(6)
-        .reply(202);
+        .reply(202, function() {deleteBlobStub();});
         
         var cb = function(err, res) {
             sinon.assert.callCount(processLogStub, 6);
+            sinon.assert.callCount(deleteBlobStub, 6);
             sinon.assert.calledWith(processLogStub, sinon.match.any, ehubActivityLogsFormat.logRecord);
             sinon.assert.calledWith(processLogStub, sinon.match.any, ehubGeneralFormat.logRecord);
             done();
@@ -150,6 +152,7 @@ describe('Event hub DLBlob function unit tests.', function() {
         .reply(404, mock.CONTAINER_NOT_FOUND);
         
         // Delete blob
+        var deleteBlobStub = sinon.fake();
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl.*/)
         .times(4)

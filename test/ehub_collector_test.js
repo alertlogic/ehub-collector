@@ -14,9 +14,9 @@ const nock = require('nock');
 const alcollector = require('al-collector-js');
 
 const mock = require('./mock');
+const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 const ehubCollector = require('../common/ehub_collector');
 const ehubActivityLogsFormat = require('../EHubActivityLogs/format');
-
 
 describe('Common Event hub collector unit tests.', function() {
     var fakeAuth;
@@ -77,6 +77,30 @@ describe('Common Event hub collector unit tests.', function() {
         ehubCollector(mock.context(), testMessage, ehubActivityLogsFormat.logRecord , null, function(err, res) {
             ingestSendStub.restore();
             sinon.assert.callCount(ingestSendStub, 1);
+            done();
+        });
+    });
+    
+    it('Batch processing error test', function(done) {
+        process.env.COLLECTOR_HOST_ID = 'host-id';
+        process.env.COLLECTOR_SOURCE_ID = 'source-id';
+        var processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
+                function fakeFn(messages, formatFun, hostmetaElems, callback) {
+                    if (messages[0].operationName === 'Good batch') {
+                        return callback(null);
+                    } else {
+                        return callback('Test processing error');
+                    }
+                });
+        const inputRecords = [
+            {records: [{operationName: 'Good batch'}, {some: 'message 1'}]},
+            {records: [{operationName: 'Bad batch'}, {bad: 'mAssage'}]},
+            {records: [{operationName: 'Good batch'}, {some: 'message 2'}]},
+        ];
+        
+        ehubCollector(mock.context(), inputRecords, ehubActivityLogsFormat.logRecord , null, function(err, res) {
+            processLogStub.restore();
+            sinon.assert.callCount(processLogStub, 3);
             done();
         });
     });
