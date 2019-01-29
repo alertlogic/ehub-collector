@@ -20,7 +20,7 @@ const ehubActivityLogsFormat = require('../EHubActivityLogs/format');
 const ehubGeneralFormat = require('../EHubGeneral/format');
 
 
-describe('Event hub health check unit tests.', function() {
+describe('Event hub DLBlob function unit tests.', function() {
     var fakeAuth;
     var processLogStub;
     

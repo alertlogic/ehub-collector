@@ -170,7 +170,8 @@ Collected JSON objects are wrapped into the protobuf [structure](https://github.
 
 ## DLBlob Function
 
-The `DLBlob` function processes dead letter blob produced by `EHubGeneral` and `EHubActivityLog` function. Every 15 minutes the `DLBlob` function lists all blobs located in  `alertlogic-dl` container and processes them according to the function dead letter blob belongs to. Once a blob is processed it gets removed from the container.
+Both `EHubActivityLogs` and `EHubGeneral` may not be able to process incoming event hub records. If that happens then unprocessed messages are saved as blobs to the `alertlogic-dl` container so that collection can be retried at a later time. The `alertlogic-dl` container is located in the collector web application storage account which is created durign collector setup.
+The `DLBlob` function processes dead letter blobs very 15 minutes. The `DLBlob` function lists all blobs located in  `alertlogic-dl` container and processes them according to the function which dead letter blob belongs to. Once a blob is processed it gets removed from the container.
 
 # Local Development
 
