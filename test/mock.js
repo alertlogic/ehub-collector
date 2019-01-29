@@ -48,8 +48,7 @@ var context = function(done) {
             }
         },
         done: function (result) {
-            console.log('Done.', result);
-            done();
+            done(result);
         },
         res: null
     };
@@ -433,7 +432,7 @@ const GET_BLOB_CONTENT_TEXT = [{
           ]
         }];
 
-    
+const CONTAINER_NOT_FOUND = "﻿<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The specified container does not exist.\nRequestId:3d918968-601e-012a-452a-b7aebb000000\nTime:2019-01-28T16:59:40.0095030Z</Message></Error>";
 module.exports = {
     context: context,
     timer: timer,
@@ -448,5 +447,6 @@ module.exports = {
     AZURE_TOKEN_MOCK: AZURE_TOKEN_MOCK,
     AZURE_RESOURCE_NOT_FOUND: AZURE_RESOURCE_NOT_FOUND,
     LIST_CONTAINER_BLOBS: LIST_CONTAINER_BLOBS,
-    GET_BLOB_CONTENT_TEXT: GET_BLOB_CONTENT_TEXT
+    GET_BLOB_CONTENT_TEXT: GET_BLOB_CONTENT_TEXT,
+    CONTAINER_NOT_FOUND: CONTAINER_NOT_FOUND
 };

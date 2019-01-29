@@ -14,11 +14,8 @@ const nock = require('nock');
 const alcollector = require('al-collector-js');
 
 const mock = require('./mock');
-var AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
-const dlblob = require('../DLBlob/index');
 const ehubCollector = require('../common/ehub_collector');
 const ehubActivityLogsFormat = require('../EHubActivityLogs/format');
-//const ehubGeneralFormat = require('../EHubGeneral/format');
 
 
 describe('Common Event hub collector unit tests.', function() {
@@ -74,13 +71,12 @@ describe('Common Event hub collector unit tests.', function() {
     });
     
     it('Simple OK check', function(done) {
-        
         const testMessage = [{ records: [mock.SQL_AUDIT_LOG_RECORD]}];
-        nock.recorder.rec();
         var ingestSendStub = sinon.stub(alcollector.IngestC.prototype, 'sendAicspmsgs').resolves({});
+        
         ehubCollector(mock.context(), testMessage, ehubActivityLogsFormat.logRecord , null, function(err, res) {
+            ingestSendStub.restore();
             sinon.assert.callCount(ingestSendStub, 1);
-            console.log(err);
             done();
         });
     });
