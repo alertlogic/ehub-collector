@@ -25,6 +25,7 @@ process.env.COLLECTOR_SOURCE_ID = 'collector-source-id';
 process.env.CUSTOMCONNSTR_APP_AL_RESIDENCY = 'default';
 process.env.CUSTOMCONNSTR_APP_AL_API_ENDPOINT = 'al-api-endpoint';
 process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=testappo365;AccountKey=S0meKey+';
+process.env.APP_DL_CONTAINER_NAME = 'alertlogic-dl';
 
 
 var context = function(done) {
@@ -47,8 +48,7 @@ var context = function(done) {
             }
         },
         done: function (result) {
-            console.log('Done.', result);
-            done();
+            done(result);
         },
         res: null
     };
@@ -370,6 +370,69 @@ const AZURE_TOKEN_MOCK = {
     'access_token' :  'some-token'
 };
 
+const LIST_CONTAINER_BLOBS = function(blobName = 'kktestdl/ehubactivitylogs/2019-01-23T15-53-09Z') {
+    return "﻿<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults ServiceEndpoint=\"https://kktestdl.blob.core.windows.net/\" ContainerName=\"alertlogic-dl\"><Prefix>kktestdl</Prefix><MaxResults>100</MaxResults><Blobs><Blob><Name>kktestdl/ehubactivitylogs/2019-01-23T15-53-06Z</Name><Properties><Creation-Time>Wed, 23 Jan 2019 15:53:09 GMT</Creation-Time><Last-Modified>Wed, 23 Jan 2019 15:53:09 GMT</Last-Modified><Etag>0x8D6814ADF284F6B</Etag><Content-Length>2224</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding /><Content-Language /><Content-MD5>awDMbdCbE2Ug/pjWSIIaxg==</Content-MD5><Cache-Control /><Content-Disposition /><BlobType>BlockBlob</BlobType><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob><Blob><Name>" + blobName + "</Name><Properties><Creation-Time>Wed, 23 Jan 2019 15:53:09 GMT</Creation-Time><Last-Modified>Wed, 23 Jan 2019 15:53:09 GMT</Last-Modified><Etag>0x8D6814ADF282853</Etag><Content-Length>4121</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding /><Content-Language /><Content-MD5>QtJ4ADhiTaTaXiBVqf9jcQ==</Content-MD5><Cache-Control /><Content-Disposition /><BlobType>BlockBlob</BlobType><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob><Blob><Name>kktestdl/ehubactivitylogs/2019-01-23T15-53-14Z</Name><Properties><Creation-Time>Wed, 23 Jan 2019 15:53:15 GMT</Creation-Time><Last-Modified>Wed, 23 Jan 2019 15:53:15 GMT</Last-Modified><Etag>0x8D6814AE2F971D2</Etag><Content-Length>2127</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding /><Content-Language /><Content-MD5>5O/1TeQD6wJd+ZrL4e8Stw==</Content-MD5><Cache-Control /><Content-Disposition /><BlobType>BlockBlob</BlobType><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob><Blob><Name>kktestdl/ehubactivitylogs/2019-01-23T15-56-35Z</Name><Properties><Creation-Time>Wed, 23 Jan 2019 15:56:35 GMT</Creation-Time><Last-Modified>Wed, 23 Jan 2019 15:56:35 GMT</Last-Modified><Etag>0x8D6814B5A562BE6</Etag><Content-Length>4257</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding /><Content-Language /><Content-MD5>3Y2UHwlL2FrCoPzm49uwJA==</Content-MD5><Cache-Control /><Content-Disposition /><BlobType>BlockBlob</BlobType><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob><Blob><Name>kktestdl/ehubgeneral/2019-01-23T15-44-58Z</Name><Properties><Creation-Time>Wed, 23 Jan 2019 15:44:58 GMT</Creation-Time><Last-Modified>Wed, 23 Jan 2019 15:44:58 GMT</Last-Modified><Etag>0x8D68149BA8F82AB</Etag><Content-Length>1193</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding /><Content-Language /><Content-MD5>oUA31BVNzFFVTtqrTwBGCg==</Content-MD5><Cache-Control /><Content-Disposition /><BlobType>BlockBlob</BlobType><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob><Blob><Name>kktestdl/ehubgeneral/2019-01-23T15-45-04Z</Name><Properties><Creation-Time>Wed, 23 Jan 2019 15:45:04 GMT</Creation-Time><Last-Modified>Wed, 23 Jan 2019 15:45:04 GMT</Last-Modified><Etag>0x8D68149BE34839A</Etag><Content-Length>1193</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding /><Content-Language /><Content-MD5>oUA31BVNzFFVTtqrTwBGCg==</Content-MD5><Cache-Control /><Content-Disposition /><BlobType>BlockBlob</BlobType><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob></Blobs><NextMarker /></EnumerationResults>";
+};
+
+const GET_BLOB_CONTENT_TEXT = [{
+        "records": [
+            {
+              "properties": {
+                "serviceRequestId": "e0a5d4a5-e4b7-4ee7-b56c-59261e237a74",
+                "statusCode": "OK"
+              },
+              "location": "global",
+              "level": "Information",
+              "identity": {
+                "claims": {
+                  "wids": "62e90394-69f5-4237-9190-012177145e10",
+                  "ver": "1.0",
+                  "uti": "123",
+                  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn": "kkuzmin@alazurealertlogic.onmicrosoft.com",
+                  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": "kkuzmin@alazurealertlogic.onmicrosoft.com",
+                  "http://schemas.microsoft.com/identity/claims/tenantid": "bf8d32d3-1c13-4487-af02-80dba2236485",
+                  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": "123",
+                  "http://schemas.microsoft.com/identity/claims/scope": "user_impersonation",
+                  "puid": "10030000A19F1B13",
+                  "http://schemas.microsoft.com/claims/authnmethodsreferences": "pwd",
+                  "aio": "123",
+                  "http://schemas.microsoft.com/claims/authnclassreference": "1",
+                  "exp": "1548260145",
+                  "nbf": "1548256245",
+                  "iat": "1548256245",
+                  "iss": "https://sts.windows.net/bf8d32d3-1c13-4487-af02-80dba2236485/",
+                  "aud": "https://management.core.windows.net/",
+                  "appid": "c44b4083-3bb0-49c1-b47d-974e53cbdf3c",
+                  "appidacr": "2",
+                  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname": "Kuzmin",
+                  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname": "Konstantin",
+                  "groups": "a8d70315-c07f-412e-a5f7-50beea4b7981",
+                  "ipaddr": "165.225.81.22",
+                  "name": "Konstantin Kuzmin",
+                  "http://schemas.microsoft.com/identity/claims/objectidentifier": "bea5cb4c-0348-49e4-b225-8acf2623d1ea"
+                },
+                "authorization": {
+                  "evidence": {
+                    "role": "Subscription Admin"
+                  },
+                  "action": "Microsoft.Web/sites/config/write",
+                  "scope": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/kktestdl/providers/Microsoft.Web/sites/kktestdl/config/appSettings"
+                }
+              },
+              "correlationId": "4fa74760-07f2-4439-9c97-ded92ce726c2",
+              "time": "2019-01-23T15:36:57.079Z",
+              "resourceId": "/SUBSCRIPTIONS/05DCD414-C680-4F2C-8716-058CD058974B/RESOURCEGROUPS/KKTESTDL/PROVIDERS/MICROSOFT.WEB/SITES/KKTESTDL/CONFIG/APPSETTINGS",
+              "operationName": "MICROSOFT.WEB/SITES/CONFIG/WRITE",
+              "category": "Write",
+              "resultType": "Success",
+              "resultSignature": "Succeeded.OK",
+              "durationMs": 2347,
+              "callerIpAddress": "165.225.81.22"
+            }
+          ]
+        }];
+
+const CONTAINER_NOT_FOUND = "﻿<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The specified container does not exist.\nRequestId:3d918968-601e-012a-452a-b7aebb000000\nTime:2019-01-28T16:59:40.0095030Z</Message></Error>";
 module.exports = {
     context: context,
     timer: timer,
@@ -382,5 +445,8 @@ module.exports = {
     AZURE_GET_EHUB_NS: AZURE_GET_EHUB_NS,
     AZURE_LIST_EVENT_HUBS: AZURE_LIST_EVENT_HUBS,
     AZURE_TOKEN_MOCK: AZURE_TOKEN_MOCK,
-    AZURE_RESOURCE_NOT_FOUND: AZURE_RESOURCE_NOT_FOUND
+    AZURE_RESOURCE_NOT_FOUND: AZURE_RESOURCE_NOT_FOUND,
+    LIST_CONTAINER_BLOBS: LIST_CONTAINER_BLOBS,
+    GET_BLOB_CONTENT_TEXT: GET_BLOB_CONTENT_TEXT,
+    CONTAINER_NOT_FOUND: CONTAINER_NOT_FOUND
 };

@@ -5,6 +5,8 @@
  * Various Event hub collector health checks.
  * The last error code is EHUB000006
  * 
+ * TODO: check 'alertlogic-dl' container exists.
+ * 
  * @end
  * ----------------------------------------------------------------------------
  */
