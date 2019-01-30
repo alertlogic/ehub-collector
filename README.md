@@ -140,6 +140,16 @@ If you want to deploy the template through the Azure command line (CLI), you can
 1. In the Alert Logic console, navigate to `Configuration` -> `Deployments` -> `All Deployments` -> `Log Sources`, and then filter the list by `Push (Office 365, EventHub)` collection method. 
 1. Verify a new Azure Event Hub log source with the name provided during `az group deployment create` [above](#deploy-through-the-azure-cli) appears with the source status as `OK`.
 
+# Integrating With Azure Event Hubs
+
+This section contains helpful links to instructions of how to integrate different Azure services with event hubs. Please select `alertlogic-log` as a target event hub name if this option is available during configuration.
+
+* [Azure Active Directory Logs](https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub#stream-logs-to-an-event-hub)
+* [Azure Diagnostic Logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-logs-stream-event-hubs#stream-diagnostic-logs-using-the-portal)
+* [Azure Activity Logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs#enable-streaming-of-the-activity-log)
+* [Azure Security Center Events](https://docs.microsoft.com/en-us/azure/security-center/security-center-partner-integration#exporting-data-to-a-siem)
+* [Azure SQL Audit Logs](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-auditing#subheading-2)
+
 # How the Collector Works
 
 The [template](https://github.com/alertlogic/ehub-collector/blob/master/templates/ehub.json) creates an `AlertLogicIngest-<region-name>-<unique-string>` Event Hub Namespace where `alertlogic-log` event hub is created. Collector Azure function listens to event hub and forwards incoming events to the Alert Logic Ingestion service. If data processing fails the data is stored in `alertlogic-dl` Azure Blob container located in the storage account specified during template deployment. 
