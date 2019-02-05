@@ -16,7 +16,7 @@ To perform the setup required to grant Alert Logic permission to access Events H
 
 ## Register a new Azure web application
 
-In the Azure portal, you must register a new web application. Any application that wants to use the capabilities of Azure Active Directory must first be registered in an Azure AD tenant. This registration process involves giving Azure AD details about your application, such as the URL where it iss located, the URL to send replies after a user is authenticated, and the URI that identifies the app.
+In the Azure portal, you must register a new web application. Any application that wants to use the capabilities of Azure Active Directory must first be registered in an Azure AD tenant. This registration process involves giving Azure AD details about your application, such as the URL where it is located, the URL to send replies after a user is authenticated, and the URI that identifies the app.
 
 **To register an Azure web application to collect logs:**
 
@@ -115,7 +115,7 @@ Click the button below to start deployment.
    
    - **App Client ID** - Type the GUID of your application that created the subscription. 
    
-   **Note:** You can obtain this value from _Azure_ -> _AD_ -> _App registrations_ -> _Your app name_
+   **Note:** You can obtain this value from _Azure_ > _AD_ > _App registrations_ > _Your app name_
    - **App Client Secret** - Type the secret key of your application (available from from _App Registrations_).
 
 1. Click **Purchase**.
@@ -146,9 +146,9 @@ If you want to deploy the template through the Azure command line interface (CLI
 **To verify successful installation of the template:**
 
 1. In the Azure portal, access `Function Apps`, and then choose the Alert Logic Event Hub collector function. 
-1. Click `Functions` > `Master` -> `Monitor` and verify the recent log entry has the status of `OK` and contains no error messages.
+1. Click `Functions` > `Master` > `Monitor` and verify the recent log entry has the status of `OK` and contains no error messages.
 **Example:** `Ehub source checkin OK`.
-1. In the Alert Logic console, navigate to `Configuration` -> `Deployments` -> `All Deployments` -> `Log Sources`, and then filter the list by `Push (Office 365, EventHub)` collection method. 
+1. In the Alert Logic console, navigate to `Configuration` > `Deployments` > `All Deployments` > `Log Sources`, and then filter the list by `Push (Office 365, EventHub)` collection method. 
 1. Verify a new Azure Event Hub log source with the name provided during `az group deployment create` [above](#deploy-through-the-azure-cli) appears with the source status as `OK`.
 
 # Integrating With Azure Event Hubs
@@ -219,10 +219,6 @@ Please use the following [code style](https://github.com/airbnb/javascript) as m
 - `process.env.CUSTOMCONNSTR_APP_CI_ACCESS_KEY_ID` - The access key returned from AIMs [above](#create_an_alert_logic_access_key).
 - `process.env.CUSTOMCONNSTR_APP_CI_SECRET_KEY`- The secret key returned from AIMs [above](#create_an_alert_logic_access_key).
 
-
-# Known Issues/ Open Questions
-<!--Do we want to publish this in customer-facing documentation? If so, let's talk about making this statement more useful for customers.-->
-- Sometimes deployments fail after siteSync action. We need better updater to handle that in order not to wait for 12 hours for the next update attempt.
 
 # Useful Links
 
