@@ -152,7 +152,6 @@ describe('Event hub DLBlob function unit tests.', function() {
         .reply(404, mock.CONTAINER_NOT_FOUND);
         
         // Delete blob
-        var deleteBlobStub = sinon.fake();
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl.*/)
         .times(4)

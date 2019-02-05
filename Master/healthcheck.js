@@ -12,27 +12,9 @@
  */
  
 const async = require('async');
-const azure = require('azure');
-const parse = require('parse-key-value');
 
-function initArmEhub(master) {
-    const azureCreds = master.getApplicationTokenCredentials();
-    const subscriptionId = master.getConfigAttrs().subscription_id;
-    return azure.createEventHubManagementClient(azureCreds, subscriptionId);
-}
+const ehubUtil = require('../common/util');
 
-function formatSdkError(master, alErrorCode, err) {
-    if (typeof err === 'string' || err instanceof String) {
-        return master.errorStatusFmt(alErrorCode, err);
-    } else if (typeof err === 'object') {
-        return master.errorStatusFmt(alErrorCode, JSON.stringify(err));
-    }
-}
-
-function getEhubNsName() {
-    const connectionParams = parse(process.env.APP_LOG_EHUB_CONNECTION);
-    return connectionParams.Endpoint.split(/[\.\/]/g)[2];
-}
 
 function checkEventHubNamespace(master, ns, callback) {
     const pState = ns.provisioningState;
@@ -76,16 +58,16 @@ function checkEventHub(master, eventHubs, callback) {
     }
 }
 
-var eventHubNs = function(master, callback) {
-    var armEhub = initArmEhub(master);
+const eventHubNs = function(master, callback) {
+    var armEhub = ehubUtil.initArmEhub(master);
     const rg = master.getConfigAttrs().app_resource_group;
-    const nsName = getEhubNsName();
+    const nsName = ehubUtil.getEhubNsName();
     
     async.waterfall([
         function(callback){
             return armEhub.namespaces.get(rg, nsName, function (err, namespace, req, resp) {
                 if (err) {
-                    return callback(formatSdkError(master, 'EHUB000003', err));
+                    return callback(ehubUtil.formatSdkError(master, 'EHUB000003', err));
                 } else {
                     return checkEventHubNamespace(master, namespace, callback);
                 }
@@ -94,7 +76,7 @@ var eventHubNs = function(master, callback) {
         function(namespace, callback) {
             return armEhub.eventHubs.listByNamespace(rg, namespace.name, function(err, eventHubs) {
                 if (err) {
-                    return callback(formatSdkError(master, 'EHUB000004', err));
+                    return callback(ehubUtil.formatSdkError(master, 'EHUB000004', err));
                 } else if (eventHubs.length === 0){
                     return callback(master.errorStatusFmt(
                         'EHUB000005',
