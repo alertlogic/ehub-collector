@@ -2,7 +2,7 @@
  * @copyright (C) 2019, Alert Logic, Inc
  * @doc
  * 
- * Unit tests for Master health-check  functions
+ * Unit tests for Master stats functions
  * 
  * @end
  * -----------------------------------------------------------------------------
@@ -101,7 +101,7 @@ describe('Event hub collection stats unit tests.', function() {
         });
     });
     
-    it('Simple OK collection stats error', function(done) {
+    it('Simple OK collection stats get event hub error error', function(done) {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -116,6 +116,31 @@ describe('Event hub collection stats unit tests.', function() {
         ehubStats.getEventHubCollectionMetrics(master, '2019-02-05T15:20:00', function(err) {
             assert.equal(err.status, 'error');
             assert.equal(err.error_code, 'EHUB000100');
+            done();
+        });
+    });
+    
+    it('Simple OK collection stats get event hub metrics error', function(done) {
+        // Mock Azure HTTP calls
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/2wljtgprz47om$/, /.*/ )
+        .query(true)
+        .times(1)
+        .reply(200, mock.EHUB_STATS_RESP);
+        
+        nock('https://management.azure.com:443', {'encodedQueryParams':true})
+        .get(/metrics$/)
+        .query(true)
+        .times(1)
+        .reply(404, mock.AZURE_RESOURCE_NOT_FOUND);
+        
+        process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
+        
+        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        
+        ehubStats.getEventHubCollectionMetrics(master, '2019-02-05T15:20:00', function(err) {
+            assert.equal(err.status, 'error');
+            assert.equal(err.error_code, 'EHUB000101');
             done();
         });
     });
