@@ -433,6 +433,57 @@ const GET_BLOB_CONTENT_TEXT = [{
         }];
 
 const CONTAINER_NOT_FOUND = "﻿<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The specified container does not exist.\nRequestId:3d918968-601e-012a-452a-b7aebb000000\nTime:2019-01-28T16:59:40.0095030Z</Message></Error>";
+
+const EHUB_STATS_RESP = {
+        "resourceregion": "centralus",
+        "namespace": "Microsoft.EventHub/namespaces",
+        "value": [
+          {
+            "timeseries": [
+              {
+                "data": [
+                  {
+                    "total": 6,
+                    "timeStamp": "2019-02-05T15:05:00Z"
+                  }
+                ],
+                "metadatavalues": []
+              }
+            ],
+            "unit": "Count",
+            "name": {
+              "localizedValue": "Outgoing Messages",
+              "value": "OutgoingMessages"
+            },
+            "type": "Microsoft.Insights/metrics",
+            "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/kktestdl/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-centralus-lj5bvlo74hoqs/providers/Microsoft.Insights/metrics/OutgoingMessages"
+          },
+          {
+            "timeseries": [
+              {
+                "data": [
+                  {
+                    "total": 9680,
+                    "timeStamp": "2019-02-05T15:05:00Z"
+                  }
+                ],
+                "metadatavalues": []
+              }
+            ],
+            "unit": "Bytes",
+            "name": {
+              "localizedValue": "Outgoing Bytes.",
+              "value": "OutgoingBytes"
+            },
+            "type": "Microsoft.Insights/metrics",
+            "id": "/subscriptions/05dcd414-c680-4f2c-8716-058cd058974b/resourceGroups/kktestdl/providers/Microsoft.EventHub/namespaces/AlertLogicIngest-centralus-lj5bvlo74hoqs/providers/Microsoft.Insights/metrics/OutgoingBytes"
+          }
+        ],
+        "interval": "PT15M",
+        "timespan": "2019-02-05T15:05:00Z/2019-02-05T15:20:00Z",
+        "cost": 0
+      };
+
 module.exports = {
     context: context,
     timer: timer,
@@ -448,5 +499,6 @@ module.exports = {
     AZURE_RESOURCE_NOT_FOUND: AZURE_RESOURCE_NOT_FOUND,
     LIST_CONTAINER_BLOBS: LIST_CONTAINER_BLOBS,
     GET_BLOB_CONTENT_TEXT: GET_BLOB_CONTENT_TEXT,
-    CONTAINER_NOT_FOUND: CONTAINER_NOT_FOUND
+    CONTAINER_NOT_FOUND: CONTAINER_NOT_FOUND,
+    EHUB_STATS_RESP: EHUB_STATS_RESP
 };

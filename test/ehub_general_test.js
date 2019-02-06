@@ -9,11 +9,8 @@
  */
  
 const assert = require('assert');
-const sinon = require('sinon');
 const mock = require('./mock');
 
-var AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
-var ehubGeneral = require('../EHubGeneral/index');
 var formatFun = require('../EHubGeneral/format').logRecord;
 
 describe('Event hub general function unit tests.', function() {
