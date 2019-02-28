@@ -15,7 +15,6 @@ const async = require('async');
 const azure = require('azure');
 
 const ehubCollector = require('../common/ehub_collector');
-const ehubActivityLogsFormat = require('../EHubActivityLogs/format').logRecord;
 const ehubGeneralFormat = require('../EHubGeneral/format').logRecord;
 
 const CONCURRENT_BLOB_PROCESS_NUM = 20;
@@ -35,8 +34,8 @@ function processDLBlob(blobService, context, blob, callback) {
     var collectorFormatFun;
     
     switch(getCollectorFunName(blob.name)) {
-        case 'ehubactivitylogs':
-            collectorFormatFun =  ehubActivityLogsFormat;
+        case 'ehubgeneral':
+            collectorFormatFun =  ehubGeneralFormat;
             break;
         default:
             collectorFormatFun =  ehubGeneralFormat;

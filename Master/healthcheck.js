@@ -30,29 +30,33 @@ function checkEventHubNamespace(master, ns, callback) {
 }
 
 function checkEventHub(master, eventHubs, callback) {
+    const ehubForLogName = ehubUtil.getEhubForLogName();
+    // Keep array.reduce here in case we'd like to check other event hubs status.
     const check = eventHubs.reduce(function(acc, ehub) {
-        acc.logHubExists = acc.logHubExists || ehub.name === 'alertlogic-log';
+        acc.logEhubExists = acc.logEhubExists || ehub.name === ehubForLogName;
         if (acc.error) {
             return acc;
-        } else {
+        } else if (ehub.name === ehubForLogName) {
             const status = ehub.status;
-            
             if (status === 'Active') {
                 return acc;
             } else {
+                const nsName = ehubUtil.getEhubNsName();
                 acc.error = master.errorStatusFmt(
                     'EHUB000002',
-                    `Event Hub status is not ok. EventHub = ${ehub.name}, status = ${status}`);
+                    `Event Hub status is not ok. Namespace = ${nsName}, EventHub = ${ehub.name}, status = ${status}`);
                 return acc;
             }
-            
+        } else {
+            return acc;
         }
-    }, {logHubExists: false, error: null});
+    }, {logEhubExists: false, error: null});
     
-    if (!check.logHubExists) {
+    if (!check.logEhubExists) {
+        const nsName = ehubUtil.getEhubNsName();
         return callback(master.errorStatusFmt(
             'EHUB000006',
-            `Default alertlogic-log event hub doesn't exist in the namespace.`));
+            `Event hub doesn't exist. Namespace = ${nsName}, EventHub = ${ehubForLogName}`));
     } else {
         return callback(check.error);
     }
@@ -60,7 +64,7 @@ function checkEventHub(master, eventHubs, callback) {
 
 const eventHubNs = function(master, callback) {
     var armEhub = ehubUtil.initArmEhub(master);
-    const rg = master.getConfigAttrs().app_resource_group;
+    const rg = ehubUtil.getEhubForLogResourceGroup(master);
     const nsName = ehubUtil.getEhubNsName();
     
     async.waterfall([

@@ -149,7 +149,7 @@ describe('Event hub health check unit tests.', function() {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000002',
-                details: ['Event Hub status is not ok. EventHub = alertlogic-log, status = Disabled']
+                details: ['Event Hub status is not ok. Namespace = alertlogicingest-centralus-2wljtgprz47om, EventHub = alertlogic-log, status = Disabled']
             };
             assert.deepEqual(err, expected);
             done();
@@ -259,7 +259,7 @@ describe('Event hub health check unit tests.', function() {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000006',
-                details: [`Default alertlogic-log event hub doesn't exist in the namespace.`]
+                details: [`Event hub doesn't exist. Namespace = alertlogicingest-centralus-2wljtgprz47om, EventHub = alertlogic-log`]
             };
             assert.deepEqual(err, expected);
             done();

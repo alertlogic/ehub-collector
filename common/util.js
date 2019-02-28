@@ -10,6 +10,9 @@
 const azure = require('azure');
 const parse = require('parse-key-value');
 
+const DEFAULT_EHUB_FOR_LOG_NAME = 'alertlogic-log';
+
+
 const initArmMonitor = function(master) {
     const azureCreds = master.getApplicationTokenCredentials();
     const subscriptionId = master.getConfigAttrs().subscription_id;
@@ -35,9 +38,19 @@ const getEhubNsName = function() {
     return connectionParams.Endpoint.split(/[\.\/]/g)[2];
 };
 
+const getEhubForLogName = function() {
+    return process.env.APP_LOG_EHUB_NAME ? process.env.APP_LOG_EHUB_NAME : DEFAULT_EHUB_FOR_LOG_NAME;
+};
+
+const getEhubForLogResourceGroup = function(master) {
+    return process.env.APP_LOG_EHUB_RESOURCE_GROUP ?
+        process.env.APP_LOG_EHUB_RESOURCE_GROUP : master.getConfigAttrs().app_resource_group;
+};
 
 module.exports = {
     getEhubNsName: getEhubNsName,
+    getEhubForLogName: getEhubForLogName,
+    getEhubForLogResourceGroup: getEhubForLogResourceGroup,
     formatSdkError: formatSdkError,
     initArmMonitor: initArmMonitor,
     initArmEhub: initArmEhub

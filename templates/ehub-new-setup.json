@@ -1,0 +1,258 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Name": {
+            "type": "String"
+        },
+        "Storage Name": {
+            "type": "String"
+        },
+        "Alert Logic Access Key ID": {
+            "type": "String"
+        },
+        "Alert Logic Secret Key": {
+            "type": "SecureString"
+        },
+        "Alert Logic API endpoint": {
+            "type": "String",
+            "defaultValue": "api.global-services.global.alertlogic.com",
+            "allowedValues" : [
+                "api.global-services.global.alertlogic.com",
+                "api.global-integration.product.dev.alertlogic.com"
+            ]
+        },
+        "Alert Logic Data Residency": {
+            "type": "String",
+            "defaultValue": "default",
+            "allowedValues": [
+                "default"
+            ]
+        },
+        "Service Principal ID": {
+            "type": "String"
+        },
+        "App Client ID": {
+            "type": "String"
+        },
+        "App Client Secret": {
+            "type": "SecureString"
+        },
+        "New Event Hub Name": {
+            "type": "String",
+            "defaultValue": "insights-operational-logs"
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "resourceGroupName": "[resourceGroup().name]",
+        "resourceGroupId": "[resourceGroup().id]",
+        "roleAssignmentId": "[guid(uniqueString( resourceGroup().id, deployment().name ))]",
+        "subscriptionId": "[split(subscription().id, '/')[2]]",
+        "tenantId": "[subscription().tenantId]",
+        "contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "repo": "https://github.com/alertlogic/ehub-collector.git",
+        "branch": "v1",
+        "ehubNsName": "[concat('AlertLogicIngest-', resourceGroup().location, '-', uniqueString(resourceGroup().id))]",
+        "dlContainerName": "alertlogic-dl"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "kind": "functionapp",
+            "name": "[parameters('name')]",
+            "apiVersion": "2016-03-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "name": "[parameters('name')]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "AzureWebJobsDashboard",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name')), '2015-06-15').key1)]"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name')), '2015-06-15').key1)]"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~1"
+                        },
+                        {
+                            "name": "SCM_USE_FUNCPACK",
+                            "value": "1"
+                        },
+                        {
+                            "name": "SCM_POST_DEPLOYMENT_ACTIONS_PATH",
+                            "value": "PostDeploymentActions"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name')), '2015-06-15').key1)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[concat(toLower(parameters('name')), '9546')]"
+                        },
+                        {
+                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                            "value": "6.5.0"
+                        },
+                        {
+                            "name": "APP_SUBSCRIPTION_ID",
+                            "value": "[variables('subscriptionId')]"
+                        },
+                        {
+                            "name": "APP_RESOURCE_GROUP",
+                            "value": "[variables('resourceGroupName')]"
+                        },
+                        {
+                            "name": "APP_TENANT_ID",
+                            "value": "[variables('tenantId')]"
+                        },
+                        {
+                            "name": "APP_LOG_EHUB_CONNECTION",
+                            "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
+                        },
+                        {
+                            "name": "APP_LOG_EHUB_NAME",
+                            "value": "[parameters('New Event Hub Name')]"
+                        },
+                        {
+                            "name": "APP_LOG_EHUB_CONSUMER_GROUP",
+                            "value": "$Default"
+                        },
+                        {
+                            "name": "APP_LOG_EHUB_RESOURCE_GROUP",
+                            "value": "[variables('resourceGroupName')]"
+                        },
+                        {
+                            "name": "APP_DL_CONTAINER_NAME",
+                            "value": "[variables('dlContainerName')]"
+                        },
+                        {
+                            "name": "DL_BLOB_PAGE_SIZE",
+                            "value": "100"
+                        }
+                    ],
+                    "connectionStrings": [
+                        {
+                            "name": "APP_CLIENT_ID",
+                            "type": "Custom",
+                            "connectionString": "[parameters('App Client ID')]"
+                        },
+                        {
+                            "name": "APP_CLIENT_SECRET",
+                            "type": "Custom",
+                            "connectionString": "[parameters('App Client Secret')]"
+                        },
+                        {
+                            "name": "APP_AL_ACCESS_KEY_ID",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic Access Key ID')]"
+                        },
+                        {
+                            "name": "APP_AL_SECRET_KEY",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic Secret Key')]"
+                        },
+                        {
+                            "name": "APP_AL_API_ENDPOINT",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic API endpoint')]"
+                        },
+                        {
+                            "name": "APP_AL_RESIDENCY",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic Data Residency')]"
+                        }
+                    ]
+                },
+                "clientAffinityEnabled": false
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name'))]",
+                "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
+            ],
+            "resources": [{
+                "apiVersion": "2015-08-01",
+                "name": "web",
+                "type": "sourcecontrols",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/Sites', parameters('name'))]"
+                ],
+                "properties": {
+                    "RepoUrl": "[variables('repo')]",
+                    "branch": "[variables('branch')]",
+                    "IsManualIntegration": true
+                }
+            }]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('Storage Name')]",
+            "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "Standard_LRS"
+            },
+            "dependsOn": [],
+            "resources": [
+                {
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "name": "[concat('default/', variables('dlContainerName'))]",
+                    "dependsOn": [
+                        "[parameters('Storage Name')]"
+                    ],
+                    "properties": {
+                        "publicAccess": "None"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "name": "[variables('roleAssignmentId')]",
+            "apiVersion": "2015-07-01",
+            "properties": {
+                "roleDefinitionId": "[variables('contributor')]",
+                "principalId": "[parameters('Service Principal ID')]",
+                "scope": "[variables('resourceGroupId')]"
+            }
+        },
+        {
+            "type": "Microsoft.EventHub/namespaces",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard",
+                "capacity": 1
+            },
+            "name": "[variables('ehubNsName')]",
+            "apiVersion": "2017-04-01",
+            "location": "[variables('location')]",
+            "tags": {},
+            "properties": {
+                "isAutoInflateEnabled": true,
+                "maximumThroughputUnits": 16
+            },
+            "dependsOn": [],
+            "resources": [
+                {
+                    "type": "eventhubs",
+                    "name": "[parameters('New Event Hub Name')]",
+                    "apiVersion": "2017-04-01",
+                    "location": "[variables('location')]",
+                    "properties": {
+                        "messageRetentionInDays": 7,
+                        "partitionCount": 4
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
+                    ]
+                }
+            ]
+        }
+    ]
+}

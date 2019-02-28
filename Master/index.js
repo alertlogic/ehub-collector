@@ -15,7 +15,7 @@ const AlAzureMaster = require('al-azure-collector-js').AlAzureMaster;
 const healthcheck = require('./healthcheck');
 const stats = require('./stats');
 
-const APP_FUNCTIONS = ['Master', 'Updater', 'EHubGeneral', 'EHubActivityLogs', 'DLBlob'];
+const APP_FUNCTIONS = ['Master', 'Updater', 'EHubGeneral', 'DLBlob'];
 
 module.exports = function (context, AlertlogicMasterTimer) {
     const healthFuns = [

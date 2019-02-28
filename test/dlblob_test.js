@@ -16,7 +16,6 @@ const alcollector = require('al-collector-js');
 const mock = require('./mock');
 var AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 const dlblob = require('../DLBlob/index');
-const ehubActivityLogsFormat = require('../EHubActivityLogs/format');
 const ehubGeneralFormat = require('../EHubGeneral/format');
 
 
@@ -108,7 +107,6 @@ describe('Event hub DLBlob function unit tests.', function() {
         var cb = function(err, res) {
             sinon.assert.callCount(processLogStub, 6);
             sinon.assert.callCount(deleteBlobStub, 6);
-            sinon.assert.calledWith(processLogStub, sinon.match.any, ehubActivityLogsFormat.logRecord);
             sinon.assert.calledWith(processLogStub, sinon.match.any, ehubGeneralFormat.logRecord);
             done();
         };
