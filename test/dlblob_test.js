@@ -138,25 +138,25 @@ describe('Event hub DLBlob function unit tests.', function() {
         .query({'restype':'container','comp':'list','maxresults':process.env.DL_BLOB_PAGE_SIZE,'prefix':process.env.WEBSITE_SITE_NAME})
         .reply(200, mock.LIST_CONTAINER_BLOBS());
         
-        // Get blob content
+        // Get blob content 2019-01-23T15-53-06Z
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
-        .get(/alertlogic-dl\/kktestdl\/ehubactivitylogs.*/)
-        .times(4)
+        .get(/alertlogic-dl\/kktestdl\/ehubgeneral\/2019-01-23T15-53-06Z/)
+        .times(1)
         .reply(200, mock.GET_BLOB_CONTENT_TEXT);
         
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get(/alertlogic-dl\/kktestdl\/ehubgeneral.*/)
-        .times(2)
+        .times(5)
         .reply(404, mock.CONTAINER_NOT_FOUND);
         
         // Delete blob
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl.*/)
-        .times(4)
+        .times(5)
         .reply(202);
         
         var cb = function(err, res) {
-            sinon.assert.callCount(processLogStub, 4);
+            sinon.assert.callCount(processLogStub, 1);
             assert.equal(err.statusCode, 404);
             assert.equal(err.code, 'ContainerNotFound');
             done();
@@ -180,13 +180,8 @@ describe('Event hub DLBlob function unit tests.', function() {
         
         // Delete blob
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
-        .delete(/alertlogic-dl\/kktestdl\/ehubactivitylogs.*/)
-        .times(4)
-        .reply(202);
-        
-        nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl\/kktestdl\/ehubgeneral.*/)
-        .times(2)
+        .times(6)
         .reply(404, mock.CONTAINER_NOT_FOUND);
         
         var cb = function(err, res) {

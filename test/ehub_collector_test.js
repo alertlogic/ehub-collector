@@ -8,7 +8,6 @@
  * -----------------------------------------------------------------------------
  */
  
-const assert = require('assert');
 const sinon = require('sinon');
 const nock = require('nock');
 const alcollector = require('al-collector-js');
