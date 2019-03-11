@@ -69,14 +69,11 @@
         "tenantId": "[subscription().tenantId]",
         "contributorRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
         "readerRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-        
         "ehubNewNsName": "[concat('AlertLogicIngest-', variables('location'), '-', uniqueString(variables('resourceGroupId')))]",
         "ehubName": "[if(equals(parameters('Event Hub Name'), ''), 'insights-operational-logs', parameters('Event Hub Name'))]",
-        "ehubNamespace": "[if(equals(parameters('Event Hub Namespace'), ''), variables('ehubNewNsName'), parameters('Event Hub Namespace'))]",
-        
+        "ehubNamespace": "[if(equals(parameters('Event Hub Namespace'), ''), variables('ehubNewNsName'), '')]",
         "ehubResourceGroup": "[if(equals(parameters('Event Hub Resource Group'), ''), variables('resourceGroupName'), parameters('Event Hub Resource Group'))]",
         "ehubConsumerGroup": "[if(equals(parameters('Event Hub Consumer Group'), ''), '$Default', parameters('Event Hub Consumer Group'))]",
-        
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
         "dlContainerName": "alertlogic-dl"
@@ -197,8 +194,7 @@
                 "clientAffinityEnabled": false
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name'))]",
-                "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNamespace'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name'))]"
             ],
             "resources": [{
                 "apiVersion": "2015-08-01",
@@ -249,7 +245,7 @@
             }
         },
         {
-            "comments": "Creae new event hub namespace and event hub in case of new deployment.",
+            "comments": "Create new event hub namespace and event hub in case of new deployment.",
             "type": "Microsoft.EventHub/namespaces",
             "sku": {
                 "name": "Standard",
