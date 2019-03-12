@@ -42,30 +42,36 @@
             "type": "String",
             "defaultValue": "",
             "metadata": {
-                "description": "Optional. Specifies the resource group for existing event hub. Leave empty to install new Alert Logic Event Hub infrastructure."
+                "description": "Optional. Specifies the resource group for existing event hub. Leave empty to install Alert Logic managed event hub infrastructure."
             }
         },
         "Event Hub Connection String": {
             "type": "SecureString",
             "defaultValue": "",
             "metadata": {
-                "description": "Optional. Specifies the connection string to existing event hub. Leave empty if you use Alert Logic managed Event Hub infrastructure."
+                "description": "Optional. Specifies the connection string for existing event hub. Leave empty if you use Alert Logic managed event hub infrastructure."
             }
         },
         "Event Hub Namespace": {
             "type": "String",
             "defaultValue": "",
             "metadata": {
-                "description": "Optional. Specifies the namespace for existing event hub. Leave empty if you use Alert Logic managed Event Hub infrastructure."
+                "description": "Optional. Specifies the namespace for existing event hub. Leave empty if you use Alert Logic managed event Hub infrastructure."
             }
         },
         "Event Hub Name": {
             "type": "String",
-            "defaultValue": "insights-operational-logs"
+            "defaultValue": "insights-operational-logs",
+            "metadata": {
+                "description": "Please use the actual name if using existing event hub."
+            }
         },
         "Event Hub Consumer Group": {
             "type": "String",
-            "defaultValue": "$Default"
+            "defaultValue": "$Default",
+            "metadata": {
+                "description": "Please use the actual consumer group if using existing event hub."
+            }
         }
     },
     "variables": {
@@ -80,7 +86,6 @@
         "readerRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
         "ehubNewNsName": "[concat('AlertLogicIngest-', variables('location'), '-', uniqueString(variables('resourceGroupId')))]",
         "ehubName": "[if(equals(parameters('Event Hub Name'), ''), 'insights-operational-logs', parameters('Event Hub Name'))]",
-        "ehubNamespace": "[if(equals(parameters('Event Hub Namespace'), ''), variables('ehubNewNsName'), '')]",
         "ehubResourceGroup": "[if(equals(parameters('Event Hub Resource Group'), ''), variables('resourceGroupName'), parameters('Event Hub Resource Group'))]",
         "ehubConsumerGroup": "[if(equals(parameters('Event Hub Consumer Group'), ''), '$Default', parameters('Event Hub Consumer Group'))]",
         "createNewEhubInfraCond": "[if(and(equals(parameters('Event Hub Resource Group'), ''), equals(parameters('Event Hub Connection String'), ''), equals(parameters('Event Hub Namespace'), '')), bool('true'), bool('false'))]",
