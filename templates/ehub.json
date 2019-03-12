@@ -40,15 +40,24 @@
         },
         "Event Hub Resource Group": {
             "type": "String",
-            "defaultValue": ""
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the resource group for existing event hub. Leave empty to install new Alert Logic Event Hub infrastructure."
+            }
         },
         "Event Hub Connection String": {
             "type": "SecureString",
-            "defaultValue": ""
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the connection string to existing event hub. Leave empty if you use Alert Logic managed Event Hub infrastructure."
+            }
         },
         "Event Hub Namespace": {
             "type": "String",
-            "defaultValue": ""
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the namespace for existing event hub. Leave empty if you use Alert Logic managed Event Hub infrastructure."
+            }
         },
         "Event Hub Name": {
             "type": "String",
@@ -64,7 +73,7 @@
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[resourceGroup().id]",
         "contribRoleAssignmentName": "[guid(uniqueString( variables('resourceGroupId'), deployment().name ))]",
-        "readerRoleAssignmentName": "[guid(uniqueString( variables('resourceGroupId'), deployment().name ))]",
+        "readerRoleAssignmentName": "[guid(parameters('Service Principal ID'), deployment().name)]",
         "subscriptionId": "[subscription().subscriptionId]",
         "tenantId": "[subscription().tenantId]",
         "contributorRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
@@ -74,6 +83,7 @@
         "ehubNamespace": "[if(equals(parameters('Event Hub Namespace'), ''), variables('ehubNewNsName'), '')]",
         "ehubResourceGroup": "[if(equals(parameters('Event Hub Resource Group'), ''), variables('resourceGroupName'), parameters('Event Hub Resource Group'))]",
         "ehubConsumerGroup": "[if(equals(parameters('Event Hub Consumer Group'), ''), '$Default', parameters('Event Hub Consumer Group'))]",
+        "createNewEhubInfraCond": "[if(and(equals(parameters('Event Hub Resource Group'), ''), equals(parameters('Event Hub Connection String'), ''), equals(parameters('Event Hub Namespace'), '')), bool('true'), bool('false'))]",
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
         "dlContainerName": "alertlogic-dl"
@@ -246,6 +256,7 @@
         },
         {
             "comments": "Create new event hub namespace and event hub in case of new deployment.",
+            "condition": "[variables('createNewEhubInfraCond')]",
             "type": "Microsoft.EventHub/namespaces",
             "sku": {
                 "name": "Standard",
@@ -263,6 +274,7 @@
             "dependsOn": [],
             "resources": [
                 {
+                    "condition": "[variables('createNewEhubInfraCond')]",
                     "type": "eventhubs",
                     "name": "[variables('ehubName')]",
                     "apiVersion": "2017-04-01",
@@ -278,8 +290,8 @@
             ]
         },
         {
-            "comments": "Assign reader role to the app principal id for exising event hub resource group.",
-            "condition": "[if(equals(parameters('Event Hub Resource Group'), ''), bool('false'), bool('true'))]",
+            "comments": "Assign reader role to the app principal id for existing event hub resource group.",
+            "condition": "[not(variables('createNewEhubInfraCond'))]",
             "apiVersion": "2018-05-01",
             "name": "nestedTemplate",
             "type": "Microsoft.Resources/deployments",
@@ -294,7 +306,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
-                            "name": "[guid(parameters('Service Principal ID'), deployment().name)]",
+                            "name": "[variables('readerRoleAssignmentName')]",
                             "apiVersion": "2017-09-01",
                             "properties": {
                                 "roleDefinitionId": "[variables('readerRole')]",
