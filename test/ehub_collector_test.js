@@ -8,7 +8,6 @@
  * -----------------------------------------------------------------------------
  */
  
-const assert = require('assert');
 const sinon = require('sinon');
 const nock = require('nock');
 const alcollector = require('al-collector-js');
@@ -16,7 +15,7 @@ const alcollector = require('al-collector-js');
 const mock = require('./mock');
 const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
 const ehubCollector = require('../common/ehub_collector');
-const ehubActivityLogsFormat = require('../EHubActivityLogs/format');
+const ehubGeneralFormat = require('../EHubGeneral/format');
 
 describe('Common Event hub collector unit tests.', function() {
     var fakeAuth;
@@ -74,7 +73,7 @@ describe('Common Event hub collector unit tests.', function() {
         const testMessage = [{ records: [mock.SQL_AUDIT_LOG_RECORD]}];
         var ingestSendStub = sinon.stub(alcollector.IngestC.prototype, 'sendAicspmsgs').resolves({});
         
-        ehubCollector(mock.context(), testMessage, ehubActivityLogsFormat.logRecord , null, function(err, res) {
+        ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
             ingestSendStub.restore();
             sinon.assert.callCount(ingestSendStub, 1);
             done();
@@ -98,7 +97,7 @@ describe('Common Event hub collector unit tests.', function() {
             {records: [{operationName: 'Good batch'}, {some: 'message 2'}]},
         ];
         
-        ehubCollector(mock.context(), inputRecords, ehubActivityLogsFormat.logRecord , null, function(err, res) {
+        ehubCollector(mock.context(), inputRecords, ehubGeneralFormat.logRecord , null, function(err, res) {
             processLogStub.restore();
             sinon.assert.callCount(processLogStub, 3);
             done();

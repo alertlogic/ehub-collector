@@ -23,7 +23,7 @@ function getMetric(metricName, metrics) {
 const getEventHubCollectionMetrics = function(master, timestamp, callback) {
     var armMonitor = ehubUtil.initArmMonitor(master);
     var armEhub = ehubUtil.initArmEhub(master);
-    const rg = master.getConfigAttrs().app_resource_group;
+    const rg = ehubUtil.getEhubForLogResourceGroup(master);
     const nsName = ehubUtil.getEhubNsName();
     
     async.waterfall([

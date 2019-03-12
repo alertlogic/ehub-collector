@@ -2,7 +2,7 @@
     "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "Name": {
+        "Application Name": {
             "type": "String"
         },
         "Storage Name": {
@@ -37,31 +37,71 @@
         },
         "App Client Secret": {
             "type": "SecureString"
+        },
+        "Event Hub Resource Group": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the resource group for existing event hub. Leave empty to install Alert Logic managed event hub infrastructure."
+            }
+        },
+        "Event Hub Connection String": {
+            "type": "SecureString",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the connection string for existing event hub. Leave empty if you use Alert Logic managed event hub infrastructure."
+            }
+        },
+        "Event Hub Namespace": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the namespace for existing event hub. Leave empty if you use Alert Logic managed event Hub infrastructure."
+            }
+        },
+        "Event Hub Name": {
+            "type": "String",
+            "defaultValue": "insights-operational-logs",
+            "metadata": {
+                "description": "Please use the actual name if using existing event hub."
+            }
+        },
+        "Event Hub Consumer Group": {
+            "type": "String",
+            "defaultValue": "$Default",
+            "metadata": {
+                "description": "Please use the actual consumer group if using existing event hub."
+            }
         }
     },
     "variables": {
         "location": "[resourceGroup().location]",
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[resourceGroup().id]",
-        "roleAssignmentId": "[guid(uniqueString( resourceGroup().id, deployment().name ))]",
-        "subscriptionId": "[split(subscription().id, '/')[2]]",
+        "contribRoleAssignmentName": "[guid(uniqueString( variables('resourceGroupId'), deployment().name ))]",
+        "readerRoleAssignmentName": "[guid(parameters('Service Principal ID'), deployment().name)]",
+        "subscriptionId": "[subscription().subscriptionId]",
         "tenantId": "[subscription().tenantId]",
-        "contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "contributorRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "readerRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "ehubNewNsName": "[concat('AlertLogicIngest-', variables('location'), '-', uniqueString(variables('resourceGroupId')))]",
+        "ehubName": "[if(equals(parameters('Event Hub Name'), ''), 'insights-operational-logs', parameters('Event Hub Name'))]",
+        "ehubResourceGroup": "[if(equals(parameters('Event Hub Resource Group'), ''), variables('resourceGroupName'), parameters('Event Hub Resource Group'))]",
+        "ehubConsumerGroup": "[if(equals(parameters('Event Hub Consumer Group'), ''), '$Default', parameters('Event Hub Consumer Group'))]",
+        "createNewEhubInfraCond": "[if(and(equals(parameters('Event Hub Resource Group'), ''), equals(parameters('Event Hub Connection String'), ''), equals(parameters('Event Hub Namespace'), '')), bool('true'), bool('false'))]",
         "repo": "https://github.com/alertlogic/ehub-collector.git",
-        "branch": "master",
-        "ehubNsName": "[concat('AlertLogicIngest-', resourceGroup().location, '-', uniqueString(resourceGroup().id))]",
-        "ehubForLogName": "alertlogic-log",
+        "branch": "v1",
         "dlContainerName": "alertlogic-dl"
     },
     "resources": [
         {
             "type": "Microsoft.Web/sites",
             "kind": "functionapp",
-            "name": "[parameters('name')]",
+            "name": "[parameters('Application Name')]",
             "apiVersion": "2016-03-01",
             "location": "[variables('location')]",
             "properties": {
-                "name": "[parameters('name')]",
+                "name": "[parameters('Application Name')]",
                 "siteConfig": {
                     "appSettings": [
                         {
@@ -90,7 +130,7 @@
                         },
                         {
                             "name": "WEBSITE_CONTENTSHARE",
-                            "value": "[concat(toLower(parameters('name')), '9546')]"
+                            "value": "[concat(toLower(parameters('Application Name')), '9546')]"
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
@@ -110,7 +150,19 @@
                         },
                         {
                             "name": "APP_LOG_EHUB_CONNECTION",
-                            "value": "[listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
+                            "value": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNewNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString, parameters('Event Hub Connection String'))]"
+                        },
+                        {
+                            "name": "APP_LOG_EHUB_NAME",
+                            "value": "[variables('ehubName')]"
+                        },
+                        {
+                            "name": "APP_LOG_EHUB_CONSUMER_GROUP",
+                            "value": "[variables('ehubConsumerGroup')]"
+                        },
+                        {
+                            "name": "APP_LOG_EHUB_RESOURCE_GROUP",
+                            "value": "[variables('ehubResourceGroup')]"
                         },
                         {
                             "name": "APP_DL_CONTAINER_NAME",
@@ -157,15 +209,14 @@
                 "clientAffinityEnabled": false
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name'))]",
-                "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name'))]"
             ],
             "resources": [{
                 "apiVersion": "2015-08-01",
                 "name": "web",
                 "type": "sourcecontrols",
                 "dependsOn": [
-                    "[resourceId('Microsoft.Web/Sites', parameters('name'))]"
+                    "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
                 ],
                 "properties": {
                     "RepoUrl": "[variables('repo')]",
@@ -198,23 +249,26 @@
             ]
         },
         {
+            "comments": "Assign contributor role to the app principal id for the resource group application is deployed to.",
             "type": "Microsoft.Authorization/roleAssignments",
-            "name": "[variables('roleAssignmentId')]",
+            "name": "[variables('contribRoleAssignmentName')]",
             "apiVersion": "2015-07-01",
             "properties": {
-                "roleDefinitionId": "[variables('contributor')]",
+                "roleDefinitionId": "[variables('contributorRole')]",
                 "principalId": "[parameters('Service Principal ID')]",
                 "scope": "[variables('resourceGroupId')]"
             }
         },
         {
+            "comments": "Create new event hub namespace and event hub in case of new deployment.",
+            "condition": "[variables('createNewEhubInfraCond')]",
             "type": "Microsoft.EventHub/namespaces",
             "sku": {
                 "name": "Standard",
                 "tier": "Standard",
                 "capacity": 1
             },
-            "name": "[variables('ehubNsName')]",
+            "name": "[variables('ehubNewNsName')]",
             "apiVersion": "2017-04-01",
             "location": "[variables('location')]",
             "tags": {},
@@ -225,8 +279,9 @@
             "dependsOn": [],
             "resources": [
                 {
+                    "condition": "[variables('createNewEhubInfraCond')]",
                     "type": "eventhubs",
-                    "name": "[variables('ehubForLogName')]",
+                    "name": "[variables('ehubName')]",
                     "apiVersion": "2017-04-01",
                     "location": "[variables('location')]",
                     "properties": {
@@ -234,10 +289,40 @@
                         "partitionCount": 4
                     },
                     "dependsOn": [
-                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
+                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNewNsName'))]"
                     ]
                 }
             ]
+        },
+        {
+            "comments": "Assign reader role to the app principal id for existing event hub resource group.",
+            "condition": "[not(variables('createNewEhubInfraCond'))]",
+            "apiVersion": "2018-05-01",
+            "name": "nestedTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('Event Hub Resource Group')]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "name": "[variables('readerRoleAssignmentName')]",
+                            "apiVersion": "2017-09-01",
+                            "properties": {
+                                "roleDefinitionId": "[variables('readerRole')]",
+                                "principalId": "[parameters('Service Principal ID')]",
+                                "scope": "[concat(variables('subscriptionId'), '/resourceGroups/', parameters('Event Hub Resource Group'))]"
+                            }
+                        }
+                    ]
+                },
+                "parameters": {}
+            }
         }
     ]
 }
