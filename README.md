@@ -13,7 +13,6 @@ To perform the setup required to grant Alert Logic permission to access Events H
 * A Microsoft Azure account with administrative privileges
 * An Alert Logic user account with administrative privileges
 
-
 ## Register a new Azure web application
 
 In the Azure portal, you must register a new web application. Any application that wants to use the capabilities of Azure Active Directory must first be registered in an Azure AD tenant. This registration process involves giving Azure AD details about your application, such as the URL where it is located, the URL to send replies after a user is authenticated, and the URI that identifies the app.
@@ -84,7 +83,6 @@ curl -s -X GET -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.glo
 In the following curl command, replace ``ACCESS_KEY_ID_HERE`` with the access key you want to delete.
 
 ```
-
 curl -X DELETE -H "x-aims-auth-token: $AL_TOKEN" https://api.global-services.global.alertlogic.com/aims/v1/$AL_ACCOUNT_ID/users/$AL_USER_ID/access_keys/<ACCESS_KEY_ID_HERE>
 ```
 
@@ -96,6 +94,8 @@ You can use either the Microsoft Azure portal or a command line to deploy the te
 
 If your organization uses multiple Active Directory tenants, log into the same tenant used to [Register a New Azure Web Application](#register-a-new-azure-web-application).
 
+The ARM template can be used to configure a new Azure Event Hub or have the Alert Logic collector reuse an existing one.
+
 ### Deploy with the custom ARM Template in an Azure Subscription
 
 Click the button below to start deployment. 
@@ -103,7 +103,7 @@ Click the button below to start deployment.
 [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fmaster%2Ftemplates%2Fehub.json)
 
 1. To start a deployment, provide the following required template parameters, and then click the `Purchase` button:
-   - **Name** - Type the name of the log source to appear in the Alert Logic console.
+   - **Application Name** - Type the name of the log source to appear in the Alert Logic console.
    - **Storage Name** - Type any storage account name (that does not currently exist).
    - **Alert Logic Access Key ID** - Type the `access_key_id` you created above.
    - **Alert Logic Secret Key** - Type the `secret_key` you created above.
@@ -116,7 +116,22 @@ Click the button below to start deployment.
    - **App Client ID** - Type the GUID of your application that created the subscription. 
    
    **Note:** You can obtain this value from _Azure_ > _AD_ > _App registrations_ > _Your app name_
+
    - **App Client Secret** - Type the secret key of your application (available from from _App Registrations_).
+
+   **Note:** The following template parameters are optional and need to be entered only if reusing an existing Event Hub:
+
+   - **Event Hub Resource Group** - Type the resource group for the existing Event Hub.
+   - **Event Hub Connection String** - Type the connection string for the existing Event Hub.
+   - **Event Hub Namespace** - Type the namespace for the existing Event Hub.
+   - **Event Hub Name** - Type the name of the existing Event Hub.
+
+   **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
+   Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs).
+
+   - **Event Hub Consumer Group** - Type the name of the consumer group of the existing Event Hub.
+
+   **Note:** This value defaults to `$Default`; you can reuse this consumer group if there are no other consumers of this Event Hub. If there are other consumers of the Event Hub, a separate consumer group should be created for the Alert Logic collector, and its name typed here.
 
 1. Click **Purchase**.
 
@@ -177,12 +192,6 @@ The `Master` function is a timer trigger function responsible for:
 
 The `Updater` function is a timer triggered function that runs a deployment sync operation every 12 hours to keep the web application up to date.
 
-## `EHubActivityLogs` function
-
-The `EHubActivityLogs` function listens to the `insights-operational-logs` event hub located in the Event Hubs namespace created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `insights-operational-logs` is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
-Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs). 
-Collected JSON objects are wrapped into the protocol buffer (protobuf) [structure](https://github.com/alertlogic/al-collector-js/blob/master/proto/common_proto.piqi.proto) and then forwarded to the Alert Logic Ingestion service.
-
 ## EHubGeneral function
 
 The `EHubGeneral` function listens to `alertlogic-log`, which is created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `alertlogicloghub` event hub can be used for integration with logs such as [diagnostic logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-logs-stream-event-hubs) or [Azure AD logs](https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub).
@@ -190,7 +199,7 @@ Collected JSON objects are wrapped into the protobuf [structure](https://github.
 
 ## DLBlob function
 
-If neither `EHubActivityLogs` or `EHubGeneral` cannot process incoming event hub records, unprocessed messages are saved as blobs to the `alertlogic-dl` container, so collection can be tried again later. The `alertlogic-dl` container is located in the collector web application storage account created during collector setup.
+If `EHubGeneral` cannot process incoming event hub records, unprocessed messages are saved as blobs to the `alertlogic-dl` container, so collection can be tried again later. The `alertlogic-dl` container is located in the collector web application storage account created during collector setup.
 The `DLBlob` function processes dead letter blobs very 15 minutes. The `DLBlob` function lists all blobs located in  `alertlogic-dl` container and processes them according to the function to which the dead letter blob belongs. After a blob is processed, it is removed from the container.
 
 # Local development
@@ -204,7 +213,6 @@ To enable local development, perform the following procedure:
 1. Run the `Master` function locally: `npm run local-master`.
 1. Run the `Updater` function locally: `npm run local-updater`.
 1. Run the `EHubGeneral` function locally: `npm run local-ehub-general`.
-1. Run the `EHubActivityLogs` function locally: `npm run local-ehub-activitylogs`.
 1. Run `npm test` to perform code analysis and unit tests.
 
 Please use the following [code style](https://github.com/airbnb/javascript) as much as possible.
