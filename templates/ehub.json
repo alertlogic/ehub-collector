@@ -91,7 +91,8 @@
         "createNewEhubInfraCond": "[if(and(equals(parameters('Event Hub Resource Group'), ''), equals(parameters('Event Hub Connection String'), ''), equals(parameters('Event Hub Namespace'), '')), bool('true'), bool('false'))]",
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
-        "dlContainerName": "alertlogic-dl"
+        "dlContainerName": "alertlogic-dl",
+        "statsQueueName": "alertlogic-stats"
     },
     "resources": [
         {
@@ -171,6 +172,10 @@
                         {
                             "name": "DL_BLOB_PAGE_SIZE",
                             "value": "100"
+                        },
+                        {
+                            "name": "APP_STATS_QUEUE_NAME",
+                            "value": "[variables('statsQueueName')]"
                         }
                     ],
                     "connectionStrings": [
