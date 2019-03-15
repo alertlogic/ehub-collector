@@ -121,9 +121,9 @@ Click the button below to start deployment.
 
    **Note:** The following template parameters are optional and need to be entered only if reusing an existing Event Hub:
 
-   - **Event Hub Resource Group** - Type the resource group for the existing Event Hub.
-   - **Event Hub Connection String** - Type the connection string for the existing Event Hub.
-   - **Event Hub Namespace** - Type the namespace for the existing Event Hub.
+   - **Event Hub Resource Group** - Type the resource group for the existing Event Hub; leave empty if creating a new Event Hub.
+   - **Event Hub Connection String** - Type the connection string for the existing Event Hub; leave empty if creating a new Event Hub.
+   - **Event Hub Namespace** - Type the namespace for the existing Event Hub; leave empty if creating a new Event Hub.
    - **Event Hub Name** - Type the name of the existing Event Hub.
 
    **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
