@@ -129,6 +129,11 @@ Click the button below to start deployment.
    **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
    Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs).
 
+   - **Event Hub Retention** - Type the number of data retention days between 1 and 7. Ignored if existing Event Hub is reused.
+   - **Event Hub Partition Count** - Type the number of partitions between 2 and 32. Ignored if existing event hub is reused.
+
+   **Note:** Partitions let you scale for your downstream processing. The partition count is not changeable, please consider long-term scale when setting partition count. General recommendation is to balance 1:1 throughput units and partitions to achieve optimal scale. There is no charge for the number of partitions you have within an Event Hub. Please make sure to follow the [guideline](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-features#partitions-1) and [FAQ](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-faq#how-many-partitions-do-i-need) before setting the partition count.
+
    - **Event Hub Consumer Group** - Type the name of the consumer group of the existing Event Hub.
 
    **Note:** This value defaults to `$Default`; you can reuse this consumer group if there are no other consumers of this Event Hub. If there are other consumers of the Event Hub, a separate consumer group should be created for the Alert Logic collector, and its name typed here.

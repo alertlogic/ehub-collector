@@ -66,6 +66,20 @@
                 "description": "Please use the actual name if using existing event hub."
             }
         },
+        "Event Hub Retention": {
+            "type": "Int",
+            "defaultValue": 7,
+            "metadata": {
+                "description": "Ignored if existing event hub is reused! Data retention time in days between 1 and 7."
+            }
+        },
+        "Event Hub Partition Count": {
+            "type": "Int",
+            "defaultValue": 32,
+            "metadata": {
+                "description": "Ignored if existing event hub is reused! Partitions count must ne between 2 and 32. Recommendation: balance 1:1 throughput units and partitions to achieve optimal scale."
+            }
+        },
         "Event Hub Consumer Group": {
             "type": "String",
             "defaultValue": "$Default",
@@ -290,8 +304,8 @@
                     "apiVersion": "2017-04-01",
                     "location": "[variables('location')]",
                     "properties": {
-                        "messageRetentionInDays": 7,
-                        "partitionCount": 4
+                        "messageRetentionInDays": "[parameters('Event Hub Retention')]",
+                        "partitionCount": "[parameters('Event Hub Partition Count')]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNewNsName'))]"
