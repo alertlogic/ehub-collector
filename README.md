@@ -135,6 +135,15 @@ Click the button below to start deployment.
 
 1. Click **Purchase**.
 
+**Note:** If you choose to create new event hub via the template then the following event hub scaling parameters are used:
+
+   - 20 maximum throughput units,
+   - auto-inflate is enabled,
+   - 32 partitions count,
+   - 7 day data retention period.
+   
+If you would like to use other parameters please change respective variable values in the the template or contact Alert Logic.
+
 ### Deploy through the Azure CLI
 
 If you want to deploy the template through the Azure command line interface (CLI), you can use either [Azure Cloud Shell](https://docs.microsoft.com/en-gb/azure/cloud-shell/quickstart#start-cloud-shell) or a local installation of [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest).

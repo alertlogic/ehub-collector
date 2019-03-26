@@ -92,7 +92,11 @@
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
         "dlContainerName": "alertlogic-dl",
-        "statsQueueName": "alertlogic-stats"
+        "statsQueueName": "alertlogic-stats",
+        "newEhubMaxThroughputUnits": 20,
+        "newEhubAutoInflateEnabled": true,
+        "newEhubPartitionCount": 32,
+        "newEhubRetentionDays": 7
     },
     "resources": [
         {
@@ -278,8 +282,8 @@
             "location": "[variables('location')]",
             "tags": {},
             "properties": {
-                "isAutoInflateEnabled": true,
-                "maximumThroughputUnits": 16
+                "isAutoInflateEnabled": "[variables('newEhubAutoInflateEnabled')]",
+                "maximumThroughputUnits": "[variables('newEhubMaxThroughputUnits')]"
             },
             "dependsOn": [],
             "resources": [
@@ -290,8 +294,8 @@
                     "apiVersion": "2017-04-01",
                     "location": "[variables('location')]",
                     "properties": {
-                        "messageRetentionInDays": 7,
-                        "partitionCount": 4
+                        "messageRetentionInDays": "[variables('newEhubRetentionDays')]",
+                        "partitionCount": "[variables('newEhubPartitionCount')]"
                     },
                     "dependsOn": [
                         "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNewNsName'))]"
