@@ -4,7 +4,7 @@
       "type": "eventHubTrigger",
       "name": "eventHubMessages",
       "direction": "in",
-      "path": "%APP_LOG_EHUB_NAME%",
+      "eventHubName": "%APP_LOG_EHUB_NAME%",
       "connection": "APP_LOG_EHUB_CONNECTION",
       "cardinality": "many",
       "consumerGroup": "%APP_LOG_EHUB_CONSUMER_GROUP%"

@@ -10,7 +10,10 @@
             }
         }
     },
-    "tracing": {
-        "consoleLevel": "verbose"
+    "logging": {
+        "logLevel": {
+            "default": "Information"
+        }
     }
-}  
+}
+
