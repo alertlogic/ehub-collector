@@ -119,7 +119,7 @@
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~1"
+                            "value": "~2"
                         },
                         {
                             "name": "SCM_USE_FUNCPACK",
@@ -139,7 +139,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "6.5.0"
+                            "value": "10.14.1"
                         },
                         {
                             "name": "APP_SUBSCRIPTION_ID",
