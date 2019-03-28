@@ -139,7 +139,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "8.11.1"
+                            "value": "10.14.1"
                         },
                         {
                             "name": "APP_SUBSCRIPTION_ID",
