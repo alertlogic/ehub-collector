@@ -10,79 +10,64 @@
  * @end
  * ----------------------------------------------------------------------------
  */
- 
-const async = require('async');
-const azure = require('azure');
 
+const AlAzureDlBlob = require('al-azure-collector-js').AlAzureDlBlob;
 const ehubCollector = require('../common/ehub_collector');
 const ehubGeneralFormat = require('../EHubGeneral/format').logRecord;
-
-const CONCURRENT_BLOB_PROCESS_NUM = 20;
 
 function getCollectorFunName(blobName) {
     return blobName.split('/')[1];
 }
 
-var collectorProcessError = function(context, err, messages) {
+const processErrorFun = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     var skipped = messages.records ? messages.records.length : messages.length;
     return skipped;
 };
 
-function processDLBlob(blobService, context, blob, callback) {
-    context.log.verbose('Processing blob: ', blob.name);
-    var collectorFormatFun;
-    
+function processBlob(context, blob, dlblobText, callback) {
+    var formatFun;
     switch(getCollectorFunName(blob.name)) {
         case 'ehubgeneral':
-            collectorFormatFun =  ehubGeneralFormat;
+            formatFun =  ehubGeneralFormat;
             break;
         default:
-            collectorFormatFun =  ehubGeneralFormat;
+            formatFun =  ehubGeneralFormat;
             break;
     }
     
-    async.waterfall([
-        function(callback) {
-            return blobService.getBlobToText(process.env.APP_DL_CONTAINER_NAME, blob.name, callback);
-        },
-        function(blobData, blobReq, blobResp, callback) {
-            try {
-                return ehubCollector(context, JSON.parse(blobData), collectorFormatFun, collectorProcessError, callback);
-            } catch (ex) {
-                return callback(ex);
-            }
-        },
-        function(result, callback) {
-            if (result.skipped === 0) {
-                return blobService.deleteBlob(process.env.APP_DL_CONTAINER_NAME, blob.name, callback);
+    try {
+        ehubCollector(context, JSON.parse(dlblobText), formatFun, processErrorFun, function(error, result) {
+            if (result.skipped) {
+                return callback(`Unprocessed records: ${result.skipped}`);
             } else {
-                return callback(null, result);
+                return callback(error);
             }
-        }
-    ], callback);
+        });
+    } catch (ex) {
+        return callback(ex);
+    }
 }
 
 module.exports = function (context, AlertlogicDLBlobTimer) {
-    const blobService = azure.createBlobService(process.env.AzureWebJobsStorage);
-    const options = {
-        maxResults: parseInt(process.env.DL_BLOB_PAGE_SIZE)
-    };
-    blobService.listBlobsSegmentedWithPrefix(
-        process.env.APP_DL_CONTAINER_NAME,
-        process.env.WEBSITE_SITE_NAME,
-        null, options,
-        function(listErr, data) {
-            if (listErr) {
-                context.done(listErr);
+    var dlblob = new AlAzureDlBlob(context, processBlob);
+    dlblob.processDlBlobs(AlertlogicDLBlobTimer, function(error, result) {
+        if (!error) {
+            var processingErrors = result.filter(function(item) {
+                if (item.error) {
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            if (processingErrors.length > 0) {
+                context.done(processingErrors);
             } else {
-                context.log.verbose('Listed blobs: ', data.entries.length);
-                async.eachLimit(data.entries, CONCURRENT_BLOB_PROCESS_NUM, function(blob, callback) {
-                    return processDLBlob(blobService, context, blob, callback);
-                }, function(processErr) {
-                    context.done(processErr);
-                });
+                context.done();
             }
+        } else {
+            context.done(error);
+        }
     });
 };
 

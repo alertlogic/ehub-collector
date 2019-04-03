@@ -75,6 +75,33 @@ describe('Event hub DLBlob function unit tests.', function() {
             nock.activate();
         }
         processLogStub.resetHistory();
+        
+        
+        // Collection stats Azure mocks
+        nock('https://kktestdl.queue.core.windows.net:443', {'encodedQueryParams':true})
+        .head('/alertlogic-stats')
+        .query({'comp':'metadata'})
+        .times(100)
+        .reply(200, '', mock.statsQueueMetadataHeaders());
+        
+        nock('https://kktestdl.queue.core.windows.net:443', {'encodedQueryParams':true})
+        .get('/alertlogic-stats')
+        .query({'comp':'metadata'})
+        .times(100)
+        .reply(200, '', mock.statsQueueMetadataHeaders());
+        
+        nock('https://kktestdl.queue.core.windows.net:443', {"encodedQueryParams":true})
+        .get('/alertlogic-stats/messages')
+        .query(true)
+        .times(100)
+        .reply(200, mock.statsMessage);
+
+        nock('https://kktestdl.queue.core.windows.net:443', {"encodedQueryParams":true})
+        .delete(/alertlogic-stats\/messages.*/)
+        .query(true)
+        .times(100)
+        .reply(204,'');
+
     });
     
     afterEach(function() {
@@ -125,6 +152,7 @@ describe('Event hub DLBlob function unit tests.', function() {
             sinon.assert.callCount(processLogStub, 0);
             assert.equal(err.statusCode, 404);
             assert.equal(err.code, 'ContainerNotFound');
+            assert.equal(res, null);
             done();
         };
         dlblob(mock.context(cb), mock.timer);
@@ -152,13 +180,16 @@ describe('Event hub DLBlob function unit tests.', function() {
         // Delete blob
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl.*/)
-        .times(5)
+        .times(1)
         .reply(202);
         
-        var cb = function(err, res) {
+        var cb = function(err) {
+            err.every(function(res) {
+                assert.equal(res.error.code, 'ContainerNotFound');
+                assert.equal(res.error.statusCode, 404);
+            });
+            assert.equal(err.length, 5);
             sinon.assert.callCount(processLogStub, 1);
-            assert.equal(err.statusCode, 404);
-            assert.equal(err.code, 'ContainerNotFound');
             done();
         };
         dlblob(mock.context(cb), mock.timer);
@@ -184,10 +215,13 @@ describe('Event hub DLBlob function unit tests.', function() {
         .times(6)
         .reply(404, mock.CONTAINER_NOT_FOUND);
         
-        var cb = function(err, res) {
+        var cb = function(err) {
+            err.every(function(res) {
+                assert.equal(res.error.code, 'ContainerNotFound');
+                assert.equal(res.error.statusCode, 404);
+            });
+            assert.equal(err.length, 6);
             sinon.assert.callCount(processLogStub, 6);
-            assert.equal(err.statusCode, 404);
-            assert.equal(err.code, 'ContainerNotFound');
             done();
         };
         dlblob(mock.context(cb), mock.timer);

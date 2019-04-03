@@ -30,7 +30,9 @@ process.env.APP_DL_CONTAINER_NAME = 'alertlogic-dl';
 
 var context = function(done) {
     return {
-        invocationId: 'invocationID',
+        executionContext: {
+            invocationId: 'invocation-id',
+        },
         bindings: {
         },
         log: {
@@ -484,6 +486,27 @@ const EHUB_STATS_RESP = {
         "cost": 0
       };
 
+var statsQueueMetadataHeaders = function(approxNumOfMessages = '0') {
+    return [ 'Cache-Control',
+        'no-cache',
+        'Content-Length',
+        '0',
+        'Server',
+        'Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0',
+        'x-ms-request-id',
+        '998e5a8b-6003-00b8-0bd6-dfe919000000',
+        'x-ms-version',
+        '2018-03-28',
+        'x-ms-approximate-messages-count',
+        approxNumOfMessages,
+        'Date',
+        'Thu, 21 Mar 2019 11:09:45 GMT' ];
+};
+
+// Contains 10 bytes and 15 events
+const statsMessage = "﻿<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>3b6915a7-373f-42ae-b40c-2ab8d49bce29</MessageId><InsertionTime>Thu, 21 Mar 2019 11:09:45 GMT</InsertionTime><ExpirationTime>Thu, 28 Mar 2019 11:09:45 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAo1dBStff1AE=</PopReceipt><TimeNextVisible>Thu, 21 Mar 2019 11:14:45 GMT</TimeNextVisible><DequeueCount>1</DequeueCount><MessageText>{&amp;quot;invocationId&amp;quot;:&amp;quot;invocation-id&amp;quot;,&amp;quot;type&amp;quot;:1,&amp;quot;bytes&amp;quot;:10,&amp;quot;events&amp;quot;:15}</MessageText></QueueMessage></QueueMessagesList>";
+
+
 module.exports = {
     context: context,
     timer: timer,
@@ -500,5 +523,7 @@ module.exports = {
     LIST_CONTAINER_BLOBS: LIST_CONTAINER_BLOBS,
     GET_BLOB_CONTENT_TEXT: GET_BLOB_CONTENT_TEXT,
     CONTAINER_NOT_FOUND: CONTAINER_NOT_FOUND,
-    EHUB_STATS_RESP: EHUB_STATS_RESP
+    EHUB_STATS_RESP: EHUB_STATS_RESP,
+    statsQueueMetadataHeaders: statsQueueMetadataHeaders,
+    statsMessage: statsMessage
 };
