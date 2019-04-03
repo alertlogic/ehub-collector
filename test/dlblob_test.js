@@ -180,7 +180,7 @@ describe('Event hub DLBlob function unit tests.', function() {
         // Delete blob
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl.*/)
-        .times(5)
+        .times(1)
         .reply(202);
         
         var cb = function(err) {
