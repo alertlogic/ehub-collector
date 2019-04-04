@@ -2,7 +2,7 @@
   "name": "ehub-collector",
   "version": "1.1.0",
   "dependencies": {
-    "al-azure-collector-js": "git://github.com/alertlogic/al-azure-collector-js#master",
+    "al-azure-collector-js": "git://github.com/alertlogic/al-azure-collector-js#msi",
     "async": "^2.6.1",
     "moment": "^2.24.0"
   },

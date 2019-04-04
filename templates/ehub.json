@@ -5,8 +5,11 @@
         "Application Name": {
             "type": "String"
         },
-        "Storage Name": {
-            "type": "String"
+        "Storage Account Name": {
+            "type": "String",
+            "metadata": {
+                "description": "Note: Storage Account Name should be different from Application Name."
+            }
         },
         "Alert Logic Access Key ID": {
             "type": "String"
@@ -28,15 +31,6 @@
             "allowedValues": [
                 "default"
             ]
-        },
-        "Service Principal ID": {
-            "type": "String"
-        },
-        "App Client ID": {
-            "type": "String"
-        },
-        "App Client Secret": {
-            "type": "SecureString"
         },
         "Event Hub Resource Group": {
             "type": "String",
@@ -79,7 +73,6 @@
         "resourceGroupName": "[resourceGroup().name]",
         "resourceGroupId": "[resourceGroup().id]",
         "contribRoleAssignmentName": "[guid(uniqueString( variables('resourceGroupId'), deployment().name ))]",
-        "readerRoleAssignmentName": "[guid(parameters('Service Principal ID'), deployment().name)]",
         "subscriptionId": "[subscription().subscriptionId]",
         "tenantId": "[subscription().tenantId]",
         "contributorRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
@@ -100,22 +93,25 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Web/sites",
+            "type": "Microsoft.Web/Sites",
             "kind": "functionapp",
             "name": "[parameters('Application Name')]",
-            "apiVersion": "2016-03-01",
+            "apiVersion": "2018-02-01",
             "location": "[variables('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
                 "name": "[parameters('Application Name')]",
                 "siteConfig": {
                     "appSettings": [
                         {
                             "name": "AzureWebJobsDashboard",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name')), '2015-06-15').key1)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Account Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name')), '2015-06-15').key1)]"
                         },
                         {
                             "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name')), '2015-06-15').key1)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Account Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name')), '2015-06-15').key1)]"
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -131,7 +127,7 @@
                         },
                         {
                             "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name')), '2015-06-15').key1)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Account Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name')), '2015-06-15').key1)]"
                         },
                         {
                             "name": "WEBSITE_CONTENTSHARE",
@@ -140,59 +136,9 @@
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "10.14.1"
-                        },
-                        {
-                            "name": "APP_SUBSCRIPTION_ID",
-                            "value": "[variables('subscriptionId')]"
-                        },
-                        {
-                            "name": "APP_RESOURCE_GROUP",
-                            "value": "[variables('resourceGroupName')]"
-                        },
-                        {
-                            "name": "APP_TENANT_ID",
-                            "value": "[variables('tenantId')]"
-                        },
-                        {
-                            "name": "APP_LOG_EHUB_CONNECTION",
-                            "value": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNewNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString, parameters('Event Hub Connection String'))]"
-                        },
-                        {
-                            "name": "APP_LOG_EHUB_NAME",
-                            "value": "[variables('ehubName')]"
-                        },
-                        {
-                            "name": "APP_LOG_EHUB_CONSUMER_GROUP",
-                            "value": "[variables('ehubConsumerGroup')]"
-                        },
-                        {
-                            "name": "APP_LOG_EHUB_RESOURCE_GROUP",
-                            "value": "[variables('ehubResourceGroup')]"
-                        },
-                        {
-                            "name": "APP_DL_CONTAINER_NAME",
-                            "value": "[variables('dlContainerName')]"
-                        },
-                        {
-                            "name": "DL_BLOB_PAGE_SIZE",
-                            "value": "100"
-                        },
-                        {
-                            "name": "APP_STATS_QUEUE_NAME",
-                            "value": "[variables('statsQueueName')]"
                         }
                     ],
                     "connectionStrings": [
-                        {
-                            "name": "APP_CLIENT_ID",
-                            "type": "Custom",
-                            "connectionString": "[parameters('App Client ID')]"
-                        },
-                        {
-                            "name": "APP_CLIENT_SECRET",
-                            "type": "Custom",
-                            "connectionString": "[parameters('App Client Secret')]"
-                        },
                         {
                             "name": "APP_AL_ACCESS_KEY_ID",
                             "type": "Custom",
@@ -218,25 +164,57 @@
                 "clientAffinityEnabled": false
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Name'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name'))]"
             ],
-            "resources": [{
-                "apiVersion": "2015-08-01",
-                "name": "web",
-                "type": "sourcecontrols",
-                "dependsOn": [
-                    "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
-                ],
-                "properties": {
-                    "RepoUrl": "[variables('repo')]",
-                    "branch": "[variables('branch')]",
-                    "IsManualIntegration": true
+            "resources": [
+                {
+                    "apiVersion": "2018-02-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "[variables('repo')]",
+                        "branch": "[variables('branch')]",
+                        "IsManualIntegration": true
+                    }
+                },
+                {
+                    "apiVersion": "2018-02-01",
+                    "name": "appsettings",
+                    "type": "config",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]",
+                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name'))]"
+                    ],
+                    "properties": {
+                        "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Account Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name')), '2015-06-15').key1)]",
+                        "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Account Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name')), '2015-06-15').key1)]",
+                        "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('Storage Account Name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('Storage Account Name')), '2015-06-15').key1)]",
+                        "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('Application Name')), '9546')]",
+                        "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
+                        "FUNCTIONS_EXTENSION_VERSION": "~2",
+                        "SCM_USE_FUNCPACK": "1",
+                        "SCM_POST_DEPLOYMENT_ACTIONS_PATH": "PostDeploymentActions",
+                        "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
+                        "APP_RESOURCE_GROUP": "[variables('resourceGroupName')]",
+                        "APP_TENANT_ID": "[variables('tenantId')]",
+                        "APP_LOG_EHUB_CONNECTION": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNewNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString, parameters('Event Hub Connection String'))]",
+                        "APP_LOG_EHUB_NAME": "[variables('ehubName')]",
+                        "APP_LOG_EHUB_CONSUMER_GROUP": "[variables('ehubConsumerGroup')]",
+                        "APP_LOG_EHUB_RESOURCE_GROUP": "[variables('ehubResourceGroup')]",
+                        "APP_DL_CONTAINER_NAME": "[variables('dlContainerName')]",
+                        "DL_BLOB_PAGE_SIZE": "100",
+                        "APP_STATS_QUEUE_NAME": "[variables('statsQueueName')]",
+                        "APP_PRINCIPAL_ID": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]"
+                    }
                 }
-            }]
+            ]
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "name": "[parameters('Storage Name')]",
+            "name": "[parameters('Storage Account Name')]",
             "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
@@ -249,7 +227,7 @@
                     "apiVersion": "2018-07-01",
                     "name": "[concat('default/', variables('dlContainerName'))]",
                     "dependsOn": [
-                        "[parameters('Storage Name')]"
+                        "[parameters('Storage Account Name')]"
                     ],
                     "properties": {
                         "publicAccess": "None"
@@ -262,9 +240,12 @@
             "type": "Microsoft.Authorization/roleAssignments",
             "name": "[variables('contribRoleAssignmentName')]",
             "apiVersion": "2015-07-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
+            ],
             "properties": {
                 "roleDefinitionId": "[variables('contributorRole')]",
-                "principalId": "[parameters('Service Principal ID')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
                 "scope": "[variables('resourceGroupId')]"
             }
         },
@@ -310,6 +291,9 @@
             "name": "nestedTemplate",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[parameters('Event Hub Resource Group')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
+            ],
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -320,12 +304,12 @@
                     "resources": [
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
-                            "name": "[variables('readerRoleAssignmentName')]",
+                            "name": "[guid(reference(parameters('Application Name'), '2016-08-01', 'Full').identity.principalId, deployment().name)]",
                             "apiVersion": "2017-09-01",
                             "properties": {
                                 "roleDefinitionId": "[variables('readerRole')]",
-                                "principalId": "[parameters('Service Principal ID')]",
-                                "scope": "[concat(variables('subscriptionId'), '/resourceGroups/', parameters('Event Hub Resource Group'))]"
+                                "principalId": "[reference(parameters('Application Name'), '2016-08-01', 'Full').identity.principalId]",
+                                "scope": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('Event Hub Resource Group'))]"
                             }
                         }
                     ]
