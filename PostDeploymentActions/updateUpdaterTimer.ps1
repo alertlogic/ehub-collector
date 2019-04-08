@@ -1,4 +1,3 @@
-$randH = Get-Random -minimum 0 -maximum 11
 $randM = Get-Random -minimum 0 -maximum 59
 $randS = Get-Random -minimum 0 -maximum 59
 $new_schedule = "$randS $randM * * * *"

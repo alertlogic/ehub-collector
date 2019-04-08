@@ -104,7 +104,6 @@ Click the button below to start deployment.
 
 1. To start a deployment, provide the following required template parameters, and then click the `Purchase` button:
    - **Application Name** - Type the name of the log source to appear in the Alert Logic console.
-   - **Storage Account Name** - Type any storage account name (that does not currently exist).
    - **Alert Logic Access Key ID** - Type the `access_key_id` you created above.
    - **Alert Logic Secret Key** - Type the `secret_key` you created above.
    - **Alert Logic API endpoint** - Leave the default value (api.global-services.global.alertlogic.com).
