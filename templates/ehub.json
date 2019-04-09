@@ -69,7 +69,7 @@
         "contribRoleAssignmentName": "[guid(uniqueString( variables('resourceGroupId'), deployment().name ))]",
         "subscriptionId": "[subscription().subscriptionId]",
         "tenantId": "[subscription().tenantId]",
-        "webAppStorageAccountName": "[concat(take(parameters('Application Name'), 17), 'storage')]",
+        "webAppStorageAccountName": "[take(concat('alertlogicstorage', uniqueString(parameters('Application Name'))), 24)]",
         "webAppSourceControlName": "web",
         "contributorRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
         "readerRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
@@ -215,6 +215,9 @@
             "location": "[variables('location')]",
             "properties": {
                 "accountType": "Standard_LRS"
+            },
+            "tags": {
+                "AlertLogicCollector": "[parameters('Application Name')]"
             },
             "dependsOn": [],
             "resources": [
