@@ -15,11 +15,11 @@ To perform the setup required to grant Alert Logic permission to access Events H
 
 ## Security Permissions for the Collector application
 
-A collector function application uses [Managed Service Identity](https://docs.microsoft.com/en-us/azure/app-service/overview-managed-identity) feature for for assigning and managing permissions granted to the application.
-By default event hub collector [template](template/ehub.json) grants the following [roles/permissions](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview#role-definition) to the application service principal:
+A collector function application uses [Managed Service Identity](https://docs.microsoft.com/en-us/azure/app-service/overview-managed-identity) feature for assigning and managing permissions granted to the application.
+By default, the event hub collector [template](template/ehub.json) grants the following [roles/permissions](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview#role-definition) to the application service principal:
 
    - [Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor) role is granted to the entire resource group where a collector is deployed.
-   - In case of data collection from existing event hub a [Reader](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#reader) role is granted to the target resource group where existing event hub is located.
+   - In case of data collection from an existing event hub, a [Reader](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#reader) role is granted to the target resource group where existing event hub is located.
 
 
 ## Create an Alert Logic Access Key
@@ -85,15 +85,6 @@ Click the button below to start deployment.
    - **Alert Logic Secret Key** - Type the `secret_key` you created above.
    - **Alert Logic API endpoint** - Leave the default value (api.global-services.global.alertlogic.com).
    - **Alert Logic Data Residency** - Leave the value as "default".
-   - **Service Principal ID** - Type the `Object ID` of the application that created the subscription. 
-   
-   **Note:** You can obtain this value from _Azure_ > _AD_ > _App registrations_ > _Your app name_ > Link under _Managed application in local directory_ > _Properties_ > _Object ID_.
-   
-   - **App Client ID** - Type the GUID of your application that created the subscription. 
-   
-   **Note:** You can obtain this value from _Azure_ > _AD_ > _App registrations_ > _Your app name_
-
-   - **App Client Secret** - Type the secret key of your application (available from from _App Registrations_).
 
    **Note:** The following template parameters are optional and need to be entered only if reusing an existing Event Hub:
 
