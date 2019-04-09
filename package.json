@@ -4,7 +4,8 @@
   "dependencies": {
     "al-azure-collector-js": "git://github.com/alertlogic/al-azure-collector-js#master",
     "async": "^2.6.1",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "parse-key-value": "^1.0.0"
   },
   "scripts": {
     "local-master": "node ./local_dev/master_local_dev.js",

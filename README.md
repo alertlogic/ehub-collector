@@ -13,37 +13,14 @@ To perform the setup required to grant Alert Logic permission to access Events H
 * A Microsoft Azure account with administrative privileges
 * An Alert Logic user account with administrative privileges
 
-## Register a new Azure web application
+## Security Permissions for the Collector application
 
-In the Azure portal, you must register a new web application. Any application that wants to use the capabilities of Azure Active Directory must first be registered in an Azure AD tenant. This registration process involves giving Azure AD details about your application, such as the URL where it is located, the URL to send replies after a user is authenticated, and the URI that identifies the app.
+A collector function application uses [Managed Service Identity](https://docs.microsoft.com/en-us/azure/app-service/overview-managed-identity) feature for assigning and managing permissions granted to the application.
+By default, the event hub collector [template](template/ehub.json) grants the following [roles/permissions](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview#role-definition) to the application service principal:
 
-**To register an Azure web application to collect logs:**
+   - [Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor) role is granted to the entire resource group where a collector is deployed.
+   - In case of data collection from an existing event hub, a [Reader](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#reader) role is granted to the target resource group where existing event hub is located.
 
-1. Log into the [Azure portal](https://portal.azure.com) as an Active Directory tenant administrator.
-1. On the left side panel click **Azure Active Directory**, and then select **App Registrations**.
-1. Click **+ New application registration**, and then provide the following configuration parameters: 
-    * **Name** - Type a name for the new application (For example `alehubcollector`).
-    * **Web app/ API** - Select `Application type`.
-    * **Sign-on URL** - Type a URL for the application (for example `http://alehubcollector.com`). 
-    
-    **Note:** This information is not used anywhere within your subscription.
-    
-1. Click **Create**.
-1. From the **All applications** tab on the App registration (Preview) blade, select **All apps**, and then click the application name you created. 
-1. Note the Application ID (such as `a261478c-84fb-42f9-84c2-de050a4babe3`).
-
-## Set up the required Active Directory security permissions
-
-1. On the **Settings** panel for the application, select **Keys**.
-1. In the **Description** field, type a key description, and then set **Duration** to **Never expires**. 
-1. Click **Save**.
-
-   **Note:** Save the key value, which you need during ARM template deployment.
-
-1. From the Registered App blade, click the link under **Managed application in local directory**, and then click **Properties**.
-1. Get the `Service Principal ID` (labeled as "Object ID" on the Properties page) associated with the application.
-
-   **Caution:** Use the Object ID on the Properties page. Do not use Object ID found under the Registered App view or under Settings.
 
 ## Create an Alert Logic Access Key
 <!--Not sure if AL capitalizes "Access Key," so I'm leaving it as-is until we have a style determination.-->
@@ -104,20 +81,10 @@ Click the button below to start deployment.
 
 1. To start a deployment, provide the following required template parameters, and then click the `Purchase` button:
    - **Application Name** - Type the name of the log source to appear in the Alert Logic console.
-   - **Storage Name** - Type any storage account name (that does not currently exist).
    - **Alert Logic Access Key ID** - Type the `access_key_id` you created above.
    - **Alert Logic Secret Key** - Type the `secret_key` you created above.
    - **Alert Logic API endpoint** - Leave the default value (api.global-services.global.alertlogic.com).
    - **Alert Logic Data Residency** - Leave the value as "default".
-   - **Service Principal ID** - Type the `Object ID` of the application that created the subscription. 
-   
-   **Note:** You can obtain this value from _Azure_ > _AD_ > _App registrations_ > _Your app name_ > Link under _Managed application in local directory_ > _Properties_ > _Object ID_.
-   
-   - **App Client ID** - Type the GUID of your application that created the subscription. 
-   
-   **Note:** You can obtain this value from _Azure_ > _AD_ > _App registrations_ > _Your app name_
-
-   - **App Client Secret** - Type the secret key of your application (available from from _App Registrations_).
 
    **Note:** The following template parameters are optional and need to be entered only if reusing an existing Event Hub:
 

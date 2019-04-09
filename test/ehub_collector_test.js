@@ -8,6 +8,7 @@
  * -----------------------------------------------------------------------------
  */
  
+const assert = require('assert');
 const sinon = require('sinon');
 const nock = require('nock');
 const alcollector = require('al-collector-js');
@@ -51,6 +52,7 @@ describe('Common Event hub collector unit tests.', function() {
         process.env.APP_TENANT_ID = 'tenant-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_ID = 'client-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_SECRET = 'client-secret';
+        process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=kktestdl;AccountKey=S0meKey+';
         
     });
     
@@ -63,6 +65,24 @@ describe('Common Event hub collector unit tests.', function() {
         if (!nock.isActive()) {
             nock.activate();
         }
+        // Collection stats Azure mocks
+        nock('https://kktestdl.queue.core.windows.net:443', {'encodedQueryParams':true})
+        .head('/alertlogic-stats')
+        .query({'comp':'metadata'})
+        .times(100)
+        .reply(200, '', mock.statsQueueMetadataHeaders());
+        
+        nock('https://kktestdl.queue.core.windows.net:443', {'encodedQueryParams':true})
+        .get('/alertlogic-stats')
+        .query({'comp':'metadata'})
+        .times(100)
+        .reply(200, '');
+        
+        nock('https://kktestdl.queue.core.windows.net:443', {'encodedQueryParams':true})
+        .post('/alertlogic-stats/messages' )
+        .query(true)
+        .times(100)
+        .reply(201, '');
     });
     
     afterEach(function() {
@@ -72,8 +92,8 @@ describe('Common Event hub collector unit tests.', function() {
     it('Simple OK check', function(done) {
         const testMessage = [{ records: [mock.SQL_AUDIT_LOG_RECORD]}];
         var ingestSendStub = sinon.stub(alcollector.IngestC.prototype, 'sendAicspmsgs').resolves({});
-        
         ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
+            assert.equal(err, null);
             ingestSendStub.restore();
             sinon.assert.callCount(ingestSendStub, 1);
             done();
