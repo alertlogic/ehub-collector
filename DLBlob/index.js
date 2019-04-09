@@ -11,7 +11,7 @@
  * ----------------------------------------------------------------------------
  */
 
-const AlAzureDlBlob = require('al-azure-collector-js').AlAzureDlBlob;
+const AlAzureDlBlob = require('@alertlogic/al-azure-collector-js').AlAzureDlBlob;
 const ehubCollector = require('../common/ehub_collector');
 const ehubGeneralFormat = require('../EHubGeneral/format').logRecord;
 

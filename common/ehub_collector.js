@@ -10,7 +10,7 @@
 
 const async = require('async');
 const pkg = require('../package.json');
-const AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
+const AlAzureCollector = require('@alertlogic/al-azure-collector-js').AlAzureCollector;
 
 const defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);

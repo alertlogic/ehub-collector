@@ -11,10 +11,10 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const nock = require('nock');
-const alcollector = require('al-collector-js');
+const alcollector = require('@alertlogic/al-collector-js');
 
 const mock = require('./mock');
-const AlAzureMaster = require('al-azure-collector-js').AlAzureMaster;
+const AlAzureMaster = require('@alertlogic/al-azure-collector-js').AlAzureMaster;
 const ehubHealthCheck = require('../Master/healthcheck');
 
 describe('Event hub health check unit tests.', function() {

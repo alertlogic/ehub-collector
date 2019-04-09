@@ -13,7 +13,7 @@ const async = require('async');
 const parse = require('parse-key-value');
 
 const pkg = require('../package.json');
-const AlAzureMaster = require('al-azure-collector-js').AlAzureMaster;
+const AlAzureMaster = require('@alertlogic/al-azure-collector-js').AlAzureMaster;
 const healthcheck = require('./healthcheck');
 
 const APP_FUNCTIONS = ['Master', 'Updater', 'EHubGeneral', 'DLBlob'];

@@ -11,10 +11,10 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const nock = require('nock');
-const alcollector = require('al-collector-js');
+const alcollector = require('@alertlogic/al-collector-js');
 
 const mock = require('./mock');
-var AlAzureCollector = require('al-azure-collector-js').AlAzureCollector;
+var AlAzureCollector = require('@alertlogic/al-azure-collector-js').AlAzureCollector;
 const dlblob = require('../DLBlob/index');
 const ehubGeneralFormat = require('../EHubGeneral/format');
 
