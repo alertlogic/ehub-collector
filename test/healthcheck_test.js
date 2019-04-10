@@ -11,7 +11,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const nock = require('nock');
-const alcollector = require('@alertlogic/al-collector-js');
 
 const mock = require('./mock');
 const AlAzureMaster = require('@alertlogic/al-azure-collector-js').AlAzureMaster;
@@ -24,13 +23,6 @@ describe('Event hub health check unit tests.', function() {
         if (!nock.isActive()) {
             nock.activate();
         }
-        // Mock Alert Logic HTTP calls
-        fakeAuth = sinon.stub(alcollector.AimsC.prototype, 'authenticate').callsFake(
-            function fakeFn() {
-                return new Promise(function(resolve, reject) {
-                    resolve(mock.getAuthResp());
-                });
-        });
         
         // Expected Alert Logic parameters
         process.env.WEBSITE_HOSTNAME = 'app-name';
@@ -55,7 +47,6 @@ describe('Event hub health check unit tests.', function() {
     
     after(function() {
         nock.restore();
-        fakeAuth.restore();
     });
 
     beforeEach(function() {

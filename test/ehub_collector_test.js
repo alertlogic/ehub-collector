@@ -11,7 +11,6 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const nock = require('nock');
-const alcollector = require('@alertlogic/al-collector-js');
 
 const mock = require('./mock');
 const AlAzureCollector = require('@alertlogic/al-azure-collector-js').AlAzureCollector;
@@ -25,13 +24,6 @@ describe('Common Event hub collector unit tests.', function() {
         if (!nock.isActive()) {
             nock.activate();
         }
-        // Mock Alert Logic HTTP calls
-        fakeAuth = sinon.stub(alcollector.AimsC.prototype, 'authenticate').callsFake(
-            function fakeFn() {
-                return new Promise(function(resolve, reject) {
-                    resolve(mock.getAuthResp());
-                });
-        });
         
         // Expected Alert Logic parameters
         process.env.WEBSITE_HOSTNAME = 'app-name';
@@ -58,7 +50,6 @@ describe('Common Event hub collector unit tests.', function() {
     
     after(function() {
         nock.restore();
-        fakeAuth.restore();
     });
 
     beforeEach(function() {
@@ -91,11 +82,14 @@ describe('Common Event hub collector unit tests.', function() {
     
     it('Simple OK check', function(done) {
         const testMessage = [{ records: [mock.SQL_AUDIT_LOG_RECORD]}];
-        var ingestSendStub = sinon.stub(alcollector.IngestC.prototype, 'sendAicspmsgs').resolves({});
+        var processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
+                function fakeFn(messages, formatFun, hostmetaElems, callback) {
+                    return callback(null);
+                });
         ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
             assert.equal(err, null);
-            ingestSendStub.restore();
-            sinon.assert.callCount(ingestSendStub, 1);
+            processLogStub.restore();
+            sinon.assert.callCount(processLogStub, 1);
             done();
         });
     });
@@ -104,13 +98,13 @@ describe('Common Event hub collector unit tests.', function() {
         process.env.COLLECTOR_HOST_ID = 'host-id';
         process.env.COLLECTOR_SOURCE_ID = 'source-id';
         var processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
-                function fakeFn(messages, formatFun, hostmetaElems, callback) {
-                    if (messages[0].operationName === 'Good batch') {
-                        return callback(null);
-                    } else {
-                        return callback('Test processing error');
-                    }
-                });
+            function fakeFn(messages, formatFun, hostmetaElems, callback) {
+                if (messages[0].operationName === 'Good batch') {
+                    return callback(null);
+                } else {
+                    return callback('Test processing error');
+                }
+            });
         const inputRecords = [
             {records: [{operationName: 'Good batch'}, {some: 'message 1'}]},
             {records: [{operationName: 'Bad batch'}, {bad: 'mAssage'}]},
