@@ -102,6 +102,10 @@
                 "siteConfig": {
                     "appSettings": [
                         {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "node"
+                        },
+                        {
                             "name": "AzureWebJobsDashboard",
                             "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]"
                         },
@@ -185,6 +189,7 @@
                         "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('Application Name'), variables('webAppSourceControlName'))]"
                     ],
                     "properties": {
+                        "FUNCTIONS_WORKER_RUNTIME": "node",
                         "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",

@@ -10,7 +10,7 @@
  * -----------------------------------------------------------------------------
  */
 
-const AlAzureUpdater = require('al-azure-collector-js').AlAzureUpdater;
+const AlAzureUpdater = require('@alertlogic/al-azure-collector-js').AlAzureUpdater;
 
 
 module.exports = function (context, AlertlogicUpdaterTimer) {
