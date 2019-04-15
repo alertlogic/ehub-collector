@@ -69,7 +69,7 @@ You can use either the Microsoft Azure portal or a command line to deploy the te
 
 **Note:** The steps in this section require an active Azure subscription. To verify your Azure subscription, visit [Azure subscriptions blade](https://portal.azure.com/#blade/Microsoft_Azure_Billing/SubscriptionsBlade).
 
-If your organization uses multiple Active Directory tenants, log into the same tenant used to [Register a New Azure Web Application](#register-a-new-azure-web-application).
+If your organization uses multiple Active Directory tenants, log into the correct tenant where a collector's Managed Service Identity need to be registered.
 
 The ARM template can be used to configure a new Azure Event Hub or have the Alert Logic collector reuse an existing one.
 
@@ -124,7 +124,6 @@ If you want to deploy the template through the Azure command line interface (CLI
     ``` az group create --name <new-resource-group-name> --location "Central US"  ```
 
 1. In the Azure portal, access the `Resource groups` blade, and then select the resource group you created.
-1. Select `Access Control (IAM)`, and add `Website Contributor` role to the Active Directory application identity you created above.
 1. In the command line, type the following command to deploy a template, and enter the required parameters when prompted.
    
    ```
@@ -144,7 +143,7 @@ If you want to deploy the template through the Azure command line interface (CLI
 
 # Integrating With Azure Event Hubs
 
-The following links contain instructions to help you integrate different Azure services with Event Hubs. Use **alertlogic-log** as a target event hub name if available during configuration.
+The following links contain instructions to help you integrate different Azure services with Event Hubs.
 
 * [Azure Active Directory Logs](https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub#stream-logs-to-an-event-hub)
 * [Azure Diagnostic Logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-logs-stream-event-hubs#stream-diagnostic-logs-using-the-portal)
@@ -154,7 +153,7 @@ The following links contain instructions to help you integrate different Azure s
 
 # How the collector works
 
-The [template](https://github.com/alertlogic/ehub-collector/blob/master/templates/ehub.json) creates an `AlertLogicIngest-<region-name>-<unique-string>` Event Hubs namespace where the "alertlogic-log" event hub is created. The Alert Logic collector listens to the Azure event hub and forwards incoming events to the Alert Logic Ingestion service. If event collection fails, Alert Logic stores the data in the `alertlogic-dl` Azure Blob container located in the storage account you specified during template deployment. 
+The [template](https://github.com/alertlogic/ehub-collector/blob/master/templates/ehub.json) creates an `AlertLogicIngest-<region-name>-<unique-string>` Event Hubs namespace where the "insights-operational-logs" event hub is created. The Alert Logic collector listens to the Azure event hub and forwards incoming events to the Alert Logic Ingestion service. If event collection fails, Alert Logic stores the data in the `alertlogic-dl` Azure Blob container located in the storage account you specified during template deployment. 
 
 ## Master function
 
@@ -170,8 +169,8 @@ The `Updater` function is a timer triggered function that runs a deployment sync
 
 ## EHubGeneral function
 
-The `EHubGeneral` function listens to `alertlogic-log`, which is created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription). The `alertlogicloghub` event hub can be used for integration with logs such as [diagnostic logs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostic-logs-stream-event-hubs) or [Azure AD logs](https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub).
-Collected JSON objects are wrapped into the protobuf [structure](https://github.com/alertlogic/al-collector-js/blob/master/proto/common_proto.piqi.proto) and then forwarded to the Alert Logic Ingestion service.
+The `EHubGeneral` function listens to `insights-operational-logs`, which is created during [collector setup](#deploy-with-the-custom-arm-template-in-an-azure-subscription).
+Collected JSON objects are wrapped into the protobuf [structure](https://github.com/alertlogic/al-collector-js/blob/master/proto/common_proto.piqi.proto) and then forwarded to the Alert Logic Ingestion service. If processing failss the data is stored in `alertlogic-dl` container for further processing.
 
 ## DLBlob function
 
