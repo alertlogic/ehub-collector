@@ -43,7 +43,7 @@ const logRecord = function(msg) {
     };
     
     if (typeId) {
-        Object.assign(formattedMsg, {messageTypeId: typeId});
+        Object.assign(formattedMsg, {messageTypeId: `${typeId}`});
     }
     if (ts.usec) {
         Object.assign(formattedMsg, {messageTsUs: ts.usec});
