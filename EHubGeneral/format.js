@@ -37,7 +37,6 @@ const logRecord = function(msg) {
         messageTs: ts.sec,
         priority: 11,
         progName: 'EHubGeneral',
-        pid: undefined,
         message: JSON.stringify(msg),
         messageType: 'json/azure.ehub'
     };
