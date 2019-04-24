@@ -41,7 +41,7 @@ const logRecord = function(msg) {
         messageType: 'json/azure.ehub'
     };
     
-    if (typeId) {
+    if (typeId !== null && typeId !== undefined) {
         formattedMsg.messageTypeId = `${typeId}`;
     }
     if (ts.usec) {
