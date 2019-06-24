@@ -16,7 +16,7 @@ const defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     const skipped = messages.records ? messages.records.length : messages.length;
     if (context.bindings.dlBlob && context.bindings.dlBlob instanceof Array) {
-        context.bindings.dlBlob.append([messages]);
+        context.bindings.dlBlob.push(messages);
     } else {
         context.bindings.dlBlob = [messages];
     }
