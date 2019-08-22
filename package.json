@@ -3,7 +3,7 @@
   "version": "1.3.2",
   "dependencies": {
     "@alertlogic/al-azure-collector-js": "1.3.0",
-    "@alertlogic/al-collector-js": "JDragovichAlertLogic/al-collector-js#ingest-direct-mode",
+    "@alertlogic/al-collector-js": "1.3.2",
     "async": "2.6.1",
     "moment": "2.24.0",
     "parse-key-value": "1.0.0"
