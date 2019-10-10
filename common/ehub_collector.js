@@ -16,7 +16,7 @@ const defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     const skipped = messages.records ? messages.records.length : messages.length;
     // We're going to ignore 400s from ingest right now. Do not put them in the DLQ
-    if(err.statusCode === 400){
+    if(err.statusCode >= 400 && err.statusCode < 500){
         return skipped;
     }
     // Otherwise, we need to put them in the DLQ
