@@ -34,6 +34,7 @@ var context = function(done) {
             invocationId: 'invocation-id',
         },
         bindings: {
+            dlBlob: 'No blob records'
         },
         log: {
             error : function() {
