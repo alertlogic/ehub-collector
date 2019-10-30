@@ -2,8 +2,8 @@
   "name": "ehub-collector",
   "version": "1.3.2",
   "dependencies": {
-    "@alertlogic/al-azure-collector-js": "1.3.0",
-    "@alertlogic/al-collector-js": "https://github.com/JDragovichAlertLogic/al-azure-collector-js.git#sdk-refresh",
+    "@alertlogic/al-azure-collector-js": "https://github.com/JDragovichAlertLogic/al-azure-collector-js.git#sdk-refresh",
+    "@alertlogic/al-collector-js": "1.3.2",
     "async": "2.6.1",
     "moment": "2.24.0",
     "parse-key-value": "1.0.0"
