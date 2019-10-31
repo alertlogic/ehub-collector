@@ -119,7 +119,7 @@
                         },
                         {
                             "name": "SCM_USE_FUNCPACK",
-                            "value": "1"
+                            "value": "0"
                         },
                         {
                             "name": "SCM_POST_DEPLOYMENT_ACTIONS_PATH",
