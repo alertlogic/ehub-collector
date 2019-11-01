@@ -7,8 +7,8 @@
  * -----------------------------------------------------------------------------
  */
 
-const {MonitorManagementClient} = require('@azure/arm-monitor');
-const {EventHubManagementClient} = require('@azure/arm-eventhub');
+const {MonitorManagementClient} = require('azure-arm-monitor');
+const {EventHubManagementClient} = require('azure-arm-eventhub');
 const parse = require('parse-key-value');
 
 const DEFAULT_EHUB_FOR_LOG_NAME = 'alertlogic-log';
