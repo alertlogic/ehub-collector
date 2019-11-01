@@ -1,6 +1,6 @@
 {
   "name": "ehub-collector",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "dependencies": {
     "@alertlogic/al-azure-collector-js": "https://github.com/JDragovichAlertLogic/al-azure-collector-js.git#sdk-second-try",
     "@alertlogic/al-collector-js": "1.3.2",
