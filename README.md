@@ -121,12 +121,14 @@ If you want to deploy the template through the Azure command line interface (CLI
 
 **Note:** The example below creates a new resource group in the "Central US" location.
 
-    ``` az group create --name <new-resource-group-name> --location "Central US"  ```
+    ```
+    az group create --name <new-resource-group-name> --location "Central US"
+    ```
 
 1. In the Azure portal, access the `Resource groups` blade, and then select the resource group you created.
 1. In the command line, type the following command to deploy a template, and enter the required parameters when prompted.
    
-   ```
+    ```
     az group deployment create \
         --resource-group <new-resource-group-name> \
         --template-uri "https://raw.githubusercontent.com/alertlogic/ehub-collector/v1/templates/ehub.json"
