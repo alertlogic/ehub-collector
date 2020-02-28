@@ -16,7 +16,7 @@ To perform the setup required to grant Alert Logic permission to access Events H
 ## Security Permissions for the Collector application
 
 A collector function application uses [Managed Service Identity](https://docs.microsoft.com/en-us/azure/app-service/overview-managed-identity) feature for assigning and managing permissions granted to the application.
-By default, the event hub collector [template](template/ehub.json) grants the following [roles/permissions](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview#role-definition) to the application service principal:
+By default, the event hub collector [template](templates/ehub.json) grants the following [roles/permissions](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview#role-definition) to the application service principal:
 
    - [Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor) role is granted to the entire resource group where a collector is deployed.
    - In case of data collection from an existing event hub, a [Reader](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#reader) role is granted to the target resource group where existing event hub is located.
@@ -129,7 +129,7 @@ If you want to deploy the template through the Azure command line interface (CLI
    ```
     az group deployment create \
         --resource-group <new-resource-group-name> \
-        --template-uri "https://raw.githubusercontent.com/alertlogic/ehub-collector/master/templates/ehub.json"
+        --template-uri "https://raw.githubusercontent.com/alertlogic/ehub-collector/v1/templates/ehub.json"
     ```
 
 ## Verify the Installation
@@ -199,8 +199,8 @@ Please use the following [code style](https://github.com/airbnb/javascript) as m
 - `process.env.CUSTOMCONNSTR_APP_CLIENT_ID` - The GUID of your application that created the subscription.
 **Note** You can obtain this value from _Azure_ > _AD_ > _App registrations_ > _Your app name_
 - `process.env.CUSTOMCONNSTR_APP_CLIENT_SECRET` - The secret key of your application from _App Registrations_.
-- `process.env.CUSTOMCONNSTR_APP_CI_ACCESS_KEY_ID` - The access key returned from AIMs [above](#create_an_alert_logic_access_key).
-- `process.env.CUSTOMCONNSTR_APP_CI_SECRET_KEY`- The secret key returned from AIMs [above](#create_an_alert_logic_access_key).
+- `process.env.CUSTOMCONNSTR_APP_CI_ACCESS_KEY_ID` - The access key returned from AIMS [above](#create-an-alert-logic-access-key).
+- `process.env.CUSTOMCONNSTR_APP_CI_SECRET_KEY`- The secret key returned from AIMS [above](#create-an-alert-logic-access-key).
 
 
 # Useful Links
