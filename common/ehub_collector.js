@@ -14,7 +14,7 @@ const AlAzureCollector = require('@alertlogic/al-azure-collector-js').AlAzureCol
 
 const defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
-    const skipped = messages.records ? messages.records.length : messages.length;
+    const skipped = messages.length;
     // We're going to ignore 400s from ingest right now. Do not put them in the DLQ
     if(err.statusCode >= 400 && err.statusCode < 500){
         return skipped;
@@ -31,39 +31,31 @@ const defaultProcessError = function(context, err, messages) {
 module.exports = function (context, eventHubMessages, parseFun, processErrorFun, callback) {
     var processError = processErrorFun ? processErrorFun : defaultProcessError;
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
-    async.reduce(eventHubMessages, {processed: 0, skipped: 0},
-        function(acc, msgArray, callback) {
-            try {
-                collector.processLog(msgArray.records, parseFun, null,
-                    function(err) {
-                        if (err) {
-                            acc.skipped += processError(context, err, msgArray);
-                        } else {
-                            acc.processed += msgArray.records.length;
-                        }
-                        return callback(null, acc);
-                });
-            } catch (exception) {
-                acc.skipped += processError(context, exception, msgArray);
-                return callback(null, acc);
-            }
+    async.reduce(eventHubMessages, [],
+        function(acc, message, reduceCallback) {
+            return reduceCallback(null,[...acc, ...message.records]);
         },
         function(err, redResult) {
-            if (err) {
-                const skipped = processError(context, err, eventHubMessages);
-                context.log.error('Records skipped:', skipped);
-                return callback(err);
-            } else {
-                context.log.info('Processed:', redResult.processed);
-                if (redResult.skipped) {
-                    context.log.info('Records skipped:', redResult.skipped);
-                }
-                
+            try {
+                collector.processLog(redResult, parseFun, null,
+                    function(err) {
+                        if (err) {
+                            const skipped =  processError(context, err, redResult);
+                            context.log.error(`Error while processing records. Skipped ${skipped} Records`);
+                            return callback(err);
+                        } else {
+                            const processed = redResult.length;
+                            context.log.info(`Processed: ${processed}`);
+                        }
+                        return callback(null, { processed: redResult, skipped: 0 });
+                });
+            } catch (exception) {
+                const skipped = processError(context, exception, redResult);
+                context.log.error(`Error while processing records. Skipped ${skipped} Records`);
+                return callback(exception);
             }
-            
             if (context.bindings.dlBlob) {
                 context.bindings.dlBlob = JSON.stringify(context.bindings.dlBlob);
             }
-            return callback(null, redResult);
     });
 };

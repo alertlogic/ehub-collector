@@ -102,12 +102,10 @@ describe('Common Event hub collector unit tests.', function() {
                 function fakeFn(messages, formatFun, hostmetaElems, callback) {
                     return callback({statusCode: 400});
                 });
-        ehubCollector(mockContext, testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
-            assert.equal(err, null);
-            assert.equal(res.skipped, 1);
-            assert.equal(res.processed, 0);
+        ehubCollector(mockContext, testMessage, ehubGeneralFormat.logRecord , null, function(err) {
+            assert.equal(err.statusCode, 400);
             console.log(mockContext.bindings.dlBlob, typeof mockContext.bindings.dlBlob);
-            assert.equal(mockContext.bindings.dlBlob, '"No blob records"');
+            assert.equal(mockContext.bindings.dlBlob, 'No blob records');
             sinon.assert.callCount(processLogStub, 1);
             done();
         });
@@ -118,11 +116,7 @@ describe('Common Event hub collector unit tests.', function() {
         process.env.COLLECTOR_SOURCE_ID = 'source-id';
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
             function fakeFn(messages, formatFun, hostmetaElems, callback) {
-                if (messages[0].operationName === 'Good batch') {
-                    return callback(null);
-                } else {
-                    return callback('Test processing error');
-                }
+                return callback(null);
             });
         const inputRecords = [
             {records: [{operationName: 'Good batch'}, {some: 'message 1'}]},
@@ -131,7 +125,9 @@ describe('Common Event hub collector unit tests.', function() {
         ];
         
         ehubCollector(mock.context(), inputRecords, ehubGeneralFormat.logRecord , null, function(err, res) {
-            sinon.assert.callCount(processLogStub, 3);
+            sinon.assert.callCount(processLogStub, 1);
+            // we want to make sure that teh collectro aggregates teh batch correctly.
+            assert.equal(processLogStub.args[0][0].length, 6);
             done();
         });
     });
