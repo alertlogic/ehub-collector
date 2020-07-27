@@ -42,12 +42,13 @@ module.exports = function (context, eventHubMessages, parseFun, processErrorFun,
                         if (err) {
                             const skipped =  processError(context, err, redResult);
                             context.log.error(`Error while processing records. Skipped ${skipped} Records`);
-                            return callback(err);
+                            context.log.error(`Error: ${err}`);
+                            return callback(null, { processed: 0, skipped });
                         } else {
                             const processed = redResult.length;
                             context.log.info(`Processed: ${processed}`);
                         }
-                        return callback(null, { processed: redResult, skipped: 0 });
+                        return callback(null, { processed: redResult.length, skipped: 0 });
                 });
             } catch (exception) {
                 const skipped = processError(context, exception, redResult);

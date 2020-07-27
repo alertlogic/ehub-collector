@@ -102,8 +102,9 @@ describe('Common Event hub collector unit tests.', function() {
                 function fakeFn(messages, formatFun, hostmetaElems, callback) {
                     return callback({statusCode: 400});
                 });
-        ehubCollector(mockContext, testMessage, ehubGeneralFormat.logRecord , null, function(err) {
-            assert.equal(err.statusCode, 400);
+        ehubCollector(mockContext, testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
+            assert.equal(err, null);
+            assert.equal(res.skipped, 1);
             console.log(mockContext.bindings.dlBlob, typeof mockContext.bindings.dlBlob);
             assert.equal(mockContext.bindings.dlBlob, 'No blob records');
             sinon.assert.callCount(processLogStub, 1);
