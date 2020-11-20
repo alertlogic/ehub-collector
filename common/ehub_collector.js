@@ -28,7 +28,17 @@ const defaultProcessError = function(context, err, messages) {
     return skipped;
 };
 
-module.exports = function (context, eventHubMessages, parseFun, processErrorFun, callback) {
+module.exports = function (context, rawMessages, parseFun, processErrorFun, callback) {
+    // the ehub collector my very well receive messages not in json format, in this case we need to wrap it in an objet that teh collector expects 
+    const eventHubMessages = rawMessages.map(message => {
+        try{
+            const parsedMessage = JSON.parse(message);
+            return parsedMessage.records ? parsedMessage : {records:[parsedMessage]};
+        } catch(e){
+            return {records:[message]};
+        }
+    });
+
     var processError = processErrorFun ? processErrorFun : defaultProcessError;
     var collector = new AlAzureCollector(context, 'ehub', pkg.version);
     async.reduce(eventHubMessages, [],
