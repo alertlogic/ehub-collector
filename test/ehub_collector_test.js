@@ -83,7 +83,20 @@ describe('Common Event hub collector unit tests.', function() {
     });
     
     it('Simple OK check', function(done) {
-        const testMessage = [{ records: [mock.SQL_AUDIT_LOG_RECORD]}];
+        const testMessage = [`{ records: [${mock.SQL_AUDIT_LOG_RECORD}]}`];
+        processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
+                function fakeFn(messages, formatFun, hostmetaElems, callback) {
+                    return callback(null);
+                });
+        ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
+            assert.equal(err, null);
+            sinon.assert.callCount(processLogStub, 1);
+            done();
+        });
+    });
+    
+    it('Non-json log message ok', function(done) {
+        const testMessage = ['this is a message that connot be parsed as json'];
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
                 function fakeFn(messages, formatFun, hostmetaElems, callback) {
                     return callback(null);
@@ -96,7 +109,7 @@ describe('Common Event hub collector unit tests.', function() {
     });
     
     it('Ingest Error', function(done) {
-        const testMessage = [{ records: [mock.SQL_AUDIT_LOG_RECORD]}];
+        const testMessage = [`{ records: [${mock.SQL_AUDIT_LOG_RECORD}]}`];
         const mockContext = mock.context(done);
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
                 function fakeFn(messages, formatFun, hostmetaElems, callback) {
@@ -120,9 +133,9 @@ describe('Common Event hub collector unit tests.', function() {
                 return callback(null);
             });
         const inputRecords = [
-            {records: [{operationName: 'Good batch'}, {some: 'message 1'}]},
-            {records: [{operationName: 'Bad batch'}, {bad: 'mAssage'}]},
-            {records: [{operationName: 'Good batch'}, {some: 'message 2'}]},
+            JSON.stringify({records: [{operationName: 'Good batch'}, {some: 'message 1'}]}),
+            JSON.stringify({records: [{operationName: 'Bad batch'}, {bad: 'mAssage'}]}),
+            JSON.stringify({records: [{operationName: 'Good batch'}, {some: 'message 2'}]}),
         ];
         
         ehubCollector(mock.context(), inputRecords, ehubGeneralFormat.logRecord , null, function(err, res) {
