@@ -15,15 +15,20 @@ const AlAzureCollector = require('@alertlogic/al-azure-collector-js').AlAzureCol
 const defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
     const skipped = messages.length;
+    const errorSample = {
+        type: 'errorSample',
+        errorMessage: err.message,
+        erroCode: err.statusCode
+    };
     // We're going to ignore 400s from ingest right now. Do not put them in the DLQ
     if(err.statusCode >= 400 && err.statusCode < 500){
         return skipped;
     }
     // Otherwise, we need to put them in the DLQ
     else if (context.bindings.dlBlob && context.bindings.dlBlob instanceof Array) {
-        context.bindings.dlBlob.push(messages);
+        context.bindings.dlBlob.push({errorSample, messages});
     } else {
-        context.bindings.dlBlob = [messages];
+        context.bindings.dlBlob = [{errorSample, messages}];
     }
     return skipped;
 };
