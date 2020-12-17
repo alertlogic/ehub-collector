@@ -54,8 +54,8 @@ function processBlob(context, blob, dlblobText, callback) {
 function getDlBlobMessages(dlblobText) {
     const parsedBlob = JSON.parse(dlblobText);
 
-    if (parsedBlob.errorSample) {
-        return parsedBlob.messages;
+    if (Array.isArray(parsedBlob) && parsedBlob[0].errorSample) {
+        return parsedBlob[0].messages;
     } else {
         return parsedBlob;
     } 
