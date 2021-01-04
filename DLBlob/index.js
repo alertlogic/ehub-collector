@@ -36,8 +36,10 @@ function processBlob(context, blob, dlblobText, callback) {
             break;
     }
     
+    const dlBlobMessages = getDlBlobMessages(dlblobText);
+
     try {
-        ehubCollector(context, JSON.parse(dlblobText), formatFun, processErrorFun, function(error, result) {
+        ehubCollector(context, dlBlobMessages, formatFun, processErrorFun, function(error, result) {
             if (result.skipped) {
                 return callback(`Unprocessed records: ${result.skipped}`);
             } else {
@@ -47,6 +49,16 @@ function processBlob(context, blob, dlblobText, callback) {
     } catch (ex) {
         return callback(ex);
     }
+}
+
+function getDlBlobMessages(dlblobText) {
+    const parsedBlob = JSON.parse(dlblobText);
+
+    if (Array.isArray(parsedBlob) && parsedBlob[0].errorSample) {
+        return parsedBlob[0].messages;
+    } else {
+        return parsedBlob;
+    } 
 }
 
 module.exports = function (context, AlertlogicDLBlobTimer) {
