@@ -55,8 +55,15 @@ function getDlBlobMessages(dlblobText) {
     const parsedBlob = JSON.parse(dlblobText);
 
     if (Array.isArray(parsedBlob) && parsedBlob[0].errorSample) {
-        return parsedBlob[0].messages;
-    } else {
+        var blobMessages = parsedBlob[0].messages;
+        if (blobMessages.length < 10){
+            return blobMessages;
+        } 
+        else {
+            return blobMessages.slice(1, 10);
+        }
+    } 
+    else {
         return parsedBlob;
     } 
 }
@@ -82,4 +89,3 @@ module.exports = function (context, AlertlogicDLBlobTimer) {
         }
     });
 };
-
