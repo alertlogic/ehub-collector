@@ -15,6 +15,8 @@ const AlAzureDlBlob = require('@alertlogic/al-azure-collector-js').AlAzureDlBlob
 const ehubCollector = require('../common/ehub_collector');
 const ehubGeneralFormat = require('../EHubGeneral/format').logRecord;
 
+const MAX_AMOUNT_OF_DL_MESSAGES = 3;
+
 function getCollectorFunName(blobName) {
     return blobName.split('/')[1];
 }
@@ -55,8 +57,15 @@ function getDlBlobMessages(dlblobText) {
     const parsedBlob = JSON.parse(dlblobText);
 
     if (Array.isArray(parsedBlob) && parsedBlob[0].errorSample) {
-        return parsedBlob[0].messages;
-    } else {
+        var blobMessages = parsedBlob[0].messages;
+        if (blobMessages.length <= MAX_AMOUNT_OF_DL_MESSAGES){
+            return blobMessages;
+        } 
+        else {
+            return blobMessages.slice(0, MAX_AMOUNT_OF_DL_MESSAGES);
+        }
+    } 
+    else {  
         return parsedBlob;
     } 
 }
@@ -82,4 +91,3 @@ module.exports = function (context, AlertlogicDLBlobTimer) {
         }
     });
 };
-
