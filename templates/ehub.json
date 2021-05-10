@@ -161,12 +161,29 @@
                         }
                     ]
                 },
-                "clientAffinityEnabled": false
+                "clientAffinityEnabled": false,
+                "httpsOnly": true,
+                "clientCertEnabled": true,
+                "clientCertMode": "Required"
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
             ],
             "resources": [
+                {
+                    "type": "Microsoft.Web/sites/config",
+                    "apiVersion": "2018-02-01",
+                    "name": "[concat(parameters('Application Name'), '/authsettings')]",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]"
+                    ],
+                    "properties": {
+                        "enabled": true,
+                        "unauthenticatedClientAction": "RedirectToLoginPage",
+                        "tokenStoreEnabled": true
+                    }
+                },
                 {
                     "apiVersion": "2018-02-01",
                     "name": "[variables('webAppSourceControlName')]",
