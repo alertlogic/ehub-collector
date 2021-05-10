@@ -163,15 +163,15 @@
                     "ftpsState": "FtpsOnly"
                 },
                 "clientAffinityEnabled": false,
-                "httpsOnly": true,
-                "clientCertEnabled": true,
-                "clientCertMode": "Required"
+                "httpsOnly": true,
+                "clientCertEnabled": true,
+                "clientCertMode": "Required"
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
             ],
             "resources": [
-                  {
+                {
                     "type": "Microsoft.Web/sites/config",
                     "apiVersion": "2018-02-01",
                     "name": "[concat(parameters('Application Name'), '/authsettings')]",
