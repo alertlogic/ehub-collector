@@ -10,6 +10,7 @@
  
 const assert = require('assert');
 const mock = require('./mock');
+const moment = require('moment-timezone');
 
 var formatFun = require('../EHubGeneral/format').logRecord;
 
@@ -39,6 +40,7 @@ describe('Event hub general function unit tests.', function() {
     
     it('Simple OK test, o365 record', function(done) {
         var result = formatFun(mock.O365_RECORD);
+        console.log(moment(result.messageTs).format("M/D/YYYY H:mm"));
         assert.equal(result.message, JSON.stringify(mock.O365_RECORD));
         assert.equal(result.messageType, 'json/azure.ehub');
         assert.equal(result.messageTypeId, '15');
@@ -50,7 +52,7 @@ describe('Event hub general function unit tests.', function() {
     
     it('Simple OK test, other record', function(done) {
         var testRecord = {
-             "CreationTime": "2018-03-21T17:00:32",
+             "CreationTime": moment.tz("2018-03-21T17:00:32","Europe/London"),
              some: 'value'
         };
         var result = formatFun(testRecord);

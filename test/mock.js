@@ -9,6 +9,7 @@
  */
  
 const util = require('util');
+const moment = require('moment-timezone');
 
 process.env.WEBSITE_HOSTNAME = 'kkuzmin-app-ehub.azurewebsites.net';
 process.env.WEBSITE_SITE_NAME = 'kkuzmin-app-ehub.azurewebsites.net';
@@ -187,7 +188,7 @@ const O365_RECORD = {
       "OrganizationId": "bf8d32d3-1c13-4487-af02-80dba2236485",
       "Operation": "UserLoggedIn",
       "Id": "425415ab-86e9-4ae1-b91f-61d748d2a812",
-      "CreationTime": "2018-03-21T17:00:32",
+      "CreationTime": moment.tz("2018-03-21T17:00:32","Europe/London"),
       "Version": 1,
       "Workload": "AzureActiveDirectory",
       "ClientIP": "87.113.76.58",
