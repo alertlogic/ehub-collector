@@ -40,7 +40,6 @@ describe('Event hub general function unit tests.', function() {
     
     it('Simple OK test, o365 record', function(done) {
         var result = formatFun(mock.O365_RECORD);
-        console.log(moment(result.messageTs).format("M/D/YYYY H:mm"));
         assert.equal(result.message, JSON.stringify(mock.O365_RECORD));
         assert.equal(result.messageType, 'json/azure.ehub');
         assert.equal(result.messageTypeId, '15');
