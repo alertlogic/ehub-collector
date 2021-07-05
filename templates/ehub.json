@@ -115,7 +115,7 @@
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~2"
+                            "value": "~3"
                         },
                         {
                             "name": "SCM_USE_FUNCPACK",
@@ -186,20 +186,6 @@
                     }
                 },
                 {
-                    "type": "Microsoft.Web/sites/config",
-                    "apiVersion": "2018-02-01",
-                    "name": "[concat(parameters('Application Name'), '/authsettings')]",
-                    "location": "[resourceGroup().location]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]"
-                    ],
-                    "properties": {
-                        "enabled": true,
-                        "unauthenticatedClientAction": "RedirectToLoginPage",
-                        "tokenStoreEnabled": true
-                    }
-                },
-                {
                     "apiVersion": "2018-02-01",
                     "name": "[variables('webAppSourceControlName')]",
                     "type": "sourcecontrols",
@@ -227,7 +213,7 @@
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('Application Name')), '9546')]",
                         "WEBSITE_NODE_DEFAULT_VERSION": "12.13.0",
-                        "FUNCTIONS_EXTENSION_VERSION": "~2",
+                        "FUNCTIONS_EXTENSION_VERSION": "~3",
                         "SCM_USE_FUNCPACK": "1",
                         "SCM_POST_DEPLOYMENT_ACTIONS_PATH": "PostDeploymentActions",
                         "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
