@@ -164,8 +164,8 @@
                 },
                 "clientAffinityEnabled": false,
                 "httpsOnly": true,
-                "clientCertEnabled": true,
-                "clientCertMode": "Required"
+                "clientCertEnabled": true,
+                "clientCertMode": "Required"
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
