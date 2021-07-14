@@ -234,10 +234,16 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('webAppStorageAccountName')]",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2019-06-01",
             "location": "[variables('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
             "properties": {
-                "accountType": "Standard_LRS"
+                "allowBlobPublicAccess": false,
+                "supportsHttpsTrafficOnly": true
             },
             "tags": {
                 "AlertLogicCollector": "[parameters('Application Name')]"
