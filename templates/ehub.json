@@ -115,7 +115,7 @@
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~2"
+                            "value": "~3"
                         },
                         {
                             "name": "SCM_USE_FUNCPACK",
@@ -135,7 +135,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "10.14.1"
+                            "value": "12.13.0"
                         }
                     ],
                     "connectionStrings": [
@@ -212,8 +212,8 @@
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('Application Name')), '9546')]",
-                        "WEBSITE_NODE_DEFAULT_VERSION": "10.14.1",
-                        "FUNCTIONS_EXTENSION_VERSION": "~2",
+                        "WEBSITE_NODE_DEFAULT_VERSION": "12.13.0",
+                        "FUNCTIONS_EXTENSION_VERSION": "~3",
                         "SCM_USE_FUNCPACK": "1",
                         "SCM_POST_DEPLOYMENT_ACTIONS_PATH": "PostDeploymentActions",
                         "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
@@ -234,10 +234,16 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('webAppStorageAccountName')]",
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2019-06-01",
             "location": "[variables('location')]",
+            "kind": "Storage",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
             "properties": {
-                "accountType": "Standard_LRS"
+                "allowBlobPublicAccess": false,
+                "supportsHttpsTrafficOnly": true
             },
             "tags": {
                 "AlertLogicCollector": "[parameters('Application Name')]"
