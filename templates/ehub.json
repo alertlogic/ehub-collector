@@ -160,7 +160,7 @@
                             "connectionString": "[parameters('Alert Logic Data Residency')]"
                         }
                     ],
-                    "ftpsState": "FtpsOnly"
+                    "ftpsState": "FtpsOnly"
                 },
                 "clientAffinityEnabled": false,
                 "httpsOnly": true,
