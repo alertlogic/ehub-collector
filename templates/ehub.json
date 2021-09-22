@@ -60,6 +60,20 @@
             "metadata": {
                 "description": "Please use the actual consumer group if using existing event hub."
             }
+        },
+        "Event Hub Filter Json": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Please enter type of filter in JSON format"
+            }
+        },
+        "Event Hub Filter Regex": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Please enter type of filter in REGEX format"
+            }
         }
     },
     "variables": {
@@ -85,7 +99,9 @@
         "newEhubMaxThroughputUnits": 20,
         "newEhubAutoInflateEnabled": true,
         "newEhubPartitionCount": 32,
-        "newEhubRetentionDays": 7
+        "newEhubRetentionDays": 7,
+        "filterJson": "[parameters('Event Hub Filter Json')]",
+        "filterRegex": "[parameters('Event Hub Filter Regex')]"
     },
     "resources": [
         {
@@ -226,7 +242,9 @@
                         "APP_DL_CONTAINER_NAME": "[variables('dlContainerName')]",
                         "DL_BLOB_PAGE_SIZE": "100",
                         "APP_STATS_QUEUE_NAME": "[variables('statsQueueName')]",
-                        "APP_PRINCIPAL_ID": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]"
+                        "APP_PRINCIPAL_ID": "reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
+                        "APP_FILTER_JSON": "[variables('filterJson')]",
+                        "APP_FILTER_REGEX": "[variables('filterRegex')]"
                     }
                 }
             ]
