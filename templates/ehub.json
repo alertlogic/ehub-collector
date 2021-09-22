@@ -65,14 +65,14 @@
             "type": "String",
             "defaultValue": "",
             "metadata": {
-                "description": "Optional. Please enter type of filter in JSON format"
+                "description": "Optional. Please enter type of filter in JSON format. Only messages which contain the specified property will be collected.\n e.g {\"channels\": \"Operation\"}"
             }
         },
         "Event Hub Filter Regex": {
             "type": "String",
             "defaultValue": "",
             "metadata": {
-                "description": "Optional. Please enter type of filter in REGEX format"
+                "description": "Optional. Please enter type of filter in REGEX format. Only messages which contain the specified property will be collected.\n e.g ^channels.*"
             }
         }
     },
