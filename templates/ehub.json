@@ -242,7 +242,7 @@
                         "APP_DL_CONTAINER_NAME": "[variables('dlContainerName')]",
                         "DL_BLOB_PAGE_SIZE": "100",
                         "APP_STATS_QUEUE_NAME": "[variables('statsQueueName')]",
-                        "APP_PRINCIPAL_ID": "reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
+                        "APP_PRINCIPAL_ID": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
                         "APP_FILTER_JSON": "[variables('filterJson')]",
                         "APP_FILTER_REGEX": "[variables('filterRegex')]"
                     }
