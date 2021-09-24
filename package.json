@@ -1,8 +1,8 @@
 {
   "name": "ehub-collector",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "dependencies": {
-    "@alertlogic/al-azure-collector-js": "https://github.com/sameerbag/al-azure-collector-js#al-filter-support",
+    "@alertlogic/al-azure-collector-js": "3.0.0",
     "@alertlogic/al-collector-js": "3.0.0",
     "@azure/arm-eventhub": "3.2.0",
     "@azure/arm-monitor": "6.0.0",
