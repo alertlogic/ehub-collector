@@ -100,6 +100,14 @@ Click the button below to start deployment.
 
    **Note:** This value defaults to `$Default`; you can reuse this consumer group if there are no other consumers of this Event Hub. If there are other consumers of the Event Hub, a separate consumer group should be created for the Alert Logic collector, and its name typed here.
 
+   **Event Hub Filter Json** - Type the filter in JSON format.
+   **example:** {"resultType":"Success"}
+
+   - **Event Hub Filter Regex** - Type the filter in REGEX format.
+   **example:** \/*.Policy or "Policy"
+
+   **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
+
 1. Click **Purchase**.
 
 **Note:** If you choose to create new event hub via the template then the following event hub scaling parameters are used:
