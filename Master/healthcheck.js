@@ -71,7 +71,10 @@ const eventHubNs = function(master, callback) {
         function(callback){
             return armEhub.namespaces.get(rg, nsName, function (err, namespace, req, resp) {
                 if (err) {
-                    return callback(ehubUtil.formatSdkError(master, 'EHUB000003', err));
+                    return callback(ehubUtil.formatSdkError(master, 
+                        'EHUB000003',
+                        `Failed to get Event Hub namespace. Resource group = ${rg}, Namespace = ${nsName}`,
+                        err));
                 } else {
                     return checkEventHubNamespace(master, namespace, callback);
                 }
@@ -80,7 +83,10 @@ const eventHubNs = function(master, callback) {
         function(namespace, callback) {
             return armEhub.eventHubs.listByNamespace(rg, namespace.name, function(err, eventHubs) {
                 if (err) {
-                    return callback(ehubUtil.formatSdkError(master, 'EHUB000004', err));
+                    return callback(ehubUtil.formatSdkError(master,
+                        'EHUB000004',
+                        `Failed to list Event Hubs by namespace. Resource group = ${rg}, Namespace = ${namespace.name}`,
+                        err));
                 } else if (eventHubs.length === 0){
                     return callback(master.errorStatusFmt(
                         'EHUB000005',
