@@ -26,11 +26,13 @@ const initArmEhub = function(master) {
     return new EventHubManagementClient(azureCreds, subscriptionId);
 };
 
-const formatSdkError = function (master, alErrorCode, err) {
+const formatSdkError = function (master, alErrorCode, message, err) {
     if (typeof err === 'string' || err instanceof String) {
-        return master.errorStatusFmt(alErrorCode, err);
+        return master.errorStatusFmt(alErrorCode, message + ' Error: ' + err);
     } else if (typeof err === 'object') {
-        return master.errorStatusFmt(alErrorCode, JSON.stringify(err));
+        return master.errorStatusFmt(alErrorCode, message + ' Error: ' + JSON.stringify(err));
+    } else {
+        return master.errorStatusFmt(alErrorCode, message);
     }
 };
 
