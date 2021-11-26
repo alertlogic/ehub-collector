@@ -13,7 +13,7 @@ const async = require('async');
 const parse = require('parse-key-value');
 
 const pkg = require('../package.json');
-const AlAzureMaster = require('@alertlogic/al-azure-collector-js').AlAzureMaster;
+const EhubCollectorMaster = require('./ehub_master').EhubCollectorMaster;
 const healthcheck = require('./healthcheck');
 
 const APP_FUNCTIONS = ['Master', 'Updater', 'EHubGeneral', 'DLBlob'];
@@ -25,10 +25,7 @@ var getRegisterConfig = function() {
 };
 
 module.exports = function (context, AlertlogicMasterTimer) {
-    const healthFuns = [
-        healthcheck.eventHubNs
-    ];
-    var master = new AlAzureMaster(context, 'ehub', pkg.version, healthFuns, null, {}, {}, APP_FUNCTIONS);
+    var master = new EhubCollectorMaster(context);
     async.waterfall([
         function(asyncCallback) {
             return master.register(getRegisterConfig(), asyncCallback);
