@@ -11,6 +11,7 @@
 const assert = require('assert');
 const rewire = require('rewire');
 const mock = require('./mock');
+const pkg = require('../package.json');
 
 const master = rewire('../Master/index');
 const EhubCollectorMaster = require('../Master/ehub_master').EhubCollectorMaster;
@@ -48,7 +49,7 @@ describe('Event hub Master function unit tests.', function() {
         var master = new EhubCollectorMaster(mock.context);
         
         const expected = {
-            version: '1.5.1',
+            version: pkg.version,
             web_app_name: 'test-site',
             app_resource_group: 'kktest11-rg',
             app_tenant_id: 'tenant-id',

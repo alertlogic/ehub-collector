@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------------------
- * @copyright (C) 2018, Alert Logic, Inc
+ * @copyright (C) 2021, Alert Logic, Inc
  * @doc
  * 
  * The purpose of this function is to check updates of collector configuration,
