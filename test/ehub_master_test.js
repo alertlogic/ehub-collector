@@ -10,8 +10,11 @@
  
 const assert = require('assert');
 const rewire = require('rewire');
+const mock = require('./mock');
+const pkg = require('../package.json');
 
 const master = rewire('../Master/index');
+const EhubCollectorMaster = require('../Master/ehub_master').EhubCollectorMaster;
 
 
 describe('Event hub Master function unit tests.', function() {
@@ -34,6 +37,41 @@ describe('Event hub Master function unit tests.', function() {
             }
         };
         assert.deepEqual(actual, expected);
+        done();
+    });
+    
+    it('getConfigAttrs test', function(done) {
+        process.env.APP_LOG_EHUB_CONNECTION =  'Endpoint=sb://alertlogicingest-westeurope-vv7gloy2am6u2.servicebus.windows.net/;SharedAccessKeyName=kkread;SharedAccessKey=some+key;EntityPath=insights-operational-logs'; 
+        process.env.APP_LOG_EHUB_NAME = 'event-hub-name';
+        process.env.APP_LOG_EHUB_RESOURCE_GROUP = 'event-hub-rg';
+        process.env.APP_LOG_EHUB_CONSUMER_GROUP = 'event-hub-cg';
+        
+        var master = new EhubCollectorMaster(mock.context);
+        
+        const expected = {
+            version: pkg.version,
+            web_app_name: 'test-site',
+            app_resource_group: 'kktest11-rg',
+            app_tenant_id: 'tenant-id',
+            subscription_id: 'subscription-id',
+            ehub_name: 'event-hub-name',
+            ehub_rg: 'event-hub-rg',
+            ehub_cg: 'event-hub-cg',
+            ehub_connection: {
+                Endpoint: 'sb://alertlogicingest-westeurope-vv7gloy2am6u2.servicebus.windows.net/',
+                SharedAccessKeyName: 'kkread',
+                EntityPath: 'insights-operational-logs'
+            }
+        };
+        
+        const actual = master.getConfigAttrs();
+        
+        delete process.env.APP_LOG_EHUB_NAME;
+        delete process.env.APP_LOG_EHUB_RESOURCE_GROUP;
+        delete process.env.APP_LOG_EHUB_CONSUMER_GROUP;
+        
+        assert.deepEqual(actual, expected);
+        
         done();
     });
 
