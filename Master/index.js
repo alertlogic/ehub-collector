@@ -12,11 +12,7 @@
 const async = require('async');
 const parse = require('parse-key-value');
 
-const pkg = require('../package.json');
 const EhubCollectorMaster = require('./ehub_master').EhubCollectorMaster;
-const healthcheck = require('./healthcheck');
-
-const APP_FUNCTIONS = ['Master', 'Updater', 'EHubGeneral', 'DLBlob'];
 
 var getRegisterConfig = function() {
     var ehubConnection = parse(process.env.APP_LOG_EHUB_CONNECTION);
