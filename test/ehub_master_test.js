@@ -50,6 +50,8 @@ describe('Event hub Master function unit tests.', function() {
         
         const expected = {
             version: pkg.version,
+            app_filter_json: '',
+            app_filter_regex: '',
             web_app_name: 'test-site',
             app_resource_group: 'kktest11-rg',
             app_tenant_id: 'tenant-id',
