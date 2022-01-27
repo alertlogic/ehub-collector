@@ -8,4 +8,6 @@ nbproject/
 coverage/
 test/ide_test.js
 .env
+local_dev/dev_config.js
+.log
 *.swp
