@@ -2,7 +2,7 @@
   "name": "ehub-collector",
   "version": "1.5.2",
   "dependencies": {
-    "@alertlogic/al-azure-collector-js": "3.0.1",
+    "@alertlogic/al-azure-collector-js": "alertlogic/al-azure-collector-js#limit_stats",
     "@alertlogic/al-collector-js": "3.0.0",
     "@azure/arm-eventhub": "3.2.0",
     "@azure/arm-monitor": "6.0.0",
