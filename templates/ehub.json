@@ -94,6 +94,8 @@
         "createNewEhubInfraCond": "[if(and(equals(parameters('Event Hub Resource Group'), ''), equals(parameters('Event Hub Connection String'), ''), equals(parameters('Event Hub Namespace'), '')), bool('true'), bool('false'))]",
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
+        "nodeRuntimeVersion": "~14",
+        "azureFunctionExtensionsVersion": "~3",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
         "newEhubMaxThroughputUnits": 20,
@@ -131,7 +133,7 @@
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
-                            "value": "~3"
+                            "value": "[variables('azureFunctionExtensionsVersion')]"
                         },
                         {
                             "name": "SCM_USE_FUNCPACK",
@@ -151,7 +153,7 @@
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                            "value": "12.13.0"
+                            "value": "[variables('nodeRuntimeVersion')]"
                         }
                     ],
                     "connectionStrings": [
@@ -176,7 +178,7 @@
                             "connectionString": "[parameters('Alert Logic Data Residency')]"
                         }
                     ],
-                    "ftpsState": "FtpsOnly"
+                    "ftpsState": "FtpsOnly"
                 },
                 "clientAffinityEnabled": false,
                 "httpsOnly": true,
@@ -228,8 +230,8 @@
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('Application Name')), '9546')]",
-                        "WEBSITE_NODE_DEFAULT_VERSION": "12.13.0",
-                        "FUNCTIONS_EXTENSION_VERSION": "~3",
+                        "WEBSITE_NODE_DEFAULT_VERSION": "[variables('nodeRuntimeVersion')]",
+                        "FUNCTIONS_EXTENSION_VERSION": "[variables('azureFunctionExtensionsVersion')]",
                         "SCM_USE_FUNCPACK": "1",
                         "SCM_POST_DEPLOYMENT_ACTIONS_PATH": "PostDeploymentActions",
                         "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",

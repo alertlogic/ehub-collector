@@ -168,7 +168,8 @@ describe('Event hub health check unit tests.', function() {
         ehubHealthCheck.eventHubNs(master, function(err) {
             assert.equal(err.status, 'error');
             assert.equal(err.error_code, 'EHUB000003');
-            let details = JSON.parse(err.details[0]);
+            const error_obj = err.details[0].split(' Error: ')[1];
+            let details = JSON.parse(error_obj);
             assert.equal(details.statusCode, 404);
             done();
         });
@@ -195,7 +196,8 @@ describe('Event hub health check unit tests.', function() {
         ehubHealthCheck.eventHubNs(master, function(err) {
             assert.equal(err.status, 'error');
             assert.equal(err.error_code, 'EHUB000004');
-            let details = JSON.parse(err.details[0]);
+            const error_obj = err.details[0].split(' Error: ')[1];
+            let details = JSON.parse(error_obj);
             assert.equal(details.statusCode, 404);
             done();
         });
