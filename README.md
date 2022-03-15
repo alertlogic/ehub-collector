@@ -101,7 +101,31 @@ Click the button below to start deployment.
    **Note:** This value defaults to `$Default`; you can reuse this consumer group if there are no other consumers of this Event Hub. If there are other consumers of the Event Hub, a separate consumer group should be created for the Alert Logic collector, and its name typed here.
 
    **Event Hub Filter Json** - Type the filter in JSON format.
-   **example:** {"resultType":"Success"}
+   **example json log:** log = [
+      {
+         "resultType":"Success"
+      },
+      {
+         "resultType": {
+            "status":"Success"
+         }
+      },
+      {
+         "resultType": {
+            "status": {
+               "result":"Success"
+            }
+         }
+      }
+   ]
+   **root level filtering example:** {"resultType":"Success"}, result --> [log[0]]
+   **child level filtering example:** {"resultType": {"status":"Success"}}, result --> [log[1]]
+   **deeper child level filtering example:** {"resultType": {"status": {"result":"Success}}}, result --> [log[2]] and so on
+
+   **Event Hub Filter Json (AND/OR Condition)** - AND/OR Condition filtering
+   **AND condition filtering** [{"resultType":"Success"},{"resultType": {"status":"Success"}}], result --> [log[0],log[1]]
+   **OR condition filtering** [{"resultType":"Success"},{"someOtherResultType": {"status":"Success"}}], result --> [log[0]]
+   **NOTE** If both the cases of OR condition filtering is available in the log then it will behave like AND filter
 
    - **Event Hub Filter Regex** - Type the filter in REGEX format.
    **example:** \/*.Policy or "Policy"
