@@ -151,36 +151,35 @@ If you would like to use other parameters please change respective variable valu
       }
    ]
    </code></pre>
-   **Root level filtering example:** 
+   ***Root level filtering example:*** 
    Filter | Output 
    --- | ---
    <pre><code>{"resultType1":"Success1"} | [{"resultType1":"Success1","type":"result","user":"user1"}]</pre></code>
    
-   **Child level filtering example:** 
+   ***Child level filtering example:***
    Filter | Output 
    --- | ---
    <pre><code>{"resultType2": {"status":"Success2"}} | [{"resultType2": {"status":"Success2","type":"result","user":"user2"}}]</pre></code>
   
-   **Deeper child level filtering example:** 
+   ***Deeper child level filtering example:***
    Filter | Output 
    --- | --- 
    <pre><code>{"resultType3": {"status": {"result":"Success3}}} | [{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"},"user":{"value": "user3"}}}]</pre></code>
   
-   **Note:** Child level filtering can go deep with the proper sequence of the object
+   <pre><code>**Note:** Child level filtering can go deep with the proper sequence of the object</code></pre>
 
-   
-   **Event Hub Filter Json (AND/OR Condition)** - AND/OR Condition filtering
-   **AND condition filtering** 
+   ***Event Hub Filter Json (AND/OR Condition)*** - AND/OR Condition filtering
+   ***AND condition filtering***
    Filter | Output 
    --- | --- 
    <pre><code>[{"resultType1":"Success1"},{"resultType2": {"status":"Success2"}}] | [{"resultType1":"Success1","type":"result","user":"user1"},{"resultType2": {"status":"Success2","type":"result","user":"user2"}}]</pre></code>
   
-   **OR condition filtering** 
+   ***OR condition filtering***
    Filter | Output 
    --- | --- 
    <pre><code>[{"resultType1":"Success1"},{"someOtherResultType": {"status":"Success"}}] | [{"resultType1":"Success1","type":"result","user":"user1"}]</pre></code>
    
-   **OR condition for same object filtering** 
+   ***OR condition for same object filtering***
    Filter | Output 
    --- | --- 
    <pre><code>[{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}] | [{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"},"user":{"value": "user3"}}}]</pre></code>
