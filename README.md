@@ -92,6 +92,7 @@ Click the button below to start deployment.
    - **Event Hub Connection String** - Type the connection string for the existing Event Hub; leave empty if creating a new Event Hub.
    - **Event Hub Namespace** - Type the namespace for the existing Event Hub; leave empty if creating a new Event Hub.
    - **Event Hub Name** - Type the name of the existing Event Hub.
+   - **Event Hub Filter** - To check filtering capabilities click [here](#-event-hub-filtering)
 
    **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
    Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs).
@@ -100,74 +101,7 @@ Click the button below to start deployment.
 
    **Note:** This value defaults to `$Default`; you can reuse this consumer group if there are no other consumers of this Event Hub. If there are other consumers of the Event Hub, a separate consumer group should be created for the Alert Logic collector, and its name typed here.
 
-   
-   **a) Event Hub Filter Regex** - Type the filter in REGEX format.
-   **example:** \/*.Policy or "Policy"
-
-   **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
-
-   **b) Event Hub Filter Json** - Type the filter in JSON format.
-   **example json log:** 
-   <pre><code>
-   log = [
-      {
-         "resultType1":"Success1",
-         "type":"result"
-      },
-      {
-         "resultType2": {
-            "status":"Success2",
-            "type":"result"
-         }
-      },
-      {
-         "resultType3": {
-            "status": {
-               "result":"Success3"
-            },
-            "type": {
-               "value": "result"
-            }
-         }
-      }
-   ]
-   </code></pre>
-   **Root level filtering example:** 
-   Filter | Output 
-   --- | ---
-   {"resultType1":"Success1"} | [{"resultType1":"Success1","type":"result"}] 
-   
-   **Child level filtering example:** 
-   Filter | Output 
-   --- | ---
-   {"resultType2": {"status":"Success2"}} | [{"resultType2": {"status":"Success2","type":"result"}}]
-  
-   **Deeper child level filtering example:** 
-   Filter | Output 
-   --- | --- 
-   {"resultType3": {"status": {"result":"Success3}}}|[{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"}}}]
-  
-   **Note:** Child level filtering can go deep with the proper sequence of the object
-
-   
-   **Event Hub Filter Json (AND/OR Condition)** - AND/OR Condition filtering
-   **AND condition filtering** 
-   Filter | Output 
-   --- | --- 
-   [{"resultType1":"Success1"},{"resultType2": {"status":"Success2"}}] | [{"resultType1":"Success1","type":"result"},{"resultType2": {"status":"Success2","type":"result"}}]
-  
-   **OR condition filtering** 
-   Filter | Output 
-   --- | --- 
-   [{"resultType1":"Success1"},{"someOtherResultType": {"status":"Success"}}] | [{"resultType1":"Success1","type":"result"}]
-   
-   **OR condition for same object filtering** 
-   Filter | Output 
-   --- | --- 
-   [{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}] | [{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"}}}]
-
-
-1. Click **Purchase**.
+2. Click **Purchase**.
 
 **Note:** If you choose to create new event hub via the template then the following event hub scaling parameters are used:
 
@@ -178,6 +112,78 @@ Click the button below to start deployment.
    
 If you would like to use other parameters please change respective variable values in the the template or contact Alert Logic.
 
+
+### Event Hub Filtering
+
+**a) Event Hub Filter Regex** - Type the filter in REGEX format.
+   **example:** \/*.Policy or "Policy"
+
+   **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
+
+   **b) Event Hub Filter Json** - Type the filter in JSON format.
+   **example json log:** 
+   <pre><code>
+   log = [
+      {
+         "resultType1":"Success1",
+         "type":"result",
+         "user":"user1"
+      },
+      {
+         "resultType2": {
+            "status":"Success2",
+            "type":"result",
+            "user":"user2"
+         }
+      },
+      {
+         "resultType3": {
+            "status": {
+               "result":"Success3"
+            },
+            "type": {
+               "value": "result"
+            },
+            "user": {
+               "value": "user3"
+            }
+         }
+      }
+   ]
+   </code></pre>
+   **Root level filtering example:** 
+   Filter | Output 
+   --- | ---
+   <pre><code>{"resultType1":"Success1"} | [{"resultType1":"Success1","type":"result","user":"user1"}]</pre></code>
+   
+   **Child level filtering example:** 
+   Filter | Output 
+   --- | ---
+   <pre><code>{"resultType2": {"status":"Success2"}} | [{"resultType2": {"status":"Success2","type":"result","user":"user2"}}]</pre></code>
+  
+   **Deeper child level filtering example:** 
+   Filter | Output 
+   --- | --- 
+   <pre><code>{"resultType3": {"status": {"result":"Success3}}} | [{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"},"user":{"value": "user3"}}}]</pre></code>
+  
+   **Note:** Child level filtering can go deep with the proper sequence of the object
+
+   
+   **Event Hub Filter Json (AND/OR Condition)** - AND/OR Condition filtering
+   **AND condition filtering** 
+   Filter | Output 
+   --- | --- 
+   <pre><code>[{"resultType1":"Success1"},{"resultType2": {"status":"Success2"}}] | [{"resultType1":"Success1","type":"result","user":"user1"},{"resultType2": {"status":"Success2","type":"result","user":"user2"}}]</pre></code>
+  
+   **OR condition filtering** 
+   Filter | Output 
+   --- | --- 
+   <pre><code>[{"resultType1":"Success1"},{"someOtherResultType": {"status":"Success"}}] | [{"resultType1":"Success1","type":"result","user":"user1"}]</pre></code>
+   
+   **OR condition for same object filtering** 
+   Filter | Output 
+   --- | --- 
+   <pre><code>[{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}] | [{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"},"user":{"value": "user3"}}}]</pre></code>
 ### Deploy through the Azure CLI
 
 If you want to deploy the template through the Azure command line interface (CLI), you can use either [Azure Cloud Shell](https://docs.microsoft.com/en-gb/azure/cloud-shell/quickstart#start-cloud-shell) or a local installation of [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest).
