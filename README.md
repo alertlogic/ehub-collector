@@ -103,29 +103,33 @@ Click the button below to start deployment.
    **Event Hub Filter Json** - Type the filter in JSON format.
    **example json log:** log = [
       {
-         "resultType":"Success"
+         "resultType1":"Success1"
       },
       {
-         "resultType": {
-            "status":"Success"
+         "resultType2": {
+            "status":"Success2"
          }
       },
       {
-         "resultType": {
+         "resultType3": {
             "status": {
-               "result":"Success"
+               "result":"Success3"
+            },
+            "type": {
+               "value": "result"
             }
          }
       }
    ]
    **root level filtering example:** {"resultType":"Success"}, result --> [log[0]]
-   **child level filtering example:** {"resultType": {"status":"Success"}}, result --> [log[1]]
-   **deeper child level filtering example:** {"resultType": {"status": {"result":"Success}}}, result --> [log[2]] and so on
+   **child level filtering example:** {"resultType2": {"status":"Success2"}}, result --> [log[1]]
+   **deeper child level filtering example:** {"resultType3": {"status": {"result":"Success3}}}, result --> [log[2]]
+   **Note:** Child level filtering can go deep in to the proper sequence of the object
 
    **Event Hub Filter Json (AND/OR Condition)** - AND/OR Condition filtering
-   **AND condition filtering** [{"resultType":"Success"},{"resultType": {"status":"Success"}}], result --> [log[0],log[1]]
+   **AND condition filtering** [{"resultType":"Success"},{"resultType2": {"status":"Success2"}}], result --> [log[0],log[1]]
    **OR condition filtering** [{"resultType":"Success"},{"someOtherResultType": {"status":"Success"}}], result --> [log[0]]
-   **NOTE** If both the cases of OR condition filtering is available in the log then it will behave like AND filter
+   **OR condition for same object filtering** [{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}], result --> [log[0]]
 
    - **Event Hub Filter Regex** - Type the filter in REGEX format.
    **example:** \/*.Policy or "Policy"
