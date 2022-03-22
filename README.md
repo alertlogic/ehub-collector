@@ -124,7 +124,7 @@ Click the button below to start deployment.
    **root level filtering example:** {"resultType":"Success"}, result --> [log[0]]
    **child level filtering example:** {"resultType2": {"status":"Success2"}}, result --> [log[1]]
    **deeper child level filtering example:** {"resultType3": {"status": {"result":"Success3}}}, result --> [log[2]]
-   **Note:** Child level filtering can go deep in to the proper sequence of the object
+   **Note:** Child level filtering can go deep with the proper sequence of the object
 
    **Event Hub Filter Json (AND/OR Condition)** - AND/OR Condition filtering
    **AND condition filtering** [{"resultType":"Success"},{"resultType2": {"status":"Success2"}}], result --> [log[0],log[1]]
