@@ -111,11 +111,13 @@ Click the button below to start deployment.
    <pre><code>
    log = [
       {
-         "resultType1":"Success1"
+         "resultType1":"Success1",
+         "type":"result"
       },
       {
          "resultType2": {
-            "status":"Success2"
+            "status":"Success2",
+            "type":"result"
          }
       },
       {
@@ -133,17 +135,17 @@ Click the button below to start deployment.
    **Root level filtering example:** 
    Filter | Output 
    --- | ---
-   {"resultType1":"Success1"} | [log[0]] 
+   {"resultType1":"Success1"} | [{"resultType1":"Success1","type":"result"}] 
    
    **Child level filtering example:** 
    Filter | Output 
    --- | ---
-   {"resultType2": {"status":"Success2"}} | [log[1]]
+   {"resultType2": {"status":"Success2"}} | [{"resultType2": {"status":"Success2","type":"result"}}]
   
    **Deeper child level filtering example:** 
    Filter | Output 
    --- | --- 
-   {"resultType3": {"status": {"result":"Success3}}} | [log[2]]
+   {"resultType3": {"status": {"result":"Success3}}}|[{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"}}}]
   
    **Note:** Child level filtering can go deep with the proper sequence of the object
 
@@ -152,17 +154,17 @@ Click the button below to start deployment.
    **AND condition filtering** 
    Filter | Output 
    --- | --- 
-   [{"resultType1":"Success1"},{"resultType2": {"status":"Success2"}}] | [log[0],log[1]]
+   [{"resultType1":"Success1"},{"resultType2": {"status":"Success2"}}] | [{"resultType1":"Success1","type":"result"},{"resultType2": {"status":"Success2","type":"result"}}]
   
    **OR condition filtering** 
    Filter | Output 
    --- | --- 
-   [{"resultType1":"Success1"},{"someOtherResultType": {"status":"Success"}}] | [log[0]]
+   [{"resultType1":"Success1"},{"someOtherResultType": {"status":"Success"}}] | [{"resultType1":"Success1","type":"result"}]
    
    **OR condition for same object filtering** 
    Filter | Output 
    --- | --- 
-   [{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}] | [log[2]]
+   [{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}] | [{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"}}}]
 
 
 1. Click **Purchase**.
