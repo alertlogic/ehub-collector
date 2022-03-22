@@ -100,8 +100,16 @@ Click the button below to start deployment.
 
    **Note:** This value defaults to `$Default`; you can reuse this consumer group if there are no other consumers of this Event Hub. If there are other consumers of the Event Hub, a separate consumer group should be created for the Alert Logic collector, and its name typed here.
 
-   **Event Hub Filter Json** - Type the filter in JSON format.
-   **example json log:** log = [
+   
+   **a) Event Hub Filter Regex** - Type the filter in REGEX format.
+   **example:** \/*.Policy or "Policy"
+
+   **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
+
+   **b) Event Hub Filter Json** - Type the filter in JSON format.
+   **example json log:** 
+   <pre><code>
+   log = [
       {
          "resultType1":"Success1"
       },
@@ -121,20 +129,41 @@ Click the button below to start deployment.
          }
       }
    ]
-   **root level filtering example:** {"resultType":"Success"}, result --> [log[0]]
-   **child level filtering example:** {"resultType2": {"status":"Success2"}}, result --> [log[1]]
-   **deeper child level filtering example:** {"resultType3": {"status": {"result":"Success3}}}, result --> [log[2]]
+   </code></pre>
+   **Root level filtering example:** 
+   Filter | Output 
+   --- | ---
+   {"resultType1":"Success1"} | [log[0]] 
+   
+   **Child level filtering example:** 
+   Filter | Output 
+   --- | ---
+   {"resultType2": {"status":"Success2"}} | [log[1]]
+  
+   **Deeper child level filtering example:** 
+   Filter | Output 
+   --- | --- 
+   {"resultType3": {"status": {"result":"Success3}}} | [log[2]]
+  
    **Note:** Child level filtering can go deep with the proper sequence of the object
 
+   
    **Event Hub Filter Json (AND/OR Condition)** - AND/OR Condition filtering
-   **AND condition filtering** [{"resultType":"Success"},{"resultType2": {"status":"Success2"}}], result --> [log[0],log[1]]
-   **OR condition filtering** [{"resultType":"Success"},{"someOtherResultType": {"status":"Success"}}], result --> [log[0]]
-   **OR condition for same object filtering** [{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}], result --> [log[0]]
+   **AND condition filtering** 
+   Filter | Output 
+   --- | --- 
+   [{"resultType1":"Success1"},{"resultType2": {"status":"Success2"}}] | [log[0],log[1]]
+  
+   **OR condition filtering** 
+   Filter | Output 
+   --- | --- 
+   [{"resultType1":"Success1"},{"someOtherResultType": {"status":"Success"}}] | [log[0]]
+   
+   **OR condition for same object filtering** 
+   Filter | Output 
+   --- | --- 
+   [{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}] | [log[2]]
 
-   - **Event Hub Filter Regex** - Type the filter in REGEX format.
-   **example:** \/*.Policy or "Policy"
-
-   **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
 
 1. Click **Purchase**.
 
