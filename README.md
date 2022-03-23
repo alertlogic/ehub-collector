@@ -96,7 +96,8 @@ Click the button below to start deployment.
    **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
    Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs).
 
-   - **Event Hub Filter** - Two types of filtering are supported, Event Hub Filter Regex and Event Hub Filter Json. For more details click [here](#event-hub-filtering)
+   - **Event Hub Filter Json** - Type the filter in JSON format. For more details click [here](#event-hub-filtering).
+   - **Event Hub Filter Regex** - Type the filter in REGEX format. For more details click [here](#event-hub-filtering).
    - **Event Hub Consumer Group** - Type the name of the consumer group of the existing Event Hub.
 
    **Note:** This value defaults to `$Default`; you can reuse this consumer group if there are no other consumers of this Event Hub. If there are other consumers of the Event Hub, a separate consumer group should be created for the Alert Logic collector, and its name typed here.
@@ -153,12 +154,12 @@ If you would like to use other parameters please change respective variable valu
    </code></pre>
    Description | Filter | Output 
    --- | --- | ---
-   Root level filtering example | <code>{"resultType1":"Success1"}</code> | <code>[{"resultType1":"Success1","type":"result","user":"user1"}]</code>
-   Child level filtering example | <code>{"resultType2": {"status":"Success2"}}</code> | <code>[{"resultType2": {"status":"Success2","type":"result","user":"user2"}}]</code>
-   Deeper child level filtering example | <code>{"resultType3": {"status": {"result":"Success3}}}</code> | <code>[{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"},"user":{"value": "user3"}}}]</code>
-   AND condition filtering | <code>{"resultType1":"Success1"},{"resultType2": {"status":"Success2"}}]</code> | <code>[{"resultType1":"Success1","type":"result","user":"user1"},{"resultType2": {"status":"Success2","type":"result","user":"user2"}}]</code>
-   OR condition filtering | <code>[{"resultType1":"Success1"},{"someOtherResultType": {"status":"Success"}}]</code> | <code>[{"resultType1":"Success1","type":"result","user":"user1"}]</code>
-   OR condition for same object filtering | <code>[{"resultType3":{"status": {"result":"Success3"}}},{"resultType3": {"type":{"value":"result"}}}]</code> | <code>[{"resultType3": {"status": {"result":"Success3"},"type": {"value": "result"},"user":{"value": "user3"}}}]</code>
+   Root level filtering example | <pre>{<br />  "resultType1":"Success1"<br />}</pre> | <pre>[<br />  {<br />    "resultType1":"Success1",<br />     "type":"result",<br />     "user":"user1"<br />  }<br />]</pre>
+   Child level filtering example | <pre>{<br />  "resultType2": {<br />    "status":"Success2"<br />  }<br />}</pre> | <pre>[<br />  {<br />    "resultType2": {<br />        "status":"Success2",<br />        "type":"result",<br />        "user":"user2"<br />    }<br />  }<br />]</pre>
+   Deeper child level filtering example | <pre>{<br />  "resultType3": {<br />    "status": {<br />      "result":"Success3<br />    }<br />  }<br />}</pre> | <pre>[<br />  {<br >    "resultType3": {<br />      "status": {<br />        "result":"Success3"<br />      },<br />      "type": {<br />        "value": "result"<br />      },<br />      "user":{<br />        "value": "user3"<br />      }<br />    }<br />  }<br />]</pre>
+   AND condition filtering | <pre>[<br />  {<br />    "resultType1":"Success1"<br />  },<br />  {<br />    "resultType2": {<br />      "status":"Success2"<br />    }<br />  }<br />]</pre> | <pre>[<br />  {<br />   "resultType1":"Success1",<br />     "type":"result",<br />     "user":"user1"<br />  }<br />]</pre>
+   OR condition filtering | <pre>[<br />  {<br />    "resultType1":"Success1"<br />  },<br />  {<br />    "someOtherResultType": {<br />      "status":"Success"<br />    }<br />  }<br />]</pre> | <pre>[<br />  {<br />    "resultType2": {<br />        "status":"Success2",<br />        "type":"result",<br />        "user":"user2"<br />    }<br />  }<br />]</pre>
+   OR condition for same object filtering | <pre>[<br />  {<br />    "resultType3":{<br />      "status": {<br />        "result":"Success3"<br />      }<br />    }<br />  },{<br />  "resultType3": {<br />    "type":{<br />      "value":"result"<br />      }<br />    }<br />  }<br />]</pre> | <pre>[<br />  {<br >    "resultType3": {<br />      "status": {<br />        "result":"Success3"<br />      },<br />      "type": {<br />        "value": "result"<br />      },<br />      "user":{<br />        "value": "user3"<br />      }<br />    }<br />  }<br />]</pre>
 
 
    **Note:** Child level filtering can go deep with the proper sequence of the object.
