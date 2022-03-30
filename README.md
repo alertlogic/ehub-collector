@@ -163,6 +163,7 @@ If you would like to use other parameters please change respective variable valu
 
 
    **Note:** Child level filtering can go deep with the proper sequence of the object.
+   **Note:** Filtering is based on case sensitiveness 
 ### Deploy through the Azure CLI
 
 If you want to deploy the template through the Azure command line interface (CLI), you can use either [Azure Cloud Shell](https://docs.microsoft.com/en-gb/azure/cloud-shell/quickstart#start-cloud-shell) or a local installation of [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest).
