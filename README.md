@@ -206,6 +206,23 @@ The following links contain instructions to help you integrate different Azure s
 * [Azure Security Center Events](https://docs.microsoft.com/en-us/azure/security-center/security-center-partner-integration#exporting-data-to-a-siem)
 * [Azure SQL Audit Logs](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-auditing#subheading-2)
 
+# Uninstallation
+
+If event hub collector was deployed into a new resource group then clean up the following:
+
+* remove the entire resource group.
+* delete collector source entry via the Alert Logic UI.
+
+If a collector was installed into an existing resource group which already contained some other resources then please check deployment history for the target resource group to find a list of resources that belong to collector. Right now collector deploys the following resources:
+
+* Function App
+* App Service plan
+* Storage account
+* *Optional*, if customer not using existing event hub for collection. Eventhub namespace and event hub itself.
+* After azure resources are deleted please delete collector source entry from the Alert Logic UI. 
+
+Here is the link [how to check resource group deployment history](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-history?tabs=azure-portal#resource-group-deployments)
+
 # How the collector works
 
 The [template](templates/ehub.json) creates an `AlertLogicIngest-<region-name>-<unique-string>` Event Hubs namespace where the "insights-operational-logs" event hub is created. The Alert Logic collector listens to the Azure event hub and forwards incoming events to the Alert Logic Ingestion service. If event collection fails, Alert Logic stores the data in the `alertlogic-dl` Azure Blob container located in the storage account you specified during template deployment. 
