@@ -87,7 +87,7 @@
         "webAppSourceControlName": "web",
         "contributorRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
         "readerRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-        "ehubNewNsName": "[concat('AlertLogicIngest-', variables('location'), '-', uniqueString(variables('resourceGroupId')))]",
+        "ehubNsName": "[if(equals(parameters('Event Hub Namespace'), ''), concat('AlertLogicIngest-', variables('location'), '-', uniqueString(variables('resourceGroupId'))), parameters('Event Hub Namespace'))]",
         "ehubName": "[if(equals(parameters('Event Hub Name'), ''), 'insights-operational-logs', toLower(parameters('Event Hub Name')))]",
         "ehubResourceGroup": "[if(equals(parameters('Event Hub Resource Group'), ''), variables('resourceGroupName'), parameters('Event Hub Resource Group'))]",
         "ehubConsumerGroup": "[if(equals(parameters('Event Hub Consumer Group'), ''), '$Default', parameters('Event Hub Consumer Group'))]",
@@ -122,10 +122,6 @@
                         {
                             "name": "FUNCTIONS_WORKER_RUNTIME",
                             "value": "node"
-                        },
-                        {
-                            "name": "AzureWebJobsDashboard",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]"
                         },
                         {
                             "name": "AzureWebJobsStorage",
@@ -192,10 +188,10 @@
                 {
                     "type": "Microsoft.Web/sites/config",
                     "apiVersion": "2018-02-01",
-                    "name": "[concat(parameters('Application Name'), '/authsettings')]",
+                    "name": "[concat(parameters('Application Name'), '/authsettings')]",
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]"
+                        "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]"
                     ],
                     "properties": {
                         "enabled": true,
@@ -222,7 +218,8 @@
                     "type": "config",
                     "dependsOn": [
                         "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]",
-                        "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('Application Name'), variables('webAppSourceControlName'))]"
+                        "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('Application Name'), variables('webAppSourceControlName'))]",
+                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
                     ],
                     "properties": {
                         "FUNCTIONS_WORKER_RUNTIME": "node",
@@ -237,7 +234,7 @@
                         "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
                         "APP_RESOURCE_GROUP": "[variables('resourceGroupName')]",
                         "APP_TENANT_ID": "[variables('tenantId')]",
-                        "APP_LOG_EHUB_CONNECTION": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNewNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString, parameters('Event Hub Connection String'))]",
+                        "APP_LOG_EHUB_CONNECTION": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString, parameters('Event Hub Connection String'))]",
                         "APP_LOG_EHUB_NAME": "[variables('ehubName')]",
                         "APP_LOG_EHUB_CONSUMER_GROUP": "[variables('ehubConsumerGroup')]",
                         "APP_LOG_EHUB_RESOURCE_GROUP": "[variables('ehubResourceGroup')]",
@@ -306,7 +303,7 @@
                 "tier": "Standard",
                 "capacity": 1
             },
-            "name": "[variables('ehubNewNsName')]",
+            "name": "[variables('ehubNsName')]",
             "apiVersion": "2017-04-01",
             "location": "[variables('location')]",
             "tags": {},
@@ -327,7 +324,7 @@
                         "partitionCount": "[variables('newEhubPartitionCount')]"
                     },
                     "dependsOn": [
-                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNewNsName'))]"
+                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
                     ]
                 }
             ]
@@ -340,7 +337,8 @@
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[parameters('Event Hub Resource Group')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
+                "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]",
+                "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('Application Name'), variables('webAppSourceControlName'))]"
             ],
             "properties": {
                 "mode": "Incremental",
