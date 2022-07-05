@@ -342,6 +342,7 @@
             "resourceGroup": "[parameters('Event Hub Resource Group')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]",
+                "[resourceId('Microsoft.Web/sites/config', parameters('Application Name'), 'authsettings')]",
                 "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('Application Name'), variables('webAppSourceControlName'))]"
             ],
             "properties": {
