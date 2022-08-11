@@ -14,7 +14,7 @@
         "Alert Logic API endpoint": {
             "type": "String",
             "defaultValue": "api.global-services.global.alertlogic.com",
-            "allowedValues" : [
+            "allowedValues": [
                 "api.global-services.global.alertlogic.com",
                 "api.global-integration.product.dev.alertlogic.com"
             ]
@@ -103,14 +103,15 @@
         "newEhubPartitionCount": 32,
         "newEhubRetentionDays": 7,
         "filterJson": "[parameters('Event Hub Filter Json')]",
-        "filterRegex": "[parameters('Event Hub Filter Regex')]"
+        "filterRegex": "[parameters('Event Hub Filter Regex')]",
+        "applicationInsightsName": "[parameters('Application Name')]"
     },
     "resources": [
         {
             "type": "Microsoft.Web/Sites",
             "kind": "functionapp",
             "name": "[parameters('Application Name')]",
-            "apiVersion": "2018-02-01",
+            "apiVersion": "2021-03-01",
             "location": "[variables('location')]",
             "identity": {
                 "type": "SystemAssigned"
@@ -150,6 +151,10 @@
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "[variables('nodeRuntimeVersion')]"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))).InstrumentationKey]"
                         }
                     ],
                     "connectionStrings": [
@@ -182,6 +187,7 @@
                 "clientCertMode": "Required"
             },
             "dependsOn": [
+                "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
             ],
             "resources": [
@@ -246,6 +252,17 @@
                     }
                 }
             ]
+        },
+        {
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02-preview",
+            "name": "[variables('applicationInsightsName')]",
+            "location": "[variables('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Request_Source": "rest"
+            }
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
