@@ -103,8 +103,7 @@
         "newEhubPartitionCount": 32,
         "newEhubRetentionDays": 7,
         "filterJson": "[parameters('Event Hub Filter Json')]",
-        "filterRegex": "[parameters('Event Hub Filter Regex')]",
-        "applicationInsightsName": "[parameters('Application Name')]"
+        "filterRegex": "[parameters('Event Hub Filter Regex')]"
     },
     "resources": [
         {
@@ -154,7 +153,7 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))).InstrumentationKey]"
+                            "value": "[reference(resourceId('Microsoft.Insights/components', parameters('Application Name'))).InstrumentationKey]"
                         }
                     ],
                     "connectionStrings": [
@@ -187,7 +186,7 @@
                 "clientCertMode": "Required"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Insights/components', variables('applicationInsightsName'))]",
+                "[resourceId('Microsoft.Insights/components', parameters('Application Name'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
             ],
             "resources": [
@@ -256,7 +255,7 @@
         {
             "type": "Microsoft.Insights/components",
             "apiVersion": "2020-02-02-preview",
-            "name": "[variables('applicationInsightsName')]",
+            "name": "[parameters('Application Name')]",
             "location": "[variables('location')]",
             "kind": "web",
             "properties": {
