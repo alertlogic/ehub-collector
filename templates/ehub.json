@@ -74,14 +74,14 @@
             "metadata": {
                 "description": "Optional. Please enter type of filter in REGEX format. Only messages which contain the specified property will be collected.\n e.g ^channels.*"
             }
-		},
-		"applicationInsightsName": {
-			"type": "String",
-			"metadata": {
-				"description": "Application Insights Name"
-			}
-		}
-	},
+        },
+        "applicationInsightsName": {
+            "type": "String",
+            "metadata": {
+                "description": "Application Insights Name"
+            }
+        }
+    },
     "variables": {
         "location": "[resourceGroup().location]",
         "resourceGroupName": "[resourceGroup().name]",
@@ -159,7 +159,7 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value":"[reference(concat('microsoft.insights/components/', parameters('applicationInsightsName'))).InstrumentationKey]"
+                            "value": "[reference(concat('microsoft.insights/components/', parameters('applicationInsightsName'))).InstrumentationKey]"
                         }
                     ],
                     "connectionStrings": [
@@ -192,12 +192,12 @@
                 "clientCertMode": "Required"
             },
             "dependsOn": [
-                        "[resourceId('microsoft.insights/components/', parameters('applicationInsightsName'))]",
+                "[resourceId('microsoft.insights/components/', parameters('applicationInsightsName'))]",
 
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
             ],
             "resources": [
-                
+
                 {
                     "type": "Microsoft.Web/sites/config",
                     "apiVersion": "2018-02-01",
@@ -262,8 +262,8 @@
                 }
             ]
         },
- 
-  {
+
+        {
             "type": "Microsoft.Insights/components",
             "apiVersion": "2014-04-01",
             "name": "[parameters('applicationInsightsName')]",
@@ -273,7 +273,8 @@
                 "Application_Type": "web",
                 "Request_Source": "rest"
             }
-        },        {
+        },
+        {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('webAppStorageAccountName')]",
             "apiVersion": "2019-06-01",
