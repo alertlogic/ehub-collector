@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.1",
     "parameters": {
         "Application Name": {
@@ -75,10 +75,12 @@
                 "description": "Optional. Please enter type of filter in REGEX format. Only messages which contain the specified property will be collected.\n e.g ^channels.*"
             }
         },
-        "applicationInsightsName": {
+        "enableApplicationInsights": {
             "type": "String",
+            "defaultValue": "No",
+            "allowedValues":["Yes", "No"],
             "metadata": {
-                "description": "Application Insights Name"
+                "description": "Enable Application Insights (Optional)."
             }
         }
     },
@@ -109,7 +111,9 @@
         "newEhubPartitionCount": 32,
         "newEhubRetentionDays": 7,
         "filterJson": "[parameters('Event Hub Filter Json')]",
-        "filterRegex": "[parameters('Event Hub Filter Regex')]"
+        "filterRegex": "[parameters('Event Hub Filter Regex')]",
+        "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
+        "applicationInsightsName":"[concat('application-insights-',parameters('Application Name'))]"
     },
     "resources": [
         {
@@ -159,7 +163,7 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(concat('microsoft.insights/components/', parameters('applicationInsightsName'))).InstrumentationKey]"
+                            "value":"[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]"
                         }
                     ],
                     "connectionStrings": [
@@ -192,9 +196,9 @@
                 "clientCertMode": "Required"
             },
             "dependsOn": [
-                "[resourceId('microsoft.insights/components/', parameters('applicationInsightsName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]",
+                "[resourceId('microsoft.insights/components/', variables('applicationInsightsName'))]"
 
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
             ],
             "resources": [
 
@@ -235,7 +239,8 @@
                         "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
                     ],
                     "properties": {
-                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(concat('microsoft.insights/components/', parameters('applicationInsightsName'))).InstrumentationKey]",
+                       
+                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]",
                         "ApplicationInsightsAgent_EXTENSION_VERSION": "~2",
                         "FUNCTIONS_WORKER_RUNTIME": "node",
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
@@ -264,9 +269,10 @@
         },
 
         {
+            "condition": "[variables('isApplicationInsightEnabled')]",
             "type": "Microsoft.Insights/components",
             "apiVersion": "2014-04-01",
-            "name": "[parameters('applicationInsightsName')]",
+            "name": "[variables('applicationInsightsName')]",
             "location": "[variables('location')]",
             "kind": "web",
             "properties": {
