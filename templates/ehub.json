@@ -1,5 +1,5 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.1",
     "parameters": {
         "Application Name": {
@@ -14,7 +14,7 @@
         "Alert Logic API endpoint": {
             "type": "String",
             "defaultValue": "api.global-services.global.alertlogic.com",
-            "allowedValues" : [
+            "allowedValues": [
                 "api.global-services.global.alertlogic.com",
                 "api.global-integration.product.dev.alertlogic.com"
             ]
@@ -74,6 +74,14 @@
             "metadata": {
                 "description": "Optional. Please enter type of filter in REGEX format. Only messages which contain the specified property will be collected.\n e.g ^channels.*"
             }
+        },
+        "enableApplicationInsights": {
+            "type": "String",
+            "defaultValue": "No",
+            "allowedValues":["Yes", "No"],
+            "metadata": {
+                "description": "Enable Application Insights (Optional)."
+            }
         }
     },
     "variables": {
@@ -95,7 +103,7 @@
         "repo": "https://github.com/imranalisyed506/ehub-collector.git",
         "branch": "updatev4_test",
         "nodeRuntimeVersion": "~14",
-        "azureFunctionExtensionsVersion": "~3",
+        "azureFunctionExtensionsVersion": "~4",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
         "newEhubMaxThroughputUnits": 20,
@@ -103,14 +111,16 @@
         "newEhubPartitionCount": 32,
         "newEhubRetentionDays": 7,
         "filterJson": "[parameters('Event Hub Filter Json')]",
-        "filterRegex": "[parameters('Event Hub Filter Regex')]"
+        "filterRegex": "[parameters('Event Hub Filter Regex')]",
+        "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
+        "applicationInsightsName":"[concat('application-insights-',parameters('Application Name'))]"
     },
     "resources": [
         {
             "type": "Microsoft.Web/Sites",
             "kind": "functionapp",
             "name": "[parameters('Application Name')]",
-            "apiVersion": "2018-02-01",
+            "apiVersion": "2018-11-01",
             "location": "[variables('location')]",
             "identity": {
                 "type": "SystemAssigned"
@@ -122,10 +132,6 @@
                         {
                             "name": "FUNCTIONS_WORKER_RUNTIME",
                             "value": "node"
-                        },
-                        {
-                            "name": "AzureWebJobsDashboard",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]"
                         },
                         {
                             "name": "AzureWebJobsStorage",
@@ -154,6 +160,10 @@
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "[variables('nodeRuntimeVersion')]"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value":"[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]"
                         }
                     ],
                     "connectionStrings": [
@@ -186,9 +196,12 @@
                 "clientCertMode": "Required"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]",
+                "[resourceId('microsoft.insights/components/', variables('applicationInsightsName'))]"
+
             ],
             "resources": [
+
                 {
                     "type": "Microsoft.Web/sites/config",
                     "apiVersion": "2018-02-01",
@@ -226,8 +239,10 @@
                         "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
                     ],
                     "properties": {
+                       
+                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]",
+                        "ApplicationInsightsAgent_EXTENSION_VERSION": "~2",
                         "FUNCTIONS_WORKER_RUNTIME": "node",
-                        "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('Application Name')), '9546')]",
@@ -251,6 +266,19 @@
                     }
                 }
             ]
+        },
+
+        {
+            "condition": "[variables('isApplicationInsightEnabled')]",
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2014-04-01",
+            "name": "[variables('applicationInsightsName')]",
+            "location": "[variables('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Request_Source": "rest"
+            }
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
