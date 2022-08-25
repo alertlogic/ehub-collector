@@ -113,7 +113,7 @@
         "filterJson": "[parameters('Event Hub Filter Json')]",
         "filterRegex": "[parameters('Event Hub Filter Regex')]",
         "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
-        "applicationInsightsName":"[concat('application-insights-',parameters('Application Name'))]"
+        "applicationInsightsName":"[uniqueString(concat(parameters('Application Name'),subscription().tenantId))]"
     },
     "resources": [
         {
