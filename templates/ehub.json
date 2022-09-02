@@ -113,7 +113,7 @@
         "filterJson": "[parameters('Event Hub Filter Json')]",
         "filterRegex": "[parameters('Event Hub Filter Regex')]",
         "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
-        "applicationInsightsName":"[take(concat(parameters('Application Name'),'-',subscription().tenantId),30)]"
+        "applicationInsightsName":"[take(concat(parameters('Application Name'),'-',subscription().tenantId),5)]"
     },
     "resources": [
         {
@@ -277,7 +277,7 @@
             "kind": "web",
             "properties": {
                 "Application_Type": "web",
-                "Request_Source": "rest"
+                "ApplicationId": "[variables('applicationInsightsName')]"
             }
         },
         {

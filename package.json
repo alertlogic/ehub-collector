@@ -2,10 +2,10 @@
   "name": "ehub-collector",
   "version": "1.5.6",
   "dependencies": {
-    "@alertlogic/al-azure-collector-js": "3.0.3",
+    "@alertlogic/al-azure-collector-js": "git+https://github.com/imranalisyed506/al-azure-collector-js.git#im-azure-changes",
     "@alertlogic/al-collector-js": "3.0.1",
-    "@azure/arm-eventhub": "3.2.0",
-    "@azure/arm-monitor": "6.0.0",
+    "@azure/arm-eventhub": "4.0.0",
+    "@azure/arm-monitor": "7.0.0",
     "async": "2.6.1",
     "moment": "2.29.2",
     "moment-timezone": "0.5.34",
