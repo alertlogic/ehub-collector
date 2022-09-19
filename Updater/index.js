@@ -15,6 +15,14 @@ const AlAzureUpdater = require('@alertlogic/al-azure-collector-js').AlAzureUpdat
 
 module.exports = function (context, AlertlogicUpdaterTimer) {
     var updater = new AlAzureUpdater();
+    updater.setEnvForMigration(function(envError){
+        if (envError) {
+            context.log.error('Env failed:', envError);
+        } else {
+            context.log.info('Env OK');
+        }
+        context.done(envError);
+    });
     updater.syncWebApp(function(syncError){
         if (syncError) {
             context.log.error('Site sync failed:', syncError);
