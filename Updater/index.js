@@ -12,21 +12,13 @@
 
 const AlAzureUpdater = require('@alertlogic/al-azure-collector-js').AlAzureUpdater;
 
-const envObj = require('./al-ehub-collector.json');
+const envObj = require('../al-ehub-collector.json')
 
 module.exports = function (context, AlertlogicUpdaterTimer) {
     var updater = new AlAzureUpdater();
-    updater.setEnvForMigration(envObj,function(envError){
-        if (envError) {
-            context.log.error('Env failed:', envError);
-        } else {
-            context.log.info('Env OK');
-        }
-        context.done(envError);
-    });
-    updater.syncWebApp(function(syncError){
+    updater.run(envObj.Runtime,function(syncError){
         if (syncError) {
-            context.log.error('Site sync failed:', syncError);
+            context.log.error('Site sync and env set failed:', syncError);
         } else {
             context.log.info('Site sync OK');
         }
