@@ -142,6 +142,10 @@
                             "value": "[variables('azureFunctionExtensionsVersion')]"
                         },
                         {
+                            "name":"AZURE_FUN_UPDATE_CONFIG_NAME",
+                            "value": "al-ehub-collector.json"
+                        },
+                        {
                             "name": "SCM_USE_FUNCPACK",
                             "value": "1"
                         },
@@ -248,6 +252,7 @@
                         "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('Application Name')), '9546')]",
                         "WEBSITE_NODE_DEFAULT_VERSION": "[variables('nodeRuntimeVersion')]",
                         "FUNCTIONS_EXTENSION_VERSION": "[variables('azureFunctionExtensionsVersion')]",
+                        "AZURE_FUN_UPDATE_CONFIG_NAME": "al-ehub-collector.json",
                         "SCM_USE_FUNCPACK": "1",
                         "SCM_POST_DEPLOYMENT_ACTIONS_PATH": "PostDeploymentActions",
                         "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
