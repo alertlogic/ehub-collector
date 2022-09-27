@@ -95,7 +95,7 @@
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
         "nodeRuntimeVersion": "~14",
-        "azureFunctionExtensionsVersion": "~3",
+        "azureFunctionExtensionsVersion": "~4",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
         "newEhubMaxThroughputUnits": 20,
@@ -124,16 +124,16 @@
                             "value": "node"
                         },
                         {
-                            "name": "AzureWebJobsDashboard",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]"
-                        },
-                        {
                             "name": "AzureWebJobsStorage",
                             "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]"
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
                             "value": "[variables('azureFunctionExtensionsVersion')]"
+                        },
+                        {
+                            "name":"AZURE_FUN_UPDATE_CONFIG_NAME",
+                            "value": "al-ehub-collector.json"
                         },
                         {
                             "name": "SCM_USE_FUNCPACK",
@@ -227,12 +227,12 @@
                     ],
                     "properties": {
                         "FUNCTIONS_WORKER_RUNTIME": "node",
-                        "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
                         "WEBSITE_CONTENTSHARE": "[concat(toLower(parameters('Application Name')), '9546')]",
                         "WEBSITE_NODE_DEFAULT_VERSION": "[variables('nodeRuntimeVersion')]",
                         "FUNCTIONS_EXTENSION_VERSION": "[variables('azureFunctionExtensionsVersion')]",
+                        "AZURE_FUN_UPDATE_CONFIG_NAME": "al-ehub-collector.json",
                         "SCM_USE_FUNCPACK": "1",
                         "SCM_POST_DEPLOYMENT_ACTIONS_PATH": "PostDeploymentActions",
                         "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
