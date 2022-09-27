@@ -15,6 +15,9 @@ const AlAzureUpdater = require('@alertlogic/al-azure-collector-js').AlAzureUpdat
 
 module.exports = function (context, AlertlogicUpdaterTimer) {
     var updater = new AlAzureUpdater();
+    if(!process.env.AZURE_FUN_UPDATE_CONFIG_NAME){
+        process.env.AZURE_FUN_UPDATE_CONFIG_NAME='al-ehub-collector.json';
+    }
     updater.run(function(syncError){
         if (syncError) {
             context.log.error('Site sync and env set failed:', syncError);
