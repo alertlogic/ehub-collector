@@ -1,6 +1,6 @@
 {
   "name": "ehub-collector",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "dependencies": {
     "@alertlogic/al-azure-collector-js": "3.0.5",
     "@alertlogic/al-collector-js": "3.0.1",
