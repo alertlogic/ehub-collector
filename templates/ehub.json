@@ -74,6 +74,14 @@
             "metadata": {
                 "description": "Optional. Please enter type of filter in REGEX format. Only messages which contain the specified property will be collected.\n e.g ^channels.*"
             }
+        },
+        "enableApplicationInsights": {
+            "type": "String",
+            "defaultValue": "No",
+            "allowedValues":["Yes", "No"],
+            "metadata": {
+                "description": "Enable Application Insights (Optional)."
+            }
         }
     },
     "variables": {
@@ -103,7 +111,9 @@
         "newEhubPartitionCount": 32,
         "newEhubRetentionDays": 7,
         "filterJson": "[parameters('Event Hub Filter Json')]",
-        "filterRegex": "[parameters('Event Hub Filter Regex')]"
+        "filterRegex": "[parameters('Event Hub Filter Regex')]",
+        "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
+        "applicationInsightsName":"[concat(parameters('Application Name'),'-',take(subscription().tenantId,5))]"
     },
     "resources": [
         {
@@ -154,6 +164,10 @@
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "[variables('nodeRuntimeVersion')]"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]"
                         }
                     ],
                     "connectionStrings": [
@@ -186,7 +200,9 @@
                 "clientCertMode": "Required"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]",
+                "[resourceId('microsoft.insights/components/', variables('applicationInsightsName'))]"
+
             ],
             "resources": [
                 {
@@ -247,10 +263,24 @@
                         "APP_STATS_QUEUE_NAME": "[variables('statsQueueName')]",
                         "APP_PRINCIPAL_ID": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
                         "APP_FILTER_JSON": "[variables('filterJson')]",
-                        "APP_FILTER_REGEX": "[variables('filterRegex')]"
+                        "APP_FILTER_REGEX": "[variables('filterRegex')]",
+                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]",
+                        "ApplicationInsightsAgent_EXTENSION_VERSION": "~2"
                     }
                 }
             ]
+        },
+        {
+            "condition": "[variables('isApplicationInsightEnabled')]",
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02",
+            "name": "[variables('applicationInsightsName')]",
+            "location": "[variables('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "ApplicationId": "[variables('applicationInsightsName')]"
+            }
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
