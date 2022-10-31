@@ -109,7 +109,7 @@ Click the button below to start deployment.
    **example:** \/*.Policy or "Policy"
 
    **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
-
+     - **Enable Application Insights** - Enable or Disable Application Insights (Optional) for monitoring invocation logs. Default value is No. Follow this guide to monitor azure functions  [click here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring).
 1. Click **Purchase**.
 
 **Note:** If you choose to create new event hub via the template then the following event hub scaling parameters are used:
@@ -120,7 +120,7 @@ Click the button below to start deployment.
    - 7 day data retention period.
    
 If you would like to use other parameters please change respective variable values in the the template or contact Alert Logic.
-
+ 
 
 ### Event Hub Filtering
 
