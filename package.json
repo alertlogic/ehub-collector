@@ -1,9 +1,9 @@
 {
   "name": "ehub-collector",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "dependencies": {
-    "@alertlogic/al-azure-collector-js": "3.0.8",
-    "@alertlogic/al-collector-js": "3.0.1",
+    "@alertlogic/al-azure-collector-js": "3.1.0",
+    "@alertlogic/al-collector-js": "3.0.4",
     "@azure/arm-eventhub": "3.2.0",
     "@azure/arm-monitor": "6.0.0",
     "async": "3.2.2",
@@ -17,7 +17,7 @@
     "local-ehub-general": "node ./local_dev/ehub_general_local_dev.js",
     "local-ehub-activitylogs": "node ./local_dev/ehub_activitylogs_local_dev.js",
     "lint": "jshint --show-non-errors --exclude \"./node_modules/*\" **/*.js",
-    "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura mocha --colors --reporter mocha-jenkins-reporter"
+    "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura --reporter=text mocha --colors --reporter mocha-jenkins-reporter"
   },
   "devDependencies": {
     "jshint": "^2.9.5",

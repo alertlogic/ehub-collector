@@ -318,14 +318,15 @@
             "comments": "Assign contributor role to the app principal id for the resource group application is deployed to.",
             "type": "Microsoft.Authorization/roleAssignments",
             "name": "[variables('contribRoleAssignmentName')]",
-            "apiVersion": "2015-07-01",
+            "apiVersion": "2022-04-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
             ],
             "properties": {
                 "roleDefinitionId": "[variables('contributorRole')]",
                 "principalId": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
-                "scope": "[variables('resourceGroupId')]"
+                "scope": "[variables('resourceGroupId')]",
+                "principalType": "ServicePrincipal"
             }
         },
         {
@@ -387,11 +388,13 @@
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "name": "[guid(reference(parameters('Application Name'), '2016-08-01', 'Full').identity.principalId, deployment().name)]",
-                            "apiVersion": "2017-09-01",
+                            "apiVersion": "2022-04-01",
                             "properties": {
                                 "roleDefinitionId": "[variables('readerRole')]",
                                 "principalId": "[reference(parameters('Application Name'), '2016-08-01', 'Full').identity.principalId]",
-                                "scope": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('Event Hub Resource Group'))]"
+                                "scope": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('Event Hub Resource Group'))]",
+                                "principalType": "ServicePrincipal"
+
                             }
                         }
                     ]
