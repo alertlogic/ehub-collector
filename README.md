@@ -96,6 +96,10 @@ Click the button below to start deployment.
    **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
    Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs).
 
+    **Note:** The wrong values configured for eventhub `Maximum throughput units`, `Auto-inflate` `Partitions` and `Data retention period` causes data loss which can't be recovered
+    Follow this guide to [Scaling with Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-scalability) and [Features and terminology in Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-features).
+    
+
    - **Event Hub Filter Json** - Type the filter in JSON format. For more details click [here](#event-hub-filtering).
    - **Event Hub Filter Regex** - Type the filter in REGEX format. For more details click [here](#event-hub-filtering).
    - **Event Hub Consumer Group** - Type the name of the consumer group of the existing Event Hub.

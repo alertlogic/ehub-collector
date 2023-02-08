@@ -54,6 +54,34 @@
                 "description": "Please use the actual name if using existing event hub."
             }
         },
+         "newEhubMaxThroughputUnits": {
+            "type": "int",
+            "defaultValue": 20,
+            "metadata": {
+                "description": "The maximum number of throughput units for the Event Hub."
+            }
+        },
+        "newEhubAutoInflateEnabled": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Whether auto-inflate is enabled for the Event Hub."
+            }
+        },
+        "newEhubPartitionCount": {
+            "type": "int",
+            "defaultValue": 32,
+            "metadata": {
+                "description": "The number of partitions for the Event Hub."
+            }
+        },
+        "newEhubRetentionDays": {
+            "type": "int",
+            "defaultValue": 7,
+            "metadata": {
+                "description": "The number of days to retain data in the Event Hub."
+            }
+        },
         "Event Hub Consumer Group": {
             "type": "String",
             "defaultValue": "$Default",
@@ -106,10 +134,10 @@
        "azureFunctionExtensionsVersion": "~4",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
-        "newEhubMaxThroughputUnits": 20,
-        "newEhubAutoInflateEnabled": true,
-        "newEhubPartitionCount": 32,
-        "newEhubRetentionDays": 7,
+        "newEhubMaxThroughputUnits": "[parameters('newEhubMaxThroughputUnits')]",
+        "newEhubAutoInflateEnabled": "[parameters('newEhubAutoInflateEnabled')]",
+        "newEhubPartitionCount": "[parameters('newEhubPartitionCount')]",
+        "newEhubRetentionDays": "[parameters('newEhubRetentionDays')]",
         "filterJson": "[parameters('Event Hub Filter Json')]",
         "filterRegex": "[parameters('Event Hub Filter Regex')]",
         "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
@@ -336,7 +364,7 @@
             "sku": {
                 "name": "Standard",
                 "tier": "Standard",
-                "capacity": 1
+                "capacity":"[variables('newEhubMaxThroughputUnits')]"
             },
             "name": "[variables('ehubNsName')]",
             "apiVersion": "2017-04-01",
