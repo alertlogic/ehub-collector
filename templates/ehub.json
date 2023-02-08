@@ -54,28 +54,28 @@
                 "description": "Please use the actual name if using existing event hub."
             }
         },
-         "newEhubMaxThroughputUnits": {
+         "Event Hub Max Throughput Units": {
             "type": "int",
             "defaultValue": 20,
             "metadata": {
                 "description": "The maximum number of throughput units for the Event Hub."
             }
         },
-        "newEhubAutoInflateEnabled": {
+        "Ehub Auto Inflate Enabled": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
                 "description": "Whether auto-inflate is enabled for the Event Hub."
             }
         },
-        "newEhubPartitionCount": {
+        "Ehub Partition Count": {
             "type": "int",
             "defaultValue": 32,
             "metadata": {
                 "description": "The number of partitions for the Event Hub."
             }
         },
-        "newEhubRetentionDays": {
+        "Ehub Retention Days": {
             "type": "int",
             "defaultValue": 7,
             "metadata": {
@@ -134,10 +134,10 @@
        "azureFunctionExtensionsVersion": "~4",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
-        "newEhubMaxThroughputUnits": "[parameters('newEhubMaxThroughputUnits')]",
-        "newEhubAutoInflateEnabled": "[parameters('newEhubAutoInflateEnabled')]",
-        "newEhubPartitionCount": "[parameters('newEhubPartitionCount')]",
-        "newEhubRetentionDays": "[parameters('newEhubRetentionDays')]",
+        "newEhubMaxThroughputUnits": "[parameters('Event Hub Max Throughput Units')]",
+        "newEhubAutoInflateEnabled": "[parameters('Ehub Auto Inflate Enabled')]",
+        "newEhubPartitionCount": "[parameters('Ehub Partition Count')]",
+        "newEhubRetentionDays": "[parameters('Ehub Retention Days')]",
         "filterJson": "[parameters('Event Hub Filter Json')]",
         "filterRegex": "[parameters('Event Hub Filter Regex')]",
         "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
