@@ -54,11 +54,45 @@
                 "description": "Please use the actual name if using existing event hub."
             }
         },
+         "Event Hub Max Throughput Units": {
+            "type": "int",
+            "defaultValue": 20,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Optional. The maximum number of throughput units for the Event Hub."
+            }
+        },
+        "Event Hub Auto Inflate Enabled": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Optional. Whether auto-inflate is enabled for the Event Hub."
+            }
+        },
+        "Event Hub Partition Count": {
+            "type": "int",
+            "defaultValue": 32,
+            "minValue": 2,
+            "maxValue": 32,
+            "metadata": {
+                "description": "Optional. The number of partitions for the Event Hub."
+            }
+        },
+        "Event Hub Retention Days": {
+            "type": "int",
+            "defaultValue": 7,
+            "minValue": 1,
+            "maxValue": 7,
+            "metadata": {
+                "description": "Optional. The number of days to retain data in the Event Hub."
+            }
+        },
         "Event Hub Consumer Group": {
             "type": "String",
             "defaultValue": "$Default",
             "metadata": {
-                "description": "Please use the actual consumer group if using existing event hub."
+                "description": "Optional. Please use the actual consumer group if using existing event hub."
             }
         },
         "Event Hub Filter Json": {
@@ -106,10 +140,10 @@
        "azureFunctionExtensionsVersion": "~4",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
-        "newEhubMaxThroughputUnits": 20,
-        "newEhubAutoInflateEnabled": true,
-        "newEhubPartitionCount": 32,
-        "newEhubRetentionDays": 7,
+        "newEhubMaxThroughputUnits": "[parameters('Event Hub Max Throughput Units')]",
+        "newEhubAutoInflateEnabled": "[parameters('Event Hub Auto Inflate Enabled')]",
+        "newEhubPartitionCount": "[parameters('Event Hub Partition Count')]",
+        "newEhubRetentionDays": "[parameters('Event Hub Retention Days')]",
         "filterJson": "[parameters('Event Hub Filter Json')]",
         "filterRegex": "[parameters('Event Hub Filter Regex')]",
         "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
@@ -336,7 +370,7 @@
             "sku": {
                 "name": "Standard",
                 "tier": "Standard",
-                "capacity": 1
+                "capacity":"[variables('newEhubMaxThroughputUnits')]"
             },
             "name": "[variables('ehubNsName')]",
             "apiVersion": "2017-04-01",
