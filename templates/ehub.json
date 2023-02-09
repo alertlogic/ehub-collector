@@ -63,14 +63,14 @@
                 "description": "Optional. The maximum number of throughput units for the Event Hub."
             }
         },
-        "Ehub Auto Inflate Enabled": {
+        "Event Hub Auto Inflate Enabled": {
             "type": "bool",
             "defaultValue": true,
             "metadata": {
                 "description": "Optional. Whether auto-inflate is enabled for the Event Hub."
             }
         },
-        "Ehub Partition Count": {
+        "Event Hub Partition Count": {
             "type": "int",
             "defaultValue": 32,
             "minValue": 2,
@@ -79,7 +79,7 @@
                 "description": "Optional. The number of partitions for the Event Hub."
             }
         },
-        "Ehub Retention Days": {
+        "Event Hub Retention Days": {
             "type": "int",
             "defaultValue": 7,
             "minValue": 1,
@@ -141,9 +141,9 @@
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
         "newEhubMaxThroughputUnits": "[parameters('Event Hub Max Throughput Units')]",
-        "newEhubAutoInflateEnabled": "[parameters('Ehub Auto Inflate Enabled')]",
-        "newEhubPartitionCount": "[parameters('Ehub Partition Count')]",
-        "newEhubRetentionDays": "[parameters('Ehub Retention Days')]",
+        "newEhubAutoInflateEnabled": "[parameters('Event Hub Auto Inflate Enabled')]",
+        "newEhubPartitionCount": "[parameters('Event Hub Partition Count')]",
+        "newEhubRetentionDays": "[parameters('Event Hub Retention Days')]",
         "filterJson": "[parameters('Event Hub Filter Json')]",
         "filterRegex": "[parameters('Event Hub Filter Regex')]",
         "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
