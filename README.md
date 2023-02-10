@@ -92,6 +92,10 @@ Click the button below to start deployment.
    - **Event Hub Connection String** - Type the connection string for the existing Event Hub; leave empty if creating a new Event Hub.
    - **Event Hub Namespace** - Type the namespace for the existing Event Hub; leave empty if creating a new Event Hub.
    - **Event Hub Name** - Type the name of the existing Event Hub.
+   - **Event Hub Max Throughput Units** - The maximum number of throughput units for the Event Hub (Optional).
+   - **Event Hub Auto Inflate Enabled** - Whether auto-inflate is enabled for the Event Hub (Optional).
+   - **Event Hub Partition Count** - The number of partitions for the Event Hub (Optional).
+   - **Event Hub Retention Days** - The number of days to retain data in the Event Hub (Optional).
 
    **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
    Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs).
@@ -114,7 +118,7 @@ Click the button below to start deployment.
 
    **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
      - **Enable Application Insights** - Enable or Disable Application Insights (Optional) for monitoring invocation logs. Default value is No. Follow this guide to monitor azure functions  [click here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring).
-1. Click **Purchase**.
+2. Click **Purchase**.
 
 **Note:** If you choose to create new event hub via the template then the following event hub scaling parameters are used:
 
