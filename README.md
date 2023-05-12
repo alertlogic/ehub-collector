@@ -79,6 +79,14 @@ Click the button below to start deployment.
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub.json)
 
+or 
+Use below premium function ARM template .
+This template deploys an Azure Function Premium plan with virtual network integration and private endpoints for accessing storage account of azure function app privately.
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub_premium.json)
+
+
+
 1. To start a deployment, provide the following required template parameters, and then click the `Purchase` button:
    - **Application Name** - Type the name of the log source to appear in the Alert Logic console.
    - **Alert Logic Access Key ID** - Type the `access_key_id` you created above.
