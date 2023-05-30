@@ -79,6 +79,14 @@ Click the button below to start deployment.
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub.json)
 
+or 
+Use below premium function ARM template .
+This template deploys an Azure Function Premium plan with virtual network integration and private endpoints for accessing storage account of azure function app privately.
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub_premium.json)
+
+
+
 1. To start a deployment, provide the following required template parameters, and then click the `Purchase` button:
    - **Application Name** - Type the name of the log source to appear in the Alert Logic console.
    - **Alert Logic Access Key ID** - Type the `access_key_id` you created above.
@@ -92,9 +100,17 @@ Click the button below to start deployment.
    - **Event Hub Connection String** - Type the connection string for the existing Event Hub; leave empty if creating a new Event Hub.
    - **Event Hub Namespace** - Type the namespace for the existing Event Hub; leave empty if creating a new Event Hub.
    - **Event Hub Name** - Type the name of the existing Event Hub.
+   - **Event Hub Max Throughput Units** - The maximum number of throughput units for the Event Hub (Optional).
+   - **Event Hub Auto Inflate Enabled** - Whether auto-inflate is enabled for the Event Hub (Optional).
+   - **Event Hub Partition Count** - The number of partitions for the Event Hub (Optional).
+   - **Event Hub Retention Days** - The number of days to retain data in the Event Hub (Optional).
 
    **Note:** This value defaults to `insight-operational-logs`. This Event Hub is created automatically by Azure when a subscription [Log Profile is integrated with Event Hub through the Azure Monitor service](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/stream-monitoring-data-event-hubs#azure-subscription-monitoring-data).
    Follow this guide to [Stream the Azure Activity Log to Event Hubs](https://docs.microsoft.com/en-us/azure/azure-monitor/platform/activity-logs-stream-event-hubs).
+
+    **Note:** The wrong values configured for eventhub `Maximum throughput units`, `Auto-inflate` `Partitions` and `Data retention period` causes data loss which can't be recovered
+    Follow this guide to [Scaling with Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-scalability) and [Features and terminology in Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-features).
+    
 
    - **Event Hub Filter Json** - Type the filter in JSON format. For more details click [here](#event-hub-filtering).
    - **Event Hub Filter Regex** - Type the filter in REGEX format. For more details click [here](#event-hub-filtering).
@@ -110,7 +126,7 @@ Click the button below to start deployment.
 
    **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
      - **Enable Application Insights** - Enable or Disable Application Insights (Optional) for monitoring invocation logs. Default value is No. Follow this guide to monitor azure functions  [click here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring).
-1. Click **Purchase**.
+2. Click **Purchase**.
 
 **Note:** If you choose to create new event hub via the template then the following event hub scaling parameters are used:
 

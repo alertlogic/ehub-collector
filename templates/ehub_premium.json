@@ -1,0 +1,852 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "Application Name": {
+            "type": "String"
+        },
+        "Alert Logic Access Key ID": {
+            "type": "String"
+        },
+        "Alert Logic Secret Key": {
+            "type": "SecureString"
+        },
+        "Alert Logic API endpoint": {
+            "type": "String",
+            "defaultValue": "api.global-services.global.alertlogic.com",
+            "allowedValues" : [
+                "api.global-services.global.alertlogic.com",
+                "api.global-integration.product.dev.alertlogic.com"
+            ]
+        },
+        "Alert Logic Data Residency": {
+            "type": "String",
+            "defaultValue": "default",
+            "allowedValues": [
+                "default"
+            ]
+        },
+        "Event Hub Resource Group": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the resource group for existing event hub. Leave empty to install Alert Logic managed event hub infrastructure."
+            }
+        },
+        "Event Hub Connection String": {
+            "type": "SecureString",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the connection string for existing event hub. Leave empty if you use Alert Logic managed event hub infrastructure."
+            }
+        },
+        "Event Hub Namespace": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Specifies the namespace for existing event hub. Leave empty if you use Alert Logic managed event Hub infrastructure."
+            }
+        },
+        "Event Hub Name": {
+            "type": "String",
+            "defaultValue": "insights-operational-logs",
+            "metadata": {
+                "description": "Please use the actual name if using existing event hub."
+            }
+        },
+        "Event Hub Consumer Group": {
+            "type": "String",
+            "defaultValue": "$Default",
+            "metadata": {
+                "description": "Please use the actual consumer group if using existing event hub."
+            }
+        },
+        "Event Hub Filter Json": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Please enter type of filter in JSON format. Only messages which contain the specified property will be collected.\n e.g {\"channels\": \"Operation\"}"
+            }
+        },
+        "Event Hub Filter Regex": {
+            "type": "String",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Optional. Please enter type of filter in REGEX format. Only messages which contain the specified property will be collected.\n e.g ^channels.*"
+            }
+        },
+        "enableApplicationInsights": {
+            "type": "String",
+            "defaultValue": "No",
+            "allowedValues":["Yes", "No"],
+            "metadata": {
+                "description": "Enable Application Insights (Optional)."
+            }
+        },
+
+        "Event Hub Max Throughput Units": {
+            "type": "int",
+            "defaultValue": 20,
+            "minValue": 1,
+            "maxValue": 20,
+            "metadata": {
+                "description": "Optional. The maximum number of throughput units for the Event Hub."
+            }
+        },
+        "Event Hub Auto Inflate Enabled": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Optional. Whether auto-inflate is enabled for the Event Hub."
+            }
+        },
+        "Event Hub Partition Count": {
+            "type": "int",
+            "defaultValue": 32,
+            "minValue": 2,
+            "maxValue": 32,
+            "metadata": {
+                "description": "Optional. The number of partitions for the Event Hub."
+            }
+        },
+        "Event Hub Retention Days": {
+            "type": "int",
+            "defaultValue": 7,
+            "minValue": 1,
+            "maxValue": 7,
+            "metadata": {
+                "description": "Optional. The number of days to retain data in the Event Hub."
+            }
+        },
+        "appServicePlanSkuName": {
+            "type": "string",
+            "defaultValue": "EP1",
+            "allowedValues": [
+              "EP1",  
+              "EP2",  
+              "EP3"   
+            ]
+          },
+        "vnetName": {
+            "type": "string",
+            "defaultValue": "[format('vnet-{0}', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "The name of the virtual network for virtual network integration."
+            }
+        },
+        "functionSubnetName": {
+            "type": "string",
+            "defaultValue": "al-function-subnet",
+            "metadata": {
+                "description": "The name of the virtual network subnet to be associated with the Azure Function app."
+            }
+        },
+        "privateEndpointSubnetName": {
+            "type": "string",
+            "defaultValue": "al-privateenpoint-subnet",
+            "metadata": {
+                "description": "The name of the virtual network subnet used for allocating IP addresses for private endpoints."
+            }
+        },
+        "vnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.100.0.0/16",
+            "metadata": {
+                "description": "The IP adddress space used for the virtual network."
+            }
+        },
+        "functionSubnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.100.0.0/24",
+            "metadata": {
+                "description": "The IP address space used for the Azure Function integration subnet."
+            }
+        },
+        "privateEndpointSubnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.100.1.0/24",
+            "metadata": {
+                "description": "The IP address space used for the private endpoints."
+            }
+        }
+      
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "fileShareName": "[concat(toLower(parameters('Application Name')), '9546')]",
+        "resourceGroupName": "[resourceGroup().name]",
+        "resourceGroupId": "[resourceGroup().id]",
+        "contribRoleAssignmentName": "[guid(uniqueString( variables('resourceGroupId'), deployment().name ))]",
+        "subscriptionId": "[subscription().subscriptionId]",
+        "tenantId": "[subscription().tenantId]",
+        "webAppStorageAccountName": "[take(concat('alertlogicstorage', uniqueString(concat(subscription().tenantId, parameters('Application Name')))), 24)]",
+        "webAppSourceControlName": "web",
+        "contributorRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "readerRole": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "ehubNsName": "[if(equals(parameters('Event Hub Namespace'), ''), concat('AlertLogicIngest-', variables('location'), '-', uniqueString(variables('resourceGroupId'))), parameters('Event Hub Namespace'))]",
+        "ehubName": "[if(equals(parameters('Event Hub Name'), ''), 'insights-operational-logs', toLower(parameters('Event Hub Name')))]",
+        "ehubResourceGroup": "[if(equals(parameters('Event Hub Resource Group'), ''), variables('resourceGroupName'), parameters('Event Hub Resource Group'))]",
+        "ehubConsumerGroup": "[if(equals(parameters('Event Hub Consumer Group'), ''), '$Default', parameters('Event Hub Consumer Group'))]",
+        "createNewEhubInfraCond": "[if(and(equals(parameters('Event Hub Resource Group'), ''), equals(parameters('Event Hub Connection String'), ''), equals(parameters('Event Hub Namespace'), '')), bool('true'), bool('false'))]",
+        "repo": "https://github.com/alertlogic/ehub-collector.git",
+        "branch": "v1",
+        "nodeRuntimeVersion": "~14",
+       "azureFunctionExtensionsVersion": "~4",
+        "dlContainerName": "alertlogic-dl",
+        "statsQueueName": "alertlogic-stats",
+        "newEhubMaxThroughputUnits": "[parameters('Event Hub Max Throughput Units')]",
+        "newEhubAutoInflateEnabled": "[parameters('Event Hub Auto Inflate Enabled')]",
+        "newEhubPartitionCount": "[parameters('Event Hub Partition Count')]",
+        "newEhubRetentionDays": "[parameters('Event Hub Retention Days')]",
+        "filterJson": "[parameters('Event Hub Filter Json')]",
+        "filterRegex": "[parameters('Event Hub Filter Regex')]",
+        "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
+        "applicationInsightsName":"[concat(parameters('Application Name'),'-',take(subscription().tenantId,5))]",
+        "appServicePlanName": "[concat('AppServicePlan-', parameters('Application Name'))]",
+        "privateStorageFileDnsZoneName": "[format('privatelink.file.{0}', environment().suffixes.storage)]",
+        "privateEndpointStorageFileName": "[format('{0}-file-private-endpoint', variables('webAppStorageAccountName'))]",
+        "privateStorageTableDnsZoneName": "[format('privatelink.table.{0}', environment().suffixes.storage)]",
+        "privateEndpointStorageTableName": "[format('{0}-table-private-endpoint', variables('webAppStorageAccountName'))]",
+        "privateStorageBlobDnsZoneName": "[format('privatelink.blob.{0}', environment().suffixes.storage)]",
+        "privateEndpointStorageBlobName": "[format('{0}-blob-private-endpoint', variables('webAppStorageAccountName'))]",
+        "privateStorageQueueDnsZoneName": "[format('privatelink.queue.{0}', environment().suffixes.storage)]",
+        "privateEndpointStorageQueueName": "[format('{0}-queue-private-endpoint', variables('webAppStorageAccountName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/Sites",
+            "kind": "functionapp",
+            "name": "[parameters('Application Name')]",
+            "apiVersion": "2018-02-01",
+            "location": "[variables('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "name": "[parameters('Application Name')]",
+                "siteConfig": {
+                    "vnetRouteAllEnabled": true,
+                    "appSettings": [
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "node"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "[variables('azureFunctionExtensionsVersion')]"
+                        },
+                        {
+                            "name":"AZURE_FUN_UPDATE_CONFIG_NAME",
+                            "value": "al-ehub-collector.json"
+                        },
+                        {
+                            "name": "SCM_USE_FUNCPACK",
+                            "value": "1"
+                        },
+                        {
+                            "name": "SCM_POST_DEPLOYMENT_ACTIONS_PATH",
+                            "value": "PostDeploymentActions"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[variables('fileShareName')]"
+                        },
+                        {
+                            "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                            "value": "[variables('nodeRuntimeVersion')]"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]"
+                        },
+                        {
+                            "name": "WEBSITE_VNET_ROUTE_ALL",
+                            "value": "1"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTOVERVNET",
+                            "value": "1"
+                        }
+                    ],
+                    "connectionStrings": [
+                        {
+                            "name": "APP_AL_ACCESS_KEY_ID",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic Access Key ID')]"
+                        },
+                        {
+                            "name": "APP_AL_SECRET_KEY",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic Secret Key')]"
+                        },
+                        {
+                            "name": "APP_AL_API_ENDPOINT",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic API endpoint')]"
+                        },
+                        {
+                            "name": "APP_AL_RESIDENCY",
+                            "type": "Custom",
+                            "connectionString": "[parameters('Alert Logic Data Residency')]"
+                        }
+                    ],
+                    "ftpsState": "FtpsOnly"
+                },
+                "clientAffinityEnabled": false,
+                "httpsOnly": true,
+                "clientCertEnabled": true,
+                "clientCertMode": "Required",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('functionSubnetName'))]"
+
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]",
+                "[resourceId('Microsoft.insights/components/', variables('applicationInsightsName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', split(format('{0}/default/{1}', variables('webAppStorageAccountName'), variables('fileShareName')), '/')[0], split(format('{0}/default/{1}', variables('webAppStorageAccountName'), variables('fileShareName')), '/')[1], split(format('{0}/default/{1}', variables('webAppStorageAccountName'), variables('fileShareName')), '/')[2])]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+
+            ],
+            "resources": [
+                {
+                    "type": "Microsoft.Web/sites/config",
+                    "apiVersion": "2018-02-01",
+                    "name": "[concat(parameters('Application Name'), '/authsettings')]",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]"
+                    ],
+                    "properties": {
+                        "enabled": true,
+                        "unauthenticatedClientAction": "RedirectToLoginPage",
+                        "tokenStoreEnabled": true
+                    }
+                },
+                {
+                    "apiVersion": "2018-02-01",
+                    "name": "[variables('webAppSourceControlName')]",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "[variables('repo')]",
+                        "branch": "[variables('branch')]",
+                        "IsManualIntegration": true
+                    }
+                },
+                {
+                    "apiVersion": "2018-02-01",
+                    "name": "appsettings",
+                    "type": "config",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]",
+                        "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('Application Name'), variables('webAppSourceControlName'))]",
+                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
+                    ],
+                    "properties": {
+                        "FUNCTIONS_WORKER_RUNTIME": "node",
+                        "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
+                        "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('webAppStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName')), '2015-06-15').key1)]",
+                        "WEBSITE_CONTENTSHARE": "[variables('fileShareName')]",
+                        "WEBSITE_NODE_DEFAULT_VERSION": "[variables('nodeRuntimeVersion')]",
+                        "FUNCTIONS_EXTENSION_VERSION": "[variables('azureFunctionExtensionsVersion')]",
+                        "AZURE_FUN_UPDATE_CONFIG_NAME": "al-ehub-collector.json",
+                        "SCM_USE_FUNCPACK": "1",
+                        "SCM_POST_DEPLOYMENT_ACTIONS_PATH": "PostDeploymentActions",
+                        "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
+                        "APP_RESOURCE_GROUP": "[variables('resourceGroupName')]",
+                        "APP_TENANT_ID": "[variables('tenantId')]",
+                        "APP_LOG_EHUB_CONNECTION": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString, parameters('Event Hub Connection String'))]",
+                        "APP_LOG_EHUB_NAME": "[variables('ehubName')]",
+                        "APP_LOG_EHUB_CONSUMER_GROUP": "[variables('ehubConsumerGroup')]",
+                        "APP_LOG_EHUB_RESOURCE_GROUP": "[variables('ehubResourceGroup')]",
+                        "APP_DL_CONTAINER_NAME": "[variables('dlContainerName')]",
+                        "DL_BLOB_PAGE_SIZE": "100",
+                        "APP_STATS_QUEUE_NAME": "[variables('statsQueueName')]",
+                        "APP_PRINCIPAL_ID": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
+                        "APP_FILTER_JSON": "[variables('filterJson')]",
+                        "APP_FILTER_REGEX": "[variables('filterRegex')]",
+                        "APPINSIGHTS_INSTRUMENTATIONKEY": "[if(variables('isApplicationInsightEnabled'),reference(concat('microsoft.insights/components/', variables('applicationInsightsName'))).InstrumentationKey,json('null'))]",
+                        "ApplicationInsightsAgent_EXTENSION_VERSION": "~2",
+                        "WEBSITE_VNET_ROUTE_ALL":"1",
+                        "WEBSITE_CONTENTOVERVNET":"1"
+                    }
+                }
+            ]
+        },
+        {
+            "location": "[variables('location')]",
+            "name": "[variables('appServicePlanName')]",
+            "type": "Microsoft.Web/serverFarms",
+            "apiVersion": "2018-02-01",
+            "kind": "windows",
+            "properties": {
+              "name": "[variables('appServicePlanName')]"
+            },
+            "sku": {
+              "name": "[parameters('appServicePlanSkuName')]"
+            }
+        },
+            {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2020-06-01",
+            "name": "[format('{0}/{1}', variables('privateStorageFileDnsZoneName'), format('{0}-link', variables('privateStorageFileDnsZoneName')))]",
+            "location": "global",
+            "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageFileDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2020-06-01",
+            "name": "[format('{0}/{1}', variables('privateStorageBlobDnsZoneName'), format('{0}-link', variables('privateStorageBlobDnsZoneName')))]",
+            "location": "global",
+            "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageBlobDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2020-06-01",
+            "name": "[format('{0}/{1}', variables('privateStorageQueueDnsZoneName'), format('{0}-link', variables('privateStorageQueueDnsZoneName')))]",
+            "location": "global",
+            "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageQueueDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2020-06-01",
+            "name": "[format('{0}/{1}', variables('privateStorageTableDnsZoneName'), format('{0}-link', variables('privateStorageTableDnsZoneName')))]",
+            "location": "global",
+            "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageTableDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2021-02-01",
+            "name": "[format('{0}/{1}', variables('privateEndpointStorageFileName'), 'filePrivateDnsZoneGroup')]",
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "config",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageFileDnsZoneName'))]"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageFileDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointStorageFileName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2021-02-01",
+            "name": "[format('{0}/{1}', variables('privateEndpointStorageTableName'), 'tablePrivateDnsZoneGroup')]",
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "config",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageTableDnsZoneName'))]"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageTableDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointStorageTableName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2021-02-01",
+            "name": "[format('{0}/{1}', variables('privateEndpointStorageQueueName'), 'queuePrivateDnsZoneGroup')]",
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "config",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageQueueDnsZoneName'))]"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageQueueDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointStorageQueueName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2021-02-01",
+            "name": "[format('{0}/{1}', variables('privateEndpointStorageBlobName'), 'blobPrivateDnsZoneGroup')]",
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "config",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageBlobDnsZoneName'))]"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateStorageBlobDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointStorageBlobName'))]"
+            ]
+        },
+              {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2022-05-01",
+            "name": "[parameters('vnetName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('functionSubnetName')]",
+                        "properties": {
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "delegations": [
+                                {
+                                    "name": "webapp",
+                                    "properties": {
+                                        "serviceName": "Microsoft.Web/serverFarms"
+                                    }
+                                }
+                            ],
+                            "addressPrefix": "[parameters('functionSubnetAddressPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('privateEndpointSubnetName')]",
+                        "properties": {
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "addressPrefix": "[parameters('privateEndpointSubnetAddressPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('privateStorageFileDnsZoneName')]",
+            "location": "global"
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('privateStorageBlobDnsZoneName')]",
+            "location": "global"
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('privateStorageQueueDnsZoneName')]",
+            "location": "global"
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('privateStorageTableDnsZoneName')]",
+            "location": "global"
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('privateEndpointStorageFileName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "subnet": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('privateEndpointSubnetName'))]"
+                },
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "MyStorageFilePrivateLinkConnection",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                            "groupIds": [
+                                "file"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('privateEndpointStorageTableName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "subnet": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('privateEndpointSubnetName'))]"
+                },
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "MyStorageTablePrivateLinkConnection",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                            "groupIds": [
+                                "table"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('privateEndpointStorageQueueName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "subnet": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('privateEndpointSubnetName'))]"
+                },
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "MyStorageQueuePrivateLinkConnection",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                            "groupIds": [
+                                "queue"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('privateEndpointStorageBlobName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "subnet": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('privateEndpointSubnetName'))]"
+                },
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "MyStorageBlobPrivateLinkConnection",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                            "groupIds": [
+                                "blob"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts',  variables('webAppStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            ]
+        },
+        {
+            "condition": "[variables('isApplicationInsightEnabled')]",
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02",
+            "name": "[variables('applicationInsightsName')]",
+            "location": "[variables('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "ApplicationId": "[variables('applicationInsightsName')]"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('webAppStorageAccountName')]",
+            "apiVersion": "2019-06-01",
+            "location": "[variables('location')]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "allowBlobPublicAccess": false,
+                "supportsHttpsTrafficOnly": true,
+                 "publicNetworkAccess": "Enabled",
+                "networkAcls": {
+                    "bypass": "None",
+                    "defaultAction": "Deny"
+                }
+            },
+            "tags": {
+                "AlertLogicCollector": "[parameters('Application Name')]"
+            },
+            "resources": [
+                {
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "name": "[concat('default/', variables('dlContainerName'))]",
+                    "dependsOn": [
+                        "[variables('webAppStorageAccountName')]"
+                    ],
+                    "properties": {
+                        "publicAccess": "None"
+                    }
+                },
+				{
+					"type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+					"apiVersion": "2021-04-01",
+					"name": "[format('{0}/default/{1}', variables('webAppStorageAccountName'), variables('fileShareName'))]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts', variables('webAppStorageAccountName'))]"
+					]
+				}
+            ]
+        },
+        {
+            "comments": "Assign contributor role to the app principal id for the resource group application is deployed to.",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "name": "[variables('contribRoleAssignmentName')]",
+            "apiVersion": "2022-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/Sites', parameters('Application Name'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[variables('contributorRole')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/Sites', parameters('Application Name')), '2016-08-01', 'Full').identity.principalId]",
+                "scope": "[variables('resourceGroupId')]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "comments": "Create new event hub namespace and event hub in case of new deployment.",
+            "condition": "[variables('createNewEhubInfraCond')]",
+            "type": "Microsoft.EventHub/namespaces",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard",
+                "capacity":"[variables('newEhubMaxThroughputUnits')]"
+            },
+            "name": "[variables('ehubNsName')]",
+            "apiVersion": "2017-04-01",
+            "location": "[variables('location')]",
+            "tags": {},
+            "properties": {
+                "isAutoInflateEnabled": "[variables('newEhubAutoInflateEnabled')]",
+                "maximumThroughputUnits": "[variables('newEhubMaxThroughputUnits')]"
+            },
+            "dependsOn": [],
+            "resources": [
+                {
+                    "condition": "[variables('createNewEhubInfraCond')]",
+                    "type": "eventhubs",
+                    "name": "[variables('ehubName')]",
+                    "apiVersion": "2017-04-01",
+                    "location": "[variables('location')]",
+                    "properties": {
+                        "messageRetentionInDays": "[variables('newEhubRetentionDays')]",
+                        "partitionCount": "[variables('newEhubPartitionCount')]"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.EventHub/namespaces', variables('ehubNsName'))]"
+                    ]
+                }
+            ]
+        },
+        {
+            "comments": "Assign reader role to the app principal id for existing event hub resource group.",
+            "condition": "[not(variables('createNewEhubInfraCond'))]",
+            "apiVersion": "2018-05-01",
+            "name": "nestedTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('Event Hub Resource Group')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('Application Name'))]",
+                "[resourceId('Microsoft.Web/sites/config', parameters('Application Name'), 'authsettings')]",
+                "[resourceId('Microsoft.Web/sites/config', parameters('Application Name'), 'appsettings')]",
+                "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('Application Name'), variables('webAppSourceControlName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "name": "[guid(reference(parameters('Application Name'), '2016-08-01', 'Full').identity.principalId, deployment().name)]",
+                            "apiVersion": "2022-04-01",
+                            "properties": {
+                                "roleDefinitionId": "[variables('readerRole')]",
+                                "principalId": "[reference(parameters('Application Name'), '2016-08-01', 'Full').identity.principalId]",
+                                "scope": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('Event Hub Resource Group'))]",
+                                "principalType": "ServicePrincipal"
+
+                            }
+                        }
+                    ]
+                },
+                "parameters": {}
+            }
+        }
+    ]
+}
