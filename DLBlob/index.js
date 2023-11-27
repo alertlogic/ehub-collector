@@ -14,7 +14,7 @@
 const AlAzureDlBlob = require('@alertlogic/al-azure-collector-js').AlAzureDlBlob;
 const ehubCollector = require('../common/ehub_collector');
 const ehubGeneralFormat = require('../EHubGeneral/format').logRecord;
-
+const invocations = require('../common/invocations');
 const MAX_AMOUNT_OF_DL_MESSAGES = 3;
 
 function getCollectorFunName(blobName) {
@@ -73,6 +73,7 @@ function getDlBlobMessages(dlblobText) {
 module.exports = function (context, AlertlogicDLBlobTimer) {
     var dlblob = new AlAzureDlBlob(context, processBlob);
     dlblob.processDlBlobs(AlertlogicDLBlobTimer, function(error, result) {
+        invocations.logInvocationResult(context.executionContext.functionName, true);
         if (!error) {
             var processingErrors = result.filter(function(item) {
                 if (item.error) {
@@ -82,11 +83,13 @@ module.exports = function (context, AlertlogicDLBlobTimer) {
                 }
             });
             if (processingErrors.length > 0) {
+                invocations.logInvocationResult(context.executionContext.functionName, false);
                 context.done(processingErrors);
             } else {
                 context.done();
             }
         } else {
+            invocations.logInvocationResult(context.executionContext.functionName, false);
             context.done(error);
         }
     });

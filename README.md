@@ -73,21 +73,34 @@ If your organization uses multiple Active Directory tenants, log into the correc
 
 The ARM template can be used to configure a new Azure Event Hub or have the Alert Logic collector reuse an existing one.
 
+Two versions of the ARM template are offered for deploying the Event Hub collector: the standard ARM template and the Premium plan ARM template.
+
+-   **Standard ARM template:** The standard ARM template uses the basic 'Consumption' hosting plan which does not support integration with virtual networks and private endpoints. Using this template therefore requires that the Azure Function App storage account has public network access enabled for all networks. The storage account in this case is reachable from the public internet, but remains inaccessible without proper authentication and authorization.
+-   **Premium plan ARM template:** The Premium plan ARM template deploys the collector onto a Premium hosting plan which does support integration with virtual networks and private endpoints. Using this template therefore enables the Azure Function App storage account to restrict inbound connections to those originating from within a specific virtual network in your Azure subscription. The use of a Premium hosting plan will incur additional costs in your Azure account.
+
+For more information about these plans, refer to the [Azure Functions Premium plan overview](https://learn.microsoft.com/en-us/azure/azure-functions/functions-premium-plan?tabs=portal).
+
+
 ### Deploy with the custom ARM Template in an Azure Subscription
 
 Click the button below to start deployment. 
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub.json)
 
-or 
-Use below premium function ARM template .
-This template deploys an Azure Function Premium plan with virtual network integration and private endpoints for accessing storage account of azure function app privately.
+ *-or-*
+
+Use below premium function ARM template.
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub_premium.json)
 
+**To deploy the ARM template:**
+
+1.  Access the [ARM template page](https://portal.azure.com/#create/Microsoft.Template/uri/https:%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub.json "ARM template page") in Azure, which deploys the standard 'Consumption' plan ARM template.\
+    *-or-*\
+    Access the [Premium plan ARM template page](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub_premium.json) in Azure, which will deploy an Azure Functions Premium plan, as described above.
 
 
-1. To start a deployment, provide the following required template parameters, and then click the `Purchase` button:
+2. To start a deployment, provide the following required template parameters, and then click the `Purchase` button:
    - **Application Name** - Type the name of the log source to appear in the Alert Logic console.
    - **Alert Logic Access Key ID** - Type the `access_key_id` you created above.
    - **Alert Logic Secret Key** - Type the `secret_key` you created above.
@@ -125,8 +138,18 @@ This template deploys an Azure Function Premium plan with virtual network integr
    **example:** \/*.Policy or "Policy"
 
    **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
-     - **Enable Application Insights** - Enable or Disable Application Insights (Optional) for monitoring invocation logs. Default value is No. Follow this guide to monitor azure functions  [click here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring).
-2. Click **Purchase**.
+   - **Enable Application Insights** - Enable or Disable Application Insights (Optional) for monitoring invocation logs. Default value is No. Follow this guide to monitor azure functions  [click here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring).
+
+3.  If you are using the [Premium plan ARM template page](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub_premium.json) in Azure, provide the following additional required template parameters.
+
+	  - **AppService Plan SKU Name** - Select App service plan options for Elastic premium (EP1, EP2 or EP3) from the dropdown.
+    - **Vnet Name** - Type the name of the virtual network for virtual network integration. The default value is [format('vnet-{0}', uniqueString(resourceGroup().id))].
+    - **Function Subnet Name** -Type the name of the virtual network subnet to be associated with the Azure Function app. The default value is (al-function-subnet).
+    - **Private Endpoint Subnet Name** - Type the name of the virtual network subnet used for allocating IP addresses for private endpoints. The default value is (al-privateendpoint-subnet).
+    - **Vnet Address Prefix** - Type the IP address space used for the virtual network. The default value is (10.100.0.0/16).
+    - **Function Subnet Address Prefix** - Type the IP address space used for the Azure Function integration subnet. The default value is (10.100.0.0/24).
+    - **Private Endpoint Subnet Address Prefix** - Type the IP address space used for the private endpoints default value is (10.100.1.0/24).
+4. Click **Purchase**.
 
 **Note:** If you choose to create new event hub via the template then the following event hub scaling parameters are used:
 
