@@ -1,14 +1,14 @@
 {
   "name": "ehub-collector",
-  "version": "1.6.14",
+  "version": "1.6.15",
   "dependencies": {
-    "@alertlogic/al-azure-collector-js": "3.1.4",
-    "@alertlogic/al-collector-js": "3.0.9",
+    "@alertlogic/al-azure-collector-js": "3.1.5",
+    "@alertlogic/al-collector-js": "3.0.11",
     "@azure/arm-eventhub": "3.3.1",
     "@azure/arm-monitor": "6.1.1",
-    "async": "^3.2.4",
-    "moment": "2.29.4",
-    "moment-timezone": "^0.5.43",
+    "async": "^3.2.5",
+    "moment": "2.30.1",
+    "moment-timezone": "^0.5.45",
     "parse-key-value": "1.0.0"
   },
   "scripts": {
@@ -21,12 +21,12 @@
   },
   "devDependencies": {
     "jshint": "^2.13.6",
-    "mocha": "^10.2.0",
+    "mocha": "^10.4.0",
     "mocha-jenkins-reporter": "^0.4.8",
-    "nock": "^13.3.3",
-    "nyc": "^15.1.0",
+    "nock": "^13.5.4",
+    "nyc": "^17.0.0",
     "pre-commit": "^1.2.2",
     "rewire": "^7.0.0",
-    "sinon": "^15.1.2"
+    "sinon": "^18.0.0"
   }
 }

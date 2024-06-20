@@ -8,7 +8,7 @@ stages:
             - pull_request
             - pull_request:
                 trigger_phrase: test it
-        image: node:18
+        image: node:20
         compute_size: small
         commands:
             - make test
@@ -16,7 +16,7 @@ stages:
         name: V1 Push - Coverage
         when:
             - push: ['v1']
-        image: node:18
+        image: node:20
         compute_size: small
         commands:
             - make test
