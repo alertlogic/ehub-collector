@@ -62,8 +62,12 @@ function checkEventHub(master, eventHubs, callback) {
     }
 }
 
+function initArmEhub(master) {
+    return ehubUtil.initArmEhub(master);
+}
+
 const eventHubNs = function(master, callback) {
-    var armEhub = ehubUtil.initArmEhub(master);
+    var armEhub = initArmEhub(master);
     const rg = ehubUtil.getEhubForLogResourceGroup(master);
     const nsName = ehubUtil.getEhubNsName();
     
