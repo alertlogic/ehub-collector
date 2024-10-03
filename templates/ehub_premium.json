@@ -1,18 +1,18 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.1",
+    "contentVersion": "1.0.0.2",
     "parameters": {
         "Application Name": {
-            "type": "String"
+            "type": "string"
         },
         "Alert Logic Access Key ID": {
-            "type": "String"
+            "type": "string"
         },
         "Alert Logic Secret Key": {
-            "type": "SecureString"
+            "type": "securestring"
         },
         "Alert Logic API endpoint": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "api.global-services.global.alertlogic.com",
             "allowedValues" : [
                 "api.global-services.global.alertlogic.com",
@@ -20,70 +20,80 @@
             ]
         },
         "Alert Logic Data Residency": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "default",
             "allowedValues": [
                 "default"
             ]
         },
         "Event Hub Resource Group": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "",
             "metadata": {
                 "description": "Optional. Specifies the resource group for existing event hub. Leave empty to install Alert Logic managed event hub infrastructure."
             }
         },
         "Event Hub Connection String": {
-            "type": "SecureString",
+            "type": "securestring",
             "defaultValue": "",
             "metadata": {
                 "description": "Optional. Specifies the connection string for existing event hub. Leave empty if you use Alert Logic managed event hub infrastructure."
             }
         },
         "Event Hub Namespace": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "",
             "metadata": {
                 "description": "Optional. Specifies the namespace for existing event hub. Leave empty if you use Alert Logic managed event Hub infrastructure."
             }
         },
         "Event Hub Name": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "insights-operational-logs",
             "metadata": {
                 "description": "Please use the actual name if using existing event hub."
             }
         },
         "Event Hub Consumer Group": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "$Default",
             "metadata": {
                 "description": "Please use the actual consumer group if using existing event hub."
             }
         },
         "Event Hub Filter Json": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "",
             "metadata": {
                 "description": "Optional. Please enter type of filter in JSON format. Only messages which contain the specified property will be collected.\n e.g {\"channels\": \"Operation\"}"
             }
         },
         "Event Hub Filter Regex": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "",
             "metadata": {
                 "description": "Optional. Please enter type of filter in REGEX format. Only messages which contain the specified property will be collected.\n e.g ^channels.*"
             }
         },
         "enableApplicationInsights": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "No",
             "allowedValues":["Yes", "No"],
             "metadata": {
                 "description": "Enable Application Insights (Optional)."
             }
         },
-
+        "minimumTlsVersion": {
+            "type": "string",
+            "defaultValue": "1.2",
+            "allowedValues": [
+                "1.2",
+                "1.3"
+            ],
+            "metadata": {
+            "description": "The minimum TLS version to be used for Function App, Event Hub, and Storage Account."
+            }
+        },
         "Event Hub Max Throughput Units": {
             "type": "int",
             "defaultValue": 20,
@@ -191,7 +201,7 @@
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
         "nodeRuntimeVersion": "~20",
-       "azureFunctionExtensionsVersion": "~4",
+        "azureFunctionExtensionsVersion": "~4",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
         "newEhubMaxThroughputUnits": "[parameters('Event Hub Max Throughput Units')]",
@@ -201,6 +211,8 @@
         "filterJson": "[parameters('Event Hub Filter Json')]",
         "filterRegex": "[parameters('Event Hub Filter Regex')]",
         "isApplicationInsightEnabled": "[equals(parameters('enableApplicationInsights'),'Yes')]",
+        "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+        "minimumTlsVersionForStorage": "[if(equals(parameters('minimumTlsVersion'), '1.3'), 'TLS1_3', 'TLS1_2')]",
         "applicationInsightsName":"[concat(parameters('Application Name'),'-',take(subscription().tenantId,5))]",
         "appServicePlanName": "[concat('AppServicePlan-', parameters('Application Name'))]",
         "privateStorageFileDnsZoneName": "[format('privatelink.file.{0}', environment().suffixes.storage)]",
@@ -226,6 +238,7 @@
                 "name": "[parameters('Application Name')]",
                 "siteConfig": {
                     "vnetRouteAllEnabled": true,
+                    "alwaysOn": true,
                     "appSettings": [
                         {
                             "name": "FUNCTIONS_WORKER_RUNTIME",
@@ -298,7 +311,8 @@
                             "connectionString": "[parameters('Alert Logic Data Residency')]"
                         }
                     ],
-                    "ftpsState": "FtpsOnly"
+                    "ftpsState": "FtpsOnly",
+                    "minTlsVersion": "[variables('minimumTlsVersion')]"
                 },
                 "clientAffinityEnabled": false,
                 "httpsOnly": true,
@@ -366,7 +380,7 @@
                         "APP_SUBSCRIPTION_ID": "[variables('subscriptionId')]",
                         "APP_RESOURCE_GROUP": "[variables('resourceGroupName')]",
                         "APP_TENANT_ID": "[variables('tenantId')]",
-                        "APP_LOG_EHUB_CONNECTION": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString, parameters('Event Hub Connection String'))]",
+                        "APP_LOG_EHUB_CONNECTION": "[if(equals(parameters('Event Hub Connection String'), ''), listKeys(resourceId('Microsoft.EventHub/namespaces/AuthorizationRules', variables('ehubNsName'), 'RootManageSharedAccessKey'), '2024-01-01').primaryConnectionString, parameters('Event Hub Connection String'))]",
                         "APP_LOG_EHUB_NAME": "[variables('ehubName')]",
                         "APP_LOG_EHUB_CONSUMER_GROUP": "[variables('ehubConsumerGroup')]",
                         "APP_LOG_EHUB_RESOURCE_GROUP": "[variables('ehubResourceGroup')]",
@@ -729,7 +743,8 @@
             "properties": {
                 "allowBlobPublicAccess": false,
                 "supportsHttpsTrafficOnly": true,
-                 "publicNetworkAccess": "Enabled",
+                "minimumTlsVersion": "[variables('minimumTlsVersionForStorage')]",
+                "publicNetworkAccess": "Enabled",
                 "networkAcls": {
                     "bypass": "None",
                     "defaultAction": "Deny"
@@ -785,12 +800,13 @@
                 "capacity":"[variables('newEhubMaxThroughputUnits')]"
             },
             "name": "[variables('ehubNsName')]",
-            "apiVersion": "2017-04-01",
+            "apiVersion":"2024-01-01",
             "location": "[variables('location')]",
             "tags": {},
             "properties": {
                 "isAutoInflateEnabled": "[variables('newEhubAutoInflateEnabled')]",
-                "maximumThroughputUnits": "[variables('newEhubMaxThroughputUnits')]"
+                "maximumThroughputUnits": "[variables('newEhubMaxThroughputUnits')]",
+                "minimumTlsVersion": "[variables('minimumTlsVersion')]"
             },
             "dependsOn": [],
             "resources": [
@@ -798,7 +814,7 @@
                     "condition": "[variables('createNewEhubInfraCond')]",
                     "type": "eventhubs",
                     "name": "[variables('ehubName')]",
-                    "apiVersion": "2017-04-01",
+                    "apiVersion": "2024-01-01",
                     "location": "[variables('location')]",
                     "properties": {
                         "messageRetentionInDays": "[variables('newEhubRetentionDays')]",

@@ -18,10 +18,10 @@ const defaultProcessError = function(context, err, messages) {
     const errorSample = {
         type: 'errorSample',
         errorMessage: err.message,
-        erroCode: err.statusCode
+        erroCode: err.statusCode || err.status 
     };
     // We're going to ignore 400s from ingest right now. Do not put them in the DLQ
-    if(err.statusCode >= 400 && err.statusCode < 500){
+    if((err.statusCode >= 400 && err.statusCode < 500) || (err.status >= 400 && err.status < 500) ){
         return skipped;
     }
     // Otherwise, we need to put them in the DLQ
