@@ -12,8 +12,7 @@ const {EventHubManagementClient} = require('@azure/arm-eventhub');
 const parse = require('parse-key-value');
 
 const DEFAULT_EHUB_FOR_LOG_NAME = 'alertlogic-log';
-
-
+let eventHubClient = null;
 const initArmMonitor = function(master) {
     const azureCreds = master.getApplicationTokenCredentials();
     const subscriptionId = master.getConfigAttrs().subscription_id;
@@ -21,9 +20,12 @@ const initArmMonitor = function(master) {
 };
 
 const initArmEhub = function(master) {
-    const azureCreds = master.getApplicationTokenCredentials();
-    const subscriptionId = master.getConfigAttrs().subscription_id;
-    return new EventHubManagementClient(azureCreds, subscriptionId);
+    if (!eventHubClient) {
+        const azureCreds = master.getApplicationTokenCredentials();
+        const subscriptionId = master.getConfigAttrs().subscription_id;
+        eventHubClient = new EventHubManagementClient(azureCreds, subscriptionId);
+    }
+    return eventHubClient;
 };
 
 const formatSdkError = function (master, alErrorCode, message, err) {
