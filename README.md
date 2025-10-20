@@ -143,7 +143,7 @@ Use below premium function ARM template.
 3.  If you are using the [Premium plan ARM template page](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub_premium.json) in Azure, provide the following additional required template parameters.
 
 	  - **AppService Plan SKU Name** - Select App service plan options for Elastic premium (EP1, EP2 or EP3) from the dropdown.
-    - **Vnet Name** - Type the name of the virtual network for virtual network integration. The default value is [format('vnet-{0}', uniqueString(resourceGroup().id))].
+    - **Vnet Name** - Type the name of the virtual network for virtual network integration. The default value is al-function-vnet.
     - **Function Subnet Name** -Type the name of the virtual network subnet to be associated with the Azure Function app. The default value is (al-function-subnet).
     - **Private Endpoint Subnet Name** - Type the name of the virtual network subnet used for allocating IP addresses for private endpoints. The default value is (al-privateendpoint-subnet).
     - **Vnet Address Prefix** - Type the IP address space used for the virtual network. The default value is (10.100.0.0/16).
