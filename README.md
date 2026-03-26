@@ -139,6 +139,7 @@ Use below premium function ARM template.
 
    **Note:** For "Event Hub Filter Json" and "Event Hub Filter Regex", only messages which contain the specified property will be collected. If both the filter values are provided then logs will be collected based on both the values.
    - **Enable Application Insights** - Enable or Disable Application Insights (Optional) for monitoring invocation logs. Default value is No. Follow this guide to monitor azure functions  [click here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring).
+   - **Storage Account Type** - The storage account kind. `V2` maps to Azure `StorageV2` and is the recommended option with Hot tier. `V1 (deprecated)` maps to Azure `Storage` and will be auto-migrated by Microsoft to `StorageV2` by October 2026.
 
 3.  If you are using the [Premium plan ARM template page](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Falertlogic%2Fehub-collector%2Fv1%2Ftemplates%2Fehub_premium.json) in Azure, provide the following additional required template parameters.
 
