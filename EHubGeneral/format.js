@@ -12,6 +12,9 @@
 
 const parse = require('@alertlogic/al-collector-js').Parse;
 
+// Message formatting constants
+const DEFAULT_MESSAGE_PRIORITY = 11; // Default priority level for formatted messages
+
 const typeIdPaths = [
     { path: ['category', 'value'] },
     { path: ['category'] },
@@ -35,7 +38,7 @@ const logRecord = function(msg) {
     const typeId = parse.getMsgTypeId(msg, typeIdPaths);
     let formattedMsg = {
         messageTs: ts.sec,
-        priority: 11,
+        priority: DEFAULT_MESSAGE_PRIORITY,
         progName: 'EHubGeneral',
         message: JSON.stringify(msg),
         messageType: 'json/azure.ehub'
@@ -53,7 +56,3 @@ const logRecord = function(msg) {
 module.exports = {
     logRecord: logRecord
 };
-
-
-
-

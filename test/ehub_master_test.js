@@ -18,6 +18,8 @@ const EhubCollectorMaster = require('../Master/ehub_master').EhubCollectorMaster
 
 
 describe('Event hub Master function unit tests.', function() {
+    var private_getRegisterConfig;
+    
     before(function() {
         private_getRegisterConfig = master.__get__('getRegisterConfig');
     });
@@ -26,7 +28,7 @@ describe('Event hub Master function unit tests.', function() {
         delete process.env.APP_LOG_EHUB_CONNECTION;
     });
     
-    it('Simple OK test, activity record', function(done) {
+    it('Simple OK test, activity record', function() {
         process.env.APP_LOG_EHUB_CONNECTION =  'Endpoint=sb://alertlogicingest-westeurope-vv7gloy2am6u2.servicebus.windows.net/;SharedAccessKeyName=kkread;SharedAccessKey=some+key;EntityPath=insights-operational-logs'; 
         const actual = private_getRegisterConfig();
         const expected = { 
@@ -37,10 +39,9 @@ describe('Event hub Master function unit tests.', function() {
             }
         };
         assert.deepEqual(actual, expected);
-        done();
     });
     
-    it('getConfigAttrs test', function(done) {
+    it('getConfigAttrs test', function() {
         process.env.APP_LOG_EHUB_CONNECTION =  'Endpoint=sb://alertlogicingest-westeurope-vv7gloy2am6u2.servicebus.windows.net/;SharedAccessKeyName=kkread;SharedAccessKey=some+key;EntityPath=insights-operational-logs'; 
         process.env.APP_LOG_EHUB_NAME = 'event-hub-name';
         process.env.APP_LOG_EHUB_RESOURCE_GROUP = 'event-hub-rg';
@@ -73,9 +74,6 @@ describe('Event hub Master function unit tests.', function() {
         delete process.env.APP_LOG_EHUB_CONSUMER_GROUP;
         
         assert.deepEqual(actual, expected);
-        
-        done();
     });
 
 });
-

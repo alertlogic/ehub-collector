@@ -9,6 +9,7 @@
 
 const {MonitorManagementClient} = require('@azure/arm-monitor');
 const {EventHubManagementClient} = require('@azure/arm-eventhub');
+const {RestError} = require('@azure/core-rest-pipeline');
 const parse = require('parse-key-value');
 
 const DEFAULT_EHUB_FOR_LOG_NAME = 'alertlogic-log';
@@ -29,7 +30,18 @@ const initArmEhub = function(master) {
 };
 
 const formatSdkError = function (master, alErrorCode, message, err) {
-    if (typeof err === 'string' || err instanceof String) {
+    if (err instanceof RestError) {
+        // RestError defines request/response as non-enumerable, so JSON.stringify is safe.
+        // Explicitly extract known safe fields to be certain no auth headers are included.
+        const details = {
+            code: err.code,
+            statusCode: err.statusCode,
+            message: err.message,
+            name: err.name
+        };
+        if (err.details !== undefined) details.details = err.details;
+        return master.errorStatusFmt(alErrorCode, message + ' Error: ' + JSON.stringify(details));
+    } else if (typeof err === 'string' || err instanceof String) {
         return master.errorStatusFmt(alErrorCode, message + ' Error: ' + err);
     } else if (typeof err === 'object') {
         return master.errorStatusFmt(alErrorCode, message + ' Error: ' + JSON.stringify(err));
