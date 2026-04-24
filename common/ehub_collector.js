@@ -8,9 +8,12 @@
  * -----------------------------------------------------------------------------
  */
 
-const async = require('async');
 const pkg = require('../package.json');
 const AlAzureCollector = require('@alertlogic/al-azure-collector-js').AlAzureCollector;
+
+// Batch processing constants
+const HTTP_ERROR_MIN = 400;                // Min HTTP error status code
+const HTTP_ERROR_MAX = 500;                // Max HTTP error status code (exclusive)
 
 const defaultProcessError = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
@@ -21,7 +24,7 @@ const defaultProcessError = function(context, err, messages) {
         erroCode: err.statusCode || err.status 
     };
     // We're going to ignore 400s from ingest right now. Do not put them in the DLQ
-    if((err.statusCode >= 400 && err.statusCode < 500) || (err.status >= 400 && err.status < 500) ){
+    if((err.statusCode >= HTTP_ERROR_MIN && err.statusCode < HTTP_ERROR_MAX) || (err.status >= HTTP_ERROR_MIN && err.status < HTTP_ERROR_MAX) ){
         return skipped;
     }
     // Otherwise, we need to put them in the DLQ
@@ -33,8 +36,8 @@ const defaultProcessError = function(context, err, messages) {
     return skipped;
 };
 
-module.exports = function (context, rawMessages, parseFun, processErrorFun, callback) {
-    // the ehub collector my very well receive messages not in json format, in this case we need to wrap it in an objet that teh collector expects 
+module.exports = async function (context, rawMessages, parseFun, processErrorFun) {
+    // the ehub collector my very well receive messages not in json format, in this case we need to wrap it in an object that the collector expects 
     const eventHubMessages = rawMessages.map(message => {
         try{
             const parsedMessage = JSON.parse(message);
@@ -44,34 +47,33 @@ module.exports = function (context, rawMessages, parseFun, processErrorFun, call
         }
     });
 
-    var processError = processErrorFun ? processErrorFun : defaultProcessError;
-    var collector = new AlAzureCollector(context, 'ehub', pkg.version);
-    async.reduce(eventHubMessages, [],
-        function(acc, message, reduceCallback) {
-            return reduceCallback(null,[...acc, ...message.records]);
-        },
-        function(err, redResult) {
-            try {
-                collector.processLog(redResult, parseFun, null,
-                    function(err) {
-                        if (err) {
-                            const skipped =  processError(context, err, redResult);
-                            context.log.error(`Error while processing records. Skipped ${skipped} Records`);
-                            context.log.error(`Error: ${err}`);
-                            return callback(null, { processed: 0, skipped });
-                        } else {
-                            const processed = redResult.length;
-                            context.log.info(`Processed: ${processed}`);
-                        }
-                        return callback(null, { processed: redResult.length, skipped: 0 });
-                });
-            } catch (exception) {
-                const skipped = processError(context, exception, redResult);
-                context.log.error(`Error while processing records. Skipped ${skipped} Records`);
-                return callback(exception);
-            }
-            if (context.bindings.dlBlob) {
-                context.bindings.dlBlob = JSON.stringify(context.bindings.dlBlob);
-            }
-    });
+    const processError = processErrorFun ? processErrorFun : defaultProcessError;
+    const collector = new AlAzureCollector(context, 'ehub', pkg.version);
+    
+    // Flatten all records from all messages
+    const allRecords = eventHubMessages.reduce((acc, message) => {
+        return [...acc, ...message.records];
+    }, []);
+
+    try {
+        await collector.processLog(allRecords, parseFun, null);
+        const processed = allRecords.length;
+        context.log.info(`Processed: ${processed}`);
+        
+        if (context.bindings.dlBlob && typeof context.bindings.dlBlob === 'object') {
+            context.bindings.dlBlob = JSON.stringify(context.bindings.dlBlob);
+        }
+        
+        return { processed: allRecords.length, skipped: 0 };
+    } catch (err) {
+        const skipped = processError(context, err, allRecords);
+        context.log.error(`Error while processing records. Skipped ${skipped} Records`);
+        context.log.error(`Error: ${err}`);
+        
+        if (context.bindings.dlBlob && typeof context.bindings.dlBlob === 'object') {
+            context.bindings.dlBlob = JSON.stringify(context.bindings.dlBlob);
+        }
+        
+        return { processed: 0, skipped };
+    }
 };

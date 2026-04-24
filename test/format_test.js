@@ -3,7 +3,7 @@ const formatLog = require('../EHubGeneral/format').logRecord;
 const mock = require('./mock');
 
 describe('Format log units', function(){
-    it('Formats log record correctly, no optional properties', function(done){
+    it('Formats log record correctly, no optional properties', function(){
         let logRecord = Object.assign({}, mock.SQL_AUDIT_LOG_RECORD);
         delete logRecord.operationName;
         delete logRecord.category;
@@ -19,10 +19,9 @@ describe('Format log units', function(){
         };
 
         assert.deepEqual(formattedRecord, expectedRecord);
-        done();
     });
     
-    it('Formats log record correctly, with optional properties', function(done){
+    it('Formats log record correctly, with optional properties', function(){
         let logRecord = Object.assign({}, mock.ACTIVITY_LOG_RECORD);
         logRecord.eventTimestamp = "2018-03-21T17:00:32.125Z";
         const formattedRecord = formatLog(logRecord);
@@ -38,10 +37,9 @@ describe('Format log units', function(){
         };
 
         assert.deepEqual(formattedRecord, expectedRecord);
-        done();
     });
     
-    it('Formats log record correctly, with message type id of Zero', function(done){
+    it('Formats log record correctly, with message type id of Zero', function(){
         let logRecord = Object.assign({}, mock.AUDIT_LOG_RECORD);
         logRecord.time = "2018-03-21T17:00:32.125Z";
         logRecord.category = 0;
@@ -58,6 +56,5 @@ describe('Format log units', function(){
         };
 
         assert.deepEqual(formattedRecord, expectedRecord);
-        done();
     });
 });

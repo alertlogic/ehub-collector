@@ -11,25 +11,20 @@
  * ----------------------------------------------------------------------------
  */
  
-const async = require('async');
-
 const ehubUtil = require('../common/util');
 
-
-function checkEventHubNamespace(master, ns, callback) {
+function checkEventHubNamespace(master, ns) {
     const pState = ns.provisioningState;
     if (pState === 'Succeeded') {
-        return callback(null, ns);
+        return ns;
     } else {
-        const err = master.errorStatusFmt(
+        throw master.errorStatusFmt(
             'EHUB000001',
             `Event Hub Namespace state is not ok. Namespace = ${ns.name}, provisioningState = ${pState}`);
-        
-        return callback(err);
     }
 }
 
-function checkEventHub(master, eventHubs, callback) {
+function checkEventHub(master, eventHubs) {
     const ehubForLogName = ehubUtil.getEhubForLogName();
     // Keep array.reduce here in case we'd like to check other event hubs status.
     const check = eventHubs.reduce(function(acc, ehub) {
@@ -54,11 +49,11 @@ function checkEventHub(master, eventHubs, callback) {
     
     if (!check.logEhubExists) {
         const nsName = ehubUtil.getEhubNsName();
-        return callback(master.errorStatusFmt(
+        throw master.errorStatusFmt(
             'EHUB000006',
-            `Event hub doesn't exist. Namespace = ${nsName}, EventHub = ${ehubForLogName}`));
-    } else {
-        return callback(check.error);
+            `Event hub doesn't exist. Namespace = ${nsName}, EventHub = ${ehubForLogName}`);
+    } else if (check.error) {
+        throw check.error;
     }
 }
 
@@ -66,41 +61,48 @@ function initArmEhub(master) {
     return ehubUtil.initArmEhub(master);
 }
 
-const eventHubNs = function(master, callback) {
-    var armEhub = initArmEhub(master);
+const eventHubNs = async function(master) {
+    const armEhub = initArmEhub(master);
     const rg = ehubUtil.getEhubForLogResourceGroup(master);
     const nsName = ehubUtil.getEhubNsName();
     
-    async.waterfall([
-        function(callback){
-            return armEhub.namespaces.get(rg, nsName, function (err, namespace, req, resp) {
-                if (err) {
-                    return callback(ehubUtil.formatSdkError(master, 
-                        'EHUB000003',
-                        `Failed to get Event Hub namespace. Resource group = ${rg}, Namespace = ${nsName}`,
-                        err));
-                } else {
-                    return checkEventHubNamespace(master, namespace, callback);
-                }
-            });
-        },
-        function(namespace, callback) {
-            return armEhub.eventHubs.listByNamespace(rg, namespace.name, function(err, eventHubs) {
-                if (err) {
-                    return callback(ehubUtil.formatSdkError(master,
-                        'EHUB000004',
-                        `Failed to list Event Hubs by namespace. Resource group = ${rg}, Namespace = ${namespace.name}`,
-                        err));
-                } else if (eventHubs.length === 0){
-                    return callback(master.errorStatusFmt(
-                        'EHUB000005',
-                        `Event Hub Namespace contains zero event hubs. Namespace = ${namespace.name}`));
-                } else {
-                    return checkEventHub(master, eventHubs, callback);
-                }
-            });
+    // Get the namespace
+    let namespace;
+    try {
+        namespace = await armEhub.namespaces.get(rg, nsName);
+    } catch (err) {
+        throw ehubUtil.formatSdkError(master, 
+            'EHUB000003',
+            `Failed to get Event Hub namespace. Resource group = ${rg}, Namespace = ${nsName}`,
+            err);
+    }
+
+    // Check namespace is OK
+    checkEventHubNamespace(master, namespace);
+
+    // List event hubs
+    const eventHubs = [];
+    try {
+        for await (const eventHub of armEhub.eventHubs.listByNamespace(rg, namespace.name)) {
+            eventHubs.push(eventHub);
         }
-    ], callback);
+    } catch (err) {
+        throw ehubUtil.formatSdkError(master,
+            'EHUB000004',
+            `Failed to list Event Hubs by namespace. Resource group = ${rg}, Namespace = ${namespace.name}`,
+            err);
+    }
+
+    if (eventHubs.length === 0) {
+        throw master.errorStatusFmt(
+            'EHUB000005',
+            `Event Hub Namespace contains zero event hubs. Namespace = ${namespace.name}`);
+    }
+
+    // Check event hub
+    checkEventHub(master, eventHubs);
+    
+    return null;
 };
 
 module.exports = {

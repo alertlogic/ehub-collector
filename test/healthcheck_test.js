@@ -9,7 +9,6 @@
  */
  
 const assert = require('assert');
-const sinon = require('sinon');
 const nock = require('nock');
 
 const mock = require('./mock');
@@ -17,8 +16,6 @@ const AlAzureMaster = require('@alertlogic/al-azure-collector-js').AlAzureMaster
 const ehubHealthCheck = require('../Master/healthcheck');
 
 describe('Event hub health check unit tests.', function() {
-    var fakeAuth;
-    
     before(function() {
         if (!nock.isActive()) {
             nock.activate();
@@ -42,7 +39,7 @@ describe('Event hub health check unit tests.', function() {
         process.env.APP_TENANT_ID = 'tenant-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_ID = 'client-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_SECRET = 'client-secret';
-        process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=testappo365;AccountKey=S0meKey+';
+        process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=testappo365;AccountKey=S0meKey+;EndpointSuffix=core.windows.net';
     });
     
     after(function() {
@@ -65,7 +62,7 @@ describe('Event hub health check unit tests.', function() {
         nock.cleanAll();
     });
     
-    it('Simple OK health check', function(done) {
+    it('Simple OK health check', async function() {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -81,15 +78,13 @@ describe('Event hub health check unit tests.', function() {
         
         process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
         
-        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        const master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
         
-        ehubHealthCheck.eventHubNs(master, function(err) {
-            assert.equal(err, null);
-            done();
-        });
+        const err = await ehubHealthCheck.eventHubNs(master);
+        assert.equal(err, null);
     });
     
-    it('Event hub namespace error', function(done) {
+    it('Event hub namespace error', async function() {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -105,20 +100,22 @@ describe('Event hub health check unit tests.', function() {
         
         process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
         
-        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        const master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
         
-        ehubHealthCheck.eventHubNs(master, function(err) {
+        try {
+            await ehubHealthCheck.eventHubNs(master);
+            assert.fail('Should have thrown an error');
+        } catch (err) {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000001',
                 details: ['Event Hub Namespace state is not ok. Namespace = AlertLogicIngest-westeurope-pcmpl7iir6xxk, provisioningState = Created']
             };
             assert.deepEqual(err, expected);
-            done();
-        });
+        }
     });
         
-    it('Event hub status error', function(done) {
+    it('Event hub status error', async function() {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -134,20 +131,22 @@ describe('Event hub health check unit tests.', function() {
         
         process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
         
-        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        const master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
         
-        ehubHealthCheck.eventHubNs(master, function(err) {
+        try {
+            await ehubHealthCheck.eventHubNs(master);
+            assert.fail('Should have thrown an error');
+        } catch (err) {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000002',
                 details: ['Event Hub status is not ok. Namespace = alertlogicingest-centralus-2wljtgprz47om, EventHub = alertlogic-log, status = Disabled']
             };
             assert.deepEqual(err, expected);
-            done();
-        });
+        }
     });
     
-    it('Event hub namespace not found error', function(done) {
+    it('Event hub namespace not found error', async function() {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -163,19 +162,21 @@ describe('Event hub health check unit tests.', function() {
         
         process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
         
-        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        const master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
         
-        ehubHealthCheck.eventHubNs(master, function(err) {
+        try {
+            await ehubHealthCheck.eventHubNs(master);
+            assert.fail('Should have thrown an error');
+        } catch (err) {
             assert.equal(err.status, 'error');
             assert.equal(err.error_code, 'EHUB000003');
             const error_obj = err.details[0].split(' Error: ')[1];
-            let details = JSON.parse(error_obj);
+            const details = JSON.parse(error_obj);
             assert.equal(details.statusCode, 404);
-            done();
-        });
+        }
     });
     
-    it('List event hubs not found error', function(done) {
+    it('List event hubs not found error', async function() {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -191,19 +192,21 @@ describe('Event hub health check unit tests.', function() {
         
         process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
         
-        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        const master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
         
-        ehubHealthCheck.eventHubNs(master, function(err) {
+        try {
+            await ehubHealthCheck.eventHubNs(master);
+            assert.fail('Should have thrown an error');
+        } catch (err) {
             assert.equal(err.status, 'error');
             assert.equal(err.error_code, 'EHUB000004');
             const error_obj = err.details[0].split(' Error: ')[1];
-            let details = JSON.parse(error_obj);
+            const details = JSON.parse(error_obj);
             assert.equal(details.statusCode, 404);
-            done();
-        });
+        }
     });
     
-    it('Zero event hubs in a namespace', function(done) {
+    it('Zero event hubs in a namespace', async function() {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -219,20 +222,22 @@ describe('Event hub health check unit tests.', function() {
         
         process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
         
-        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        const master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
         
-        ehubHealthCheck.eventHubNs(master, function(err) {
+        try {
+            await ehubHealthCheck.eventHubNs(master);
+            assert.fail('Should have thrown an error');
+        } catch (err) {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000005',
                 details: ['Event Hub Namespace contains zero event hubs. Namespace = AlertLogicIngest-westeurope-pcmpl7iir6xxk']
             };
             assert.deepEqual(err, expected);
-            done();
-        });
+        }
     });
     
-    it('Absent alertlogic-log event hub', function(done) {
+    it('Absent alertlogic-log event hub', async function() {
         // Mock Azure HTTP calls
         nock('https://management.azure.com:443', {'encodedQueryParams':true})
         .get(/2wljtgprz47om$/, /.*/ )
@@ -248,17 +253,18 @@ describe('Event hub health check unit tests.', function() {
         
         process.env.APP_LOG_EHUB_CONNECTION = 'Endpoint=sb://alertlogicingest-centralus-2wljtgprz47om.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SomeKey+';
         
-        var master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
+        const master = new AlAzureMaster(mock.DEFAULT_FUNCTION_CONTEXT, 'ehub', '1.0.0');
         
-        ehubHealthCheck.eventHubNs(master, function(err) {
+        try {
+            await ehubHealthCheck.eventHubNs(master);
+            assert.fail('Should have thrown an error');
+        } catch (err) {
             const expected = {
                 status: 'error',
                 error_code: 'EHUB000006',
                 details: [`Event hub doesn't exist. Namespace = alertlogicingest-centralus-2wljtgprz47om, EventHub = alertlogic-log`]
             };
             assert.deepEqual(err, expected);
-            done();
-        });
+        }
     });
 });
-

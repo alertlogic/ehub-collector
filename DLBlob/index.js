@@ -23,33 +23,34 @@ function getCollectorFunName(blobName) {
 
 const processErrorFun = function(context, err, messages) {
     context.log.error('Error processing batch:', err);
-    var skipped = messages.records ? messages.records.length : messages.length;
+    const skipped = messages.records ? messages.records.length : messages.length;
     return skipped;
 };
 
-function processBlob(context, blob, dlblobText, callback) {
-    var formatFun;
-    switch(getCollectorFunName(blob.name)) {
-        case 'ehubgeneral':
-            formatFun =  ehubGeneralFormat;
-            break;
-        default:
-            formatFun =  ehubGeneralFormat;
-            break;
-    }
-    
-    const dlBlobMessages = getDlBlobMessages(dlblobText);
-
+async function processBlob(context, blob, dlblobText) {
     try {
-        ehubCollector(context, dlBlobMessages, formatFun, processErrorFun, function(error, result) {
-            if (result.skipped) {
-                return callback(`Unprocessed records: ${result.skipped}`);
-            } else {
-                return callback(error);
-            }
-        });
-    } catch (ex) {
-        return callback(ex);
+        let formatFun;
+        switch(getCollectorFunName(blob.name)) {
+            case 'ehubgeneral':
+                formatFun = ehubGeneralFormat;
+                break;
+            default:
+                formatFun = ehubGeneralFormat;
+                break;
+        }
+        
+        const dlBlobMessages = getDlBlobMessages(dlblobText);
+
+        const result = await ehubCollector(context, dlBlobMessages, formatFun, processErrorFun);
+        
+        if (result.skipped) {
+            throw new Error(`Unprocessed records: ${result.skipped}`);
+        }
+        
+        return result;
+    } catch (error) {
+        context.log.error(`Error processing DL blob ${blob.name}:`, error);
+        throw error;
     }
 }
 
@@ -57,7 +58,7 @@ function getDlBlobMessages(dlblobText) {
     const parsedBlob = JSON.parse(dlblobText);
 
     if (Array.isArray(parsedBlob) && parsedBlob[0].errorSample) {
-        var blobMessages = parsedBlob[0].messages;
+        const blobMessages = parsedBlob[0].messages;
         if (blobMessages.length <= MAX_AMOUNT_OF_DL_MESSAGES){
             return blobMessages;
         } 
@@ -70,27 +71,27 @@ function getDlBlobMessages(dlblobText) {
     } 
 }
 
-module.exports = function (context, AlertlogicDLBlobTimer) {
-    var dlblob = new AlAzureDlBlob(context, processBlob);
-    dlblob.processDlBlobs(AlertlogicDLBlobTimer, function(error, result) {
+module.exports = async function (context, AlertlogicDLBlobTimer) {
+    const dlblob = new AlAzureDlBlob(context, processBlob);
+    
+    try {
+        const result = await dlblob.processDlBlobs(AlertlogicDLBlobTimer);
         invocations.logInvocationResult(context.executionContext.functionName, true);
-        if (!error) {
-            var processingErrors = result.filter(function(item) {
-                if (item.error) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-            if (processingErrors.length > 0) {
-                invocations.logInvocationResult(context.executionContext.functionName, false);
-                context.done(processingErrors);
-            } else {
-                context.done();
-            }
-        } else {
+        
+        const processingErrors = result
+            .filter((item) => item.status === 'rejected')
+            .map((item) => ({ error: item.reason }));
+        
+        if (processingErrors.length > 0) {
             invocations.logInvocationResult(context.executionContext.functionName, false);
-            context.done(error);
+            context.log.error('DLBlob processing errors:', processingErrors);
+            throw processingErrors;
         }
-    });
+
+        context.log.info('DLBlob processing OK');
+    } catch (error) {
+        invocations.logInvocationResult(context.executionContext.functionName, false);
+        context.log.error('DLBlob error:', error);
+        throw error;
+    }
 };

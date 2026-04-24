@@ -18,7 +18,6 @@ const ehubCollector = require('../common/ehub_collector');
 const ehubGeneralFormat = require('../EHubGeneral/format');
 
 describe('Common Event hub collector unit tests.', function() {
-    var fakeAuth;
     var processLogStub;
     
     before(function() {
@@ -45,7 +44,7 @@ describe('Common Event hub collector unit tests.', function() {
         process.env.APP_TENANT_ID = 'tenant-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_ID = 'client-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_SECRET = 'client-secret';
-        process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=kktestdl;AccountKey=S0meKey+';
+        process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=kktestdl;AccountKey=S0meKey+;EndpointSuffix=core.windows.net';
         
     });
     
@@ -82,55 +81,50 @@ describe('Common Event hub collector unit tests.', function() {
         processLogStub.restore();
     });
     
-    it('Simple OK check', function(done) {
+    it('Simple OK check', async function() {
         const testMessage = [`{ records: [${mock.SQL_AUDIT_LOG_RECORD}]}`];
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
-                function fakeFn(messages, formatFun, hostmetaElems, callback) {
-                    return callback(null);
+                async function fakeFn(messages, formatFun, hostmetaElems) {
+                    return null;
                 });
-        ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
-            assert.equal(err, null);
-            sinon.assert.callCount(processLogStub, 1);
-            done();
-        });
+        
+        const res = await ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord, null);
+        assert.equal(res.processed, 1);
+        sinon.assert.callCount(processLogStub, 1);
     });
     
-    it('Non-json log message ok', function(done) {
+    it('Non-json log message ok', async function() {
         const testMessage = ['this is a message that connot be parsed as json'];
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
-                function fakeFn(messages, formatFun, hostmetaElems, callback) {
-                    return callback(null);
+                async function fakeFn(messages, formatFun, hostmetaElems) {
+                    return null;
                 });
-        ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
-            assert.equal(err, null);
-            sinon.assert.callCount(processLogStub, 1);
-            done();
-        });
+        
+        const res = await ehubCollector(mock.context(), testMessage, ehubGeneralFormat.logRecord, null);
+        assert.equal(res.processed, 1);
+        sinon.assert.callCount(processLogStub, 1);
     });
     
-    it('Ingest Error', function(done) {
+    it('Ingest Error', async function() {
         const testMessage = [`{ records: [${mock.SQL_AUDIT_LOG_RECORD}]}`];
-        const mockContext = mock.context(done);
+        const mockContext = mock.context();
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
-                function fakeFn(messages, formatFun, hostmetaElems, callback) {
-                    return callback({statusCode: 400});
+                async function fakeFn(messages, formatFun, hostmetaElems) {
+                    throw {statusCode: 400};
                 });
-        ehubCollector(mockContext, testMessage, ehubGeneralFormat.logRecord , null, function(err, res) {
-            assert.equal(err, null);
-            assert.equal(res.skipped, 1);
-            console.log(mockContext.bindings.dlBlob, typeof mockContext.bindings.dlBlob);
-            assert.equal(mockContext.bindings.dlBlob, 'No blob records');
-            sinon.assert.callCount(processLogStub, 1);
-            done();
-        });
+        
+        const res = await ehubCollector(mockContext, testMessage, ehubGeneralFormat.logRecord, null);
+        assert.equal(res.skipped, 1);
+        assert.equal(mockContext.bindings.dlBlob, 'No blob records');
+        sinon.assert.callCount(processLogStub, 1);
     });
 
-    it('Batch processing error test', function(done) {
+    it('Batch processing error test', async function() {
         process.env.COLLECTOR_HOST_ID = 'host-id';
         process.env.COLLECTOR_SOURCE_ID = 'source-id';
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
-            function fakeFn(messages, formatFun, hostmetaElems, callback) {
-                return callback(null);
+            async function fakeFn(messages, formatFun, hostmetaElems) {
+                return null;
             });
         const inputRecords = [
             JSON.stringify({records: [{operationName: 'Good batch'}, {some: 'message 1'}]}),
@@ -138,13 +132,10 @@ describe('Common Event hub collector unit tests.', function() {
             JSON.stringify({records: [{operationName: 'Good batch'}, {some: 'message 2'}]}),
         ];
         
-        ehubCollector(mock.context(), inputRecords, ehubGeneralFormat.logRecord , null, function(err, res) {
-            sinon.assert.callCount(processLogStub, 1);
-            // we want to make sure that teh collectro aggregates teh batch correctly.
-            assert.equal(processLogStub.args[0][0].length, 6);
-            done();
-        });
+        await ehubCollector(mock.context(), inputRecords, ehubGeneralFormat.logRecord, null);
+        sinon.assert.callCount(processLogStub, 1);
+        // we want to make sure that the collector aggregates the batch correctly.
+        assert.equal(processLogStub.args[0][0].length, 6);
     });
     
 });
-

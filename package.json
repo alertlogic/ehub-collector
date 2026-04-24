@@ -1,15 +1,14 @@
 {
   "name": "ehub-collector",
-  "version": "1.6.20",
+  "version": "1.7.0",
   "dependencies": {
-    "@alertlogic/al-azure-collector-js": "3.1.9",
-    "@alertlogic/al-collector-js": "3.0.20",
-    "@azure/arm-eventhub": "3.3.1",
-    "@azure/arm-monitor": "6.1.1",
-    "async": "^3.2.5",
-    "moment": "2.30.1",
-    "moment-timezone": "^0.5.45",
-    "parse-key-value": "1.0.0"
+    "@alertlogic/al-azure-collector-js": "4.0.0",
+    "@alertlogic/al-collector-js": "^3.0.20",
+    "@azure/arm-eventhub": "^5.2.0",
+    "@azure/arm-monitor": "^7.0.0",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.6.0",
+    "parse-key-value": "^1.0.0"
   },
   "scripts": {
     "local-master": "node ./local_dev/master_local_dev.js",
@@ -17,16 +16,23 @@
     "local-ehub-general": "node ./local_dev/ehub_general_local_dev.js",
     "local-ehub-activitylogs": "node ./local_dev/ehub_activitylogs_local_dev.js",
     "lint": "jshint --show-non-errors --exclude \"./node_modules/*\" **/*.js",
-    "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura --reporter=text mocha --colors --reporter mocha-jenkins-reporter"
+    "test": "JUNIT_REPORT_PATH=./test/report.xml nyc --reporter=cobertura --reporter=text mocha --colors"
   },
   "devDependencies": {
     "jshint": "^2.13.6",
-    "mocha": "^10.4.0",
-    "mocha-jenkins-reporter": "^0.4.8",
-    "nock": "^13.5.4",
-    "nyc": "^17.0.0",
+    "mocha": "^11.7.5",
+    "nock": "^14.0.11",
+    "nyc": "^18.0.0",
     "pre-commit": "^1.2.2",
-    "rewire": "^7.0.0",
-    "sinon": "^18.0.0"
+    "rewire": "^9.0.1",
+    "sinon": "^21.0.1"
+  },
+  "overrides": {
+    "lodash": "^4.18.1",
+    "axios": "^1.15.0",
+    "diff": "^8.0.3",
+    "minimatch": "^8.0.7",
+    "serialize-javascript": "^7.0.3",
+    "cross-spawn": "^7.0.3"
   }
 }

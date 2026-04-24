@@ -25,11 +25,12 @@ process.env.COLLECTOR_HOST_ID = 'collector-host-id';
 process.env.COLLECTOR_SOURCE_ID = 'collector-source-id';
 process.env.CUSTOMCONNSTR_APP_AL_RESIDENCY = 'default';
 process.env.CUSTOMCONNSTR_APP_AL_API_ENDPOINT = 'al-api-endpoint';
-process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=testappo365;AccountKey=S0meKey+';
+process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=testappo365;AccountKey=S0meKey+;EndpointSuffix=core.windows.net';
 process.env.APP_DL_CONTAINER_NAME = 'alertlogic-dl';
 
 
 var context = function(done) {
+  const doneFn = typeof done === 'function' ? done : function() {};
     return {
         executionContext: {
             invocationId: 'invocation-id',
@@ -52,7 +53,7 @@ var context = function(done) {
             }
         },
         done: function (result) {
-            done(result);
+          doneFn(result);
         },
         res: null
     };
