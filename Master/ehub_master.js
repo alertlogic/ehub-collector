@@ -9,7 +9,6 @@
  * ----------------------------------------------------------------------------
  */
  
-const async = require('async');
 const parse = require('parse-key-value');
 
 const pkg = require('../package.json');
@@ -43,4 +42,3 @@ class EhubCollectorMaster extends AlAzureMaster {
 module.exports = {
     EhubCollectorMaster
 };
-

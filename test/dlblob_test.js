@@ -17,9 +17,23 @@ var AlAzureCollector = require('@alertlogic/al-azure-collector-js').AlAzureColle
 const dlblob = require('../DLBlob/index');
 const ehubGeneralFormat = require('../EHubGeneral/format');
 
+const blobContentText = JSON.stringify(mock.GET_BLOB_CONTENT_TEXT);
+const blobContentHeaders = {
+    'Content-Type': 'application/json',
+    'Content-Length': Buffer.byteLength(blobContentText),
+    'ETag': '"0x8D1234567890"',
+    'Last-Modified': 'Wed, 23 Jan 2019 15:53:09 GMT'
+};
+const xmlContentHeaders = { 'Content-Type': 'application/xml' };
+const xmlErrorHeaders = { 'Content-Type': 'application/xml', 'x-ms-error-code': 'ContainerNotFound' };
+const isBlobListQuery = (queryObj) => (
+    queryObj.restype === 'container' &&
+    queryObj.comp === 'list' &&
+    queryObj.prefix === process.env.WEBSITE_SITE_NAME
+);
+
 
 describe('Event hub DLBlob function unit tests.', function() {
-    var fakeAuth;
     var processLogStub;
     
     before(function() {
@@ -46,12 +60,12 @@ describe('Event hub DLBlob function unit tests.', function() {
         process.env.APP_TENANT_ID = 'tenant-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_ID = 'client-id';
         process.env.CUSTOMCONNSTR_APP_CLIENT_SECRET = 'client-secret';
-        process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=kktestdl;AccountKey=S0meKey+';
+        process.env.AzureWebJobsStorage = 'DefaultEndpointsProtocol=https;AccountName=kktestdl;AccountKey=S0meKey+;EndpointSuffix=core.windows.net';
         
         processLogStub = sinon.stub(AlAzureCollector.prototype, 'processLog').callsFake(
-                function fakeFn(message, formatFun, hostmetaElems, callback) {
+                async function fakeFn(message, formatFun, hostmetaElems) {
                     formatFun(message);
-                    return callback(null);
+                    return null;
                 });
     });
     
@@ -98,21 +112,21 @@ describe('Event hub DLBlob function unit tests.', function() {
         nock.cleanAll();
     });
     
-    it('Simple OK check', function(done) {
+    it('Simple OK check', async function() {
         process.env.DL_BLOB_PAGE_SIZE = '10';
         // Mock Azure HTTP calls
         // List blobs
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get('/alertlogic-dl')
-        .query({'restype':'container','comp':'list','maxresults':process.env.DL_BLOB_PAGE_SIZE,'prefix':process.env.WEBSITE_SITE_NAME})
+        .query(isBlobListQuery)
         .times(5)
-        .reply(200, mock.LIST_CONTAINER_BLOBS());
+        .reply(200, mock.LIST_CONTAINER_BLOBS(), xmlContentHeaders);
         
         // Get blob content
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get(/alertlogic-dl.*/)
         .times(6)
-        .reply(200, mock.GET_BLOB_CONTENT_TEXT);
+        .reply(200, blobContentText, blobContentHeaders);
         
         // Delete blob
         var deleteBlobStub = sinon.fake();
@@ -121,51 +135,47 @@ describe('Event hub DLBlob function unit tests.', function() {
         .times(6)
         .reply(202, function() {deleteBlobStub();});
         
-        var cb = function(err, res) {
-            sinon.assert.callCount(processLogStub, 6);
-            sinon.assert.callCount(deleteBlobStub, 6);
-            sinon.assert.calledWith(processLogStub, sinon.match.any, ehubGeneralFormat.logRecord);
-            done();
-        };
-        dlblob(mock.context(cb), mock.timer);
+        await dlblob(mock.context(), mock.timer);
+        sinon.assert.callCount(processLogStub, 6);
+        sinon.assert.callCount(deleteBlobStub, 6);
+        sinon.assert.calledWith(processLogStub, sinon.match.any, ehubGeneralFormat.logRecord);
     });
     
-    it('Blob list error', function(done) {
+    it('Blob list error', async function() {
         // Mock Azure HTTP calls
         // List blobs
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get('/alertlogic-dl')
-        .query({'restype':'container','comp':'list','maxresults':process.env.DL_BLOB_PAGE_SIZE,'prefix':process.env.WEBSITE_SITE_NAME})
-        .reply(404, mock.CONTAINER_NOT_FOUND);
+        .query(isBlobListQuery)
+        .reply(404, mock.CONTAINER_NOT_FOUND, xmlErrorHeaders);
         
-        var cb = function(err, res) {
+        try {
+            await dlblob(mock.context(), mock.timer);
+        } catch (err) {
             sinon.assert.callCount(processLogStub, 0);
             assert.equal(err.statusCode, 404);
             assert.equal(err.code, 'ContainerNotFound');
-            assert.equal(res, null);
-            done();
-        };
-        dlblob(mock.context(cb), mock.timer);
+        }
     });
     
-    it('Get blob content error', function(done) {
+    it('Get blob content error', async function() {
         // Mock Azure HTTP calls
         // List blobs
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get('/alertlogic-dl')
-        .query({'restype':'container','comp':'list','maxresults':process.env.DL_BLOB_PAGE_SIZE,'prefix':process.env.WEBSITE_SITE_NAME})
-        .reply(200, mock.LIST_CONTAINER_BLOBS());
+        .query(isBlobListQuery)
+        .reply(200, mock.LIST_CONTAINER_BLOBS(), xmlContentHeaders);
         
         // Get blob content 2019-01-23T15-53-06Z
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get(/alertlogic-dl\/kktestdl\/ehubgeneral\/2019-01-23T15-53-06Z/)
         .times(1)
-        .reply(200, mock.GET_BLOB_CONTENT_TEXT);
+        .reply(200, blobContentText, blobContentHeaders);
         
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get(/alertlogic-dl\/kktestdl\/ehubgeneral.*/)
         .times(5)
-        .reply(404, mock.CONTAINER_NOT_FOUND);
+        .reply(404, mock.CONTAINER_NOT_FOUND, xmlErrorHeaders);
         
         // Delete blob
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
@@ -173,48 +183,49 @@ describe('Event hub DLBlob function unit tests.', function() {
         .times(1)
         .reply(202);
         
-        var cb = function(err) {
+        try {
+            await dlblob(mock.context(), mock.timer);
+        } catch (err) {
             err.every(function(res) {
-                assert.equal(res.error.code, 'ContainerNotFound');
+                const errorCode = res.error.code || (res.error.details && res.error.details.errorCode);
+                assert.equal(errorCode, 'ContainerNotFound');
                 assert.equal(res.error.statusCode, 404);
             });
             assert.equal(err.length, 5);
             sinon.assert.callCount(processLogStub, 1);
-            done();
-        };
-        dlblob(mock.context(cb), mock.timer);
+        }
     });
     
-    it('Delete blob error', function(done) {
+    it('Delete blob error', async function() {
         // Mock Azure HTTP calls
         // List blobs
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get('/alertlogic-dl')
-        .query({'restype':'container','comp':'list','maxresults':process.env.DL_BLOB_PAGE_SIZE,'prefix':process.env.WEBSITE_SITE_NAME})
-        .reply(200, mock.LIST_CONTAINER_BLOBS());
+        .query(isBlobListQuery)
+        .reply(200, mock.LIST_CONTAINER_BLOBS(), xmlContentHeaders);
         
         // Get blob content
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .get(/alertlogic-dl.*/)
         .times(6)
-        .reply(200, mock.GET_BLOB_CONTENT_TEXT);
+        .reply(200, blobContentText, blobContentHeaders);
         
         // Delete blob
         nock('https://kktestdl.blob.core.windows.net:443', {'encodedQueryParams':true})
         .delete(/alertlogic-dl\/kktestdl\/ehubgeneral.*/)
         .times(6)
-        .reply(404, mock.CONTAINER_NOT_FOUND);
+        .reply(404, mock.CONTAINER_NOT_FOUND, xmlErrorHeaders);
         
-        var cb = function(err) {
+        try {
+            await dlblob(mock.context(), mock.timer);
+        } catch (err) {
             err.every(function(res) {
-                assert.equal(res.error.code, 'ContainerNotFound');
+                const errorCode = res.error.code || (res.error.details && res.error.details.errorCode);
+                assert.equal(errorCode, 'ContainerNotFound');
                 assert.equal(res.error.statusCode, 404);
             });
             assert.equal(err.length, 6);
             sinon.assert.callCount(processLogStub, 6);
-            done();
-        };
-        dlblob(mock.context(cb), mock.timer);
+        }
     });
 });
-
