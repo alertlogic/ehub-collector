@@ -200,7 +200,7 @@
         "createNewEhubInfraCond": "[if(and(equals(parameters('Event Hub Resource Group'), ''), equals(parameters('Event Hub Connection String'), ''), equals(parameters('Event Hub Namespace'), '')), bool('true'), bool('false'))]",
         "repo": "https://github.com/alertlogic/ehub-collector.git",
         "branch": "v1",
-        "nodeRuntimeVersion": "~22",
+        "nodeRuntimeVersion": "~24",
         "azureFunctionExtensionsVersion": "~4",
         "dlContainerName": "alertlogic-dl",
         "statsQueueName": "alertlogic-stats",
